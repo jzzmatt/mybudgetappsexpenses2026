@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { buildDashboardQueryString } from "@/lib/dashboard/params";
 import type { DashboardPeriod } from "@/lib/dashboard/types";
+import { CURRENCY_LABELS, EXPENSE_CURRENCIES } from "@/lib/currency/types";
 
 type DashboardPeriodFormProps = {
   period: DashboardPeriod;
@@ -10,10 +11,24 @@ const currentYear = new Date().getFullYear();
 const yearOptions = Array.from({ length: 6 }, (_, index) => currentYear - index);
 
 export function DashboardPeriodForm({ period }: DashboardPeriodFormProps) {
-  const allMonthsHref = `/dashboard${buildDashboardQueryString({ year: period.year, month: null })}`;
+  const allMonthsHref = `/dashboard${buildDashboardQueryString({
+    year: period.year,
+    month: null,
+    currency: period.currency,
+  })}`;
 
   return (
     <form action="/dashboard" className="dashboard-period-form" method="get">
+      <label className="auth-field dashboard-period-field" htmlFor="dashboard-currency">
+        <span className="sr-only">Currency</span>
+        <select defaultValue={period.currency} id="dashboard-currency" name="currency">
+          {EXPENSE_CURRENCIES.map((currency) => (
+            <option key={currency} value={currency}>
+              {CURRENCY_LABELS[currency]}
+            </option>
+          ))}
+        </select>
+      </label>
       <label className="auth-field dashboard-period-field" htmlFor="dashboard-year">
         <span className="sr-only">Year</span>
         <select defaultValue={period.year} id="dashboard-year" name="year">

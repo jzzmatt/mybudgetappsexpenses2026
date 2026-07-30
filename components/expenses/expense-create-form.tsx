@@ -8,6 +8,7 @@ import {
   EXPENSE_PRIORITIES,
   EXPENSE_STATUSES,
 } from "@/lib/expenses/types";
+import { CURRENCY_LABELS, DEFAULT_EXPENSE_CURRENCY, EXPENSE_CURRENCIES } from "@/lib/currency/types";
 import { formatLabel } from "@/lib/expenses/format";
 import type { Category } from "@/lib/categories/types";
 import type { Project } from "@/lib/projects/types";
@@ -70,6 +71,16 @@ export function ExpenseCreateForm({ categories, projects, vendors }: ExpenseCrea
             {vendors.map((vendor) => (
               <option key={vendor.id} value={vendor.id}>
                 {vendor.name}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="auth-field" htmlFor="expense-currency">
+          <span>Currency</span>
+          <select defaultValue={DEFAULT_EXPENSE_CURRENCY} id="expense-currency" name="currency" required>
+            {EXPENSE_CURRENCIES.map((currency) => (
+              <option key={currency} value={currency}>
+                {CURRENCY_LABELS[currency]}
               </option>
             ))}
           </select>

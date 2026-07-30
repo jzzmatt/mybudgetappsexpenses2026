@@ -6,6 +6,7 @@ import {
   type ExpenseSortField,
   type ExpenseStatus,
 } from "@/lib/expenses/types";
+import { isExpenseCurrency } from "@/lib/currency/types";
 
 type RawSearchParams = Record<string, string | string[] | undefined>;
 
@@ -46,12 +47,15 @@ export function parseExpenseSearchParams(params: RawSearchParams): ExpenseFilter
   const year = parsePositiveInt(getParam(params, "year"));
   const order = getParam(params, "order");
 
+  const currencyParam = getParam(params, "currency");
+
   return {
     search: getParam(params, "q")?.trim() || undefined,
     categoryId: getParam(params, "category") || undefined,
     projectId: getParam(params, "project") || undefined,
     vendorId: getParam(params, "vendor") || undefined,
     status: parseStatus(getParam(params, "status")),
+    currency: isExpenseCurrency(currencyParam) ? currencyParam : undefined,
     year: year && year >= 2000 && year <= 2100 ? year : undefined,
     month: month && month >= 1 && month <= 12 ? month : undefined,
     sort: parseSortField(getParam(params, "sort")),
@@ -81,6 +85,10 @@ export function buildExpenseQueryString(filters: ExpenseFilters): string {
 
   if (filters.status) {
     params.set("status", filters.status);
+  }
+
+  if (filters.currency) {
+    params.set("currency", filters.currency);
   }
 
   if (filters.year) {

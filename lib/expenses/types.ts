@@ -1,3 +1,5 @@
+import type { ExpenseCurrency } from "@/lib/currency/types";
+
 export const EXPENSE_STATUSES = ["pending", "partial", "paid"] as const;
 export const EXPENSE_PRIORITIES = ["low", "medium", "high"] as const;
 export const EXPENSE_PAYMENT_METHODS = ["card", "bank_transfer", "cash", "check", "other"] as const;
@@ -32,6 +34,7 @@ export type Expense = {
   project_id: string | null;
   vendor_id: string | null;
   description: string;
+  currency: ExpenseCurrency;
   budget_amount: number;
   paid_amount: number;
   balance: number;
@@ -55,6 +58,7 @@ export type ExpenseFilters = {
   projectId?: string;
   vendorId?: string;
   status?: ExpenseStatus;
+  currency?: ExpenseCurrency;
   year?: number;
   month?: number;
   sort?: ExpenseSortField;

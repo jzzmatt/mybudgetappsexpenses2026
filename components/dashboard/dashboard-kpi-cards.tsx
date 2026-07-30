@@ -1,9 +1,11 @@
 import { Card } from "@/components/ui/card";
-import { formatCurrency } from "@/lib/expenses/format";
+import { formatCurrency } from "@/lib/currency/format";
+import type { ExpenseCurrency } from "@/lib/currency/types";
 import type { DashboardKpis } from "@/lib/dashboard/types";
 
 type DashboardKpiCardsProps = {
   kpis: DashboardKpis;
+  currency: ExpenseCurrency;
 };
 
 const kpiItems = [
@@ -13,7 +15,7 @@ const kpiItems = [
   { key: "pendingExpenses", label: "Pending expenses", valueKey: "pendingExpenses" as const },
 ];
 
-export function DashboardKpiCards({ kpis }: DashboardKpiCardsProps) {
+export function DashboardKpiCards({ kpis, currency }: DashboardKpiCardsProps) {
   return (
     <div className="dashboard-kpi-grid">
       {kpiItems.map((item) => (
@@ -22,7 +24,7 @@ export function DashboardKpiCards({ kpis }: DashboardKpiCardsProps) {
           <p className="dashboard-kpi-value">
             {item.valueKey === "pendingExpenses"
               ? kpis.pendingExpenses.toLocaleString("en-US")
-              : formatCurrency(kpis[item.valueKey])}
+              : formatCurrency(kpis[item.valueKey], currency)}
           </p>
         </Card>
       ))}
