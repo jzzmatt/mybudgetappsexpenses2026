@@ -24,6 +24,7 @@ const expenseSelect = `
   budget_amount,
   paid_amount,
   balance,
+  currency,
   payment_method,
   priority,
   status,
@@ -97,6 +98,10 @@ export async function getExpenses(filters: ExpenseFilters = {}): Promise<Expense
 
   if (filters.status) {
     query = query.eq("status", filters.status);
+  }
+
+  if (filters.currency) {
+    query = query.eq("currency", filters.currency);
   }
 
   if (filters.year) {

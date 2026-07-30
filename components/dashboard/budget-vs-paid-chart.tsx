@@ -12,21 +12,25 @@ import {
 } from "recharts";
 import { Card } from "@/components/ui/card";
 import { getChartColor } from "@/lib/dashboard/chart-colors";
-import { formatCurrency } from "@/lib/expenses/format";
+import { formatCurrency } from "@/lib/currency/format";
+import type { ExpenseCurrency } from "@/lib/currency/types";
 import type { CategoryChartDatum } from "@/lib/dashboard/types";
 
 type BudgetVsPaidChartProps = {
   data: CategoryChartDatum[];
+  currency: ExpenseCurrency;
 };
 
 function ChartTooltip({
   active,
   payload,
   label,
+  currency,
 }: {
   active?: boolean;
   payload?: Array<{ color?: string; name?: string; value?: number }>;
   label?: string;
+  currency: ExpenseCurrency;
 }) {
   if (!active || !payload?.length) {
     return null;
@@ -37,14 +41,14 @@ function ChartTooltip({
       <p className="dashboard-chart-tooltip-title">{label}</p>
       {payload.map((entry) => (
         <p key={entry.name} style={{ color: entry.color }}>
-          {entry.name}: {formatCurrency(entry.value ?? 0)}
+          {entry.name}: {formatCurrency(entry.value ?? 0, currency)}
         </p>
       ))}
     </div>
   );
 }
 
-export function BudgetVsPaidChart({ data }: BudgetVsPaidChartProps) {
+export function BudgetVsPaidChart({ data, currency }: BudgetVsPaidChartProps) {
   if (data.length === 0) {
     return (
       <Card className="dashboard-chart-card">
@@ -62,8 +66,11 @@ export function BudgetVsPaidChart({ data }: BudgetVsPaidChartProps) {
           <BarChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
             <CartesianGrid stroke="#e5e7eb" strokeDasharray="3 3" vertical={false} />
             <XAxis dataKey="category" tick={{ fontSize: 12 }} />
-            <YAxis tick={{ fontSize: 12 }} tickFormatter={(value) => formatCurrency(Number(value))} />
-            <Tooltip content={<ChartTooltip />} />
+            <YAxis
+              tick={{ fontSize: 12 }}
+              tickFormatter={(value) => formatCurrency(Number(value), currency)}
+            />
+            <Tooltip content={<ChartTooltip currency={currency} />} />
             <Legend />
             <Bar dataKey="budget" fill={getChartColor(0)} name="Budget" radius={[4, 4, 0, 0]} />
             <Bar dataKey="paid" fill={getChartColor(1)} name="Paid" radius={[4, 4, 0, 0]} />

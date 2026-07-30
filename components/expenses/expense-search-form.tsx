@@ -19,6 +19,7 @@ export function ExpenseSearchForm({ filters }: ExpenseSearchFormProps) {
       {filters.projectId ? <input name="project" type="hidden" value={filters.projectId} /> : null}
       {filters.vendorId ? <input name="vendor" type="hidden" value={filters.vendorId} /> : null}
       {filters.status ? <input name="status" type="hidden" value={filters.status} /> : null}
+      {filters.currency ? <input name="currency" type="hidden" value={filters.currency} /> : null}
       {filters.year ? <input name="year" type="hidden" value={filters.year} /> : null}
       {filters.month ? <input name="month" type="hidden" value={filters.month} /> : null}
       {filters.sort ? <input name="sort" type="hidden" value={filters.sort} /> : null}

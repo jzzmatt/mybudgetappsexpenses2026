@@ -104,7 +104,8 @@ export async function getDashboardData(period: DashboardPeriod): Promise<Dashboa
   let query = supabase
     .from("expenses")
     .select("month, year, budget_amount, paid_amount, balance, status, category:categories(name)")
-    .eq("year", period.year);
+    .eq("year", period.year)
+    .eq("currency", period.currency);
 
   if (period.month !== null) {
     query = query.eq("month", period.month);
@@ -120,7 +121,8 @@ export async function getDashboardData(period: DashboardPeriod): Promise<Dashboa
   const yearlyQuery = supabase
     .from("expenses")
     .select("month, year, budget_amount, paid_amount, balance, status, category:categories(name)")
-    .eq("year", period.year);
+    .eq("year", period.year)
+    .eq("currency", period.currency);
 
   const { data: yearlyData, error: yearlyError } = await yearlyQuery;
 
@@ -133,6 +135,7 @@ export async function getDashboardData(period: DashboardPeriod): Promise<Dashboa
   return {
     year: period.year,
     month: period.month,
+    currency: period.currency,
     periodLabel: buildPeriodLabel(period),
     kpis: aggregateKpis(expenses),
     categoryData: aggregateCategoryData(expenses),

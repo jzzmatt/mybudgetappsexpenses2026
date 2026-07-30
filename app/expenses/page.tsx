@@ -54,6 +54,7 @@ export default async function ExpensesPage({ searchParams }: ExpensesPageProps) 
       filters.projectId ||
       filters.vendorId ||
       filters.status ||
+      filters.currency ||
       filters.year ||
       filters.month,
   );

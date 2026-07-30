@@ -3,19 +3,23 @@
 import { Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 import { Card } from "@/components/ui/card";
 import { getChartColor } from "@/lib/dashboard/chart-colors";
-import { formatCurrency } from "@/lib/expenses/format";
+import { formatCurrency } from "@/lib/currency/format";
+import type { ExpenseCurrency } from "@/lib/currency/types";
 import type { CategoryChartDatum } from "@/lib/dashboard/types";
 
 type CategoryChartProps = {
   data: CategoryChartDatum[];
+  currency: ExpenseCurrency;
 };
 
 function ChartTooltip({
   active,
   payload,
+  currency,
 }: {
   active?: boolean;
   payload?: Array<{ payload?: CategoryChartDatum & { fill?: string } }>;
+  currency: ExpenseCurrency;
 }) {
   if (!active || !payload?.length) {
     return null;
@@ -29,13 +33,13 @@ function ChartTooltip({
   return (
     <div className="dashboard-chart-tooltip">
       <p className="dashboard-chart-tooltip-title">{entry.category}</p>
-      <p style={{ color: entry.fill }}>Budget: {formatCurrency(entry.budget)}</p>
-      <p>Paid: {formatCurrency(entry.paid)}</p>
+      <p style={{ color: entry.fill }}>Budget: {formatCurrency(entry.budget, currency)}</p>
+      <p>Paid: {formatCurrency(entry.paid, currency)}</p>
     </div>
   );
 }
 
-export function CategoryChart({ data }: CategoryChartProps) {
+export function CategoryChart({ data, currency }: CategoryChartProps) {
   if (data.length === 0) {
     return (
       <Card className="dashboard-chart-card">
@@ -70,7 +74,7 @@ export function CategoryChart({ data }: CategoryChartProps) {
                 <Cell fill={entry.fill} key={entry.category} />
               ))}
             </Pie>
-            <Tooltip content={<ChartTooltip />} />
+            <Tooltip content={<ChartTooltip currency={currency} />} />
             <Legend />
           </PieChart>
         </ResponsiveContainer>

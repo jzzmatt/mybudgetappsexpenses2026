@@ -1,4 +1,5 @@
 import type { DashboardPeriod } from "@/lib/dashboard/types";
+import { DEFAULT_EXPENSE_CURRENCY, isExpenseCurrency } from "@/lib/currency/types";
 
 type RawSearchParams = Record<string, string | string[] | undefined>;
 
@@ -32,9 +33,12 @@ export function parseDashboardPeriod(params: RawSearchParams): DashboardPeriod {
     month = now.getMonth() + 1;
   }
 
+  const currencyParam = getParam(params, "currency");
+
   return {
     year: year >= 2000 && year <= 2100 ? year : now.getFullYear(),
     month,
+    currency: isExpenseCurrency(currencyParam) ? currencyParam : DEFAULT_EXPENSE_CURRENCY,
   };
 }
 
@@ -47,6 +51,8 @@ export function buildDashboardQueryString(period: DashboardPeriod): string {
   } else {
     params.set("month", String(period.month));
   }
+
+  params.set("currency", period.currency);
 
   return `?${params.toString()}`;
 }

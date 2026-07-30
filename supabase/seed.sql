@@ -92,6 +92,7 @@ begin
     description,
     budget_amount,
     paid_amount,
+    currency,
     payment_method,
     priority,
     status,
@@ -108,18 +109,19 @@ begin
     seed.description,
     seed.budget_amount,
     seed.paid_amount,
+    seed.currency,
     seed.payment_method,
     seed.priority,
     seed.status,
     seed.notes
   from (
     values
-      ('2026-07-15'::date, 7, 2026, technology_id, alpha_id, cloud_vendor_id, 'Cloud Infrastructure', 45000::numeric, 45000::numeric, 'bank_transfer', 'high', 'paid', null::text),
-      ('2026-07-12'::date, 7, 2026, marketing_id, beta_id, null::uuid, 'Marketing Campaign', 28500::numeric, 15000::numeric, 'card', 'medium', 'partial', null::text),
-      ('2026-07-10'::date, 7, 2026, operations_id, delta_id, null::uuid, 'Office Supplies', 3200::numeric, 3200::numeric, 'card', 'low', 'paid', null::text),
-      ('2026-07-08'::date, 7, 2026, hr_id, gamma_id, null::uuid, 'Team Building', 12000::numeric, 0::numeric, 'bank_transfer', 'medium', 'pending', null::text),
-      ('2026-07-05'::date, 7, 2026, technology_id, alpha_id, cloud_vendor_id, 'Software License', 8750::numeric, 8750::numeric, 'card', 'high', 'paid', null::text)
-  ) as seed(date, month, year, category_id, project_id, vendor_id, description, budget_amount, paid_amount, payment_method, priority, status, notes)
+      ('2026-07-15'::date, 7, 2026, technology_id, alpha_id, cloud_vendor_id, 'Cloud Infrastructure', 45000::numeric, 45000::numeric, 'KZ', 'bank_transfer', 'high', 'paid', null::text),
+      ('2026-07-12'::date, 7, 2026, marketing_id, beta_id, null::uuid, 'Marketing Campaign', 28500::numeric, 15000::numeric, 'KZ', 'card', 'medium', 'partial', null::text),
+      ('2026-07-10'::date, 7, 2026, operations_id, delta_id, null::uuid, 'Office Supplies', 3200::numeric, 3200::numeric, 'KZ', 'card', 'low', 'paid', null::text),
+      ('2026-07-08'::date, 7, 2026, hr_id, gamma_id, null::uuid, 'Team Building', 12000::numeric, 0::numeric, 'KZ', 'bank_transfer', 'medium', 'pending', null::text),
+      ('2026-07-05'::date, 7, 2026, technology_id, alpha_id, cloud_vendor_id, 'Software License', 8750::numeric, 8750::numeric, 'KZ', 'card', 'high', 'paid', null::text)
+  ) as seed(date, month, year, category_id, project_id, vendor_id, description, budget_amount, paid_amount, currency, payment_method, priority, status, notes)
   where not exists (
     select 1
     from public.expenses existing

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { EXPENSE_STATUSES } from "@/lib/expenses/types";
+import { CURRENCY_LABELS, EXPENSE_CURRENCIES } from "@/lib/currency/types";
 import type { Category } from "@/lib/categories/types";
 import type { ExpenseFilters } from "@/lib/expenses/types";
 import type { Project } from "@/lib/projects/types";
@@ -77,6 +78,18 @@ export function ExpenseFiltersForm({
         </select>
       </label>
 
+      <label className="auth-field expense-filter-field" htmlFor="expense-filter-currency">
+        <span>Currency</span>
+        <select defaultValue={filters.currency ?? ""} id="expense-filter-currency" name="currency">
+          <option value="">All currencies</option>
+          {EXPENSE_CURRENCIES.map((currency) => (
+            <option key={currency} value={currency}>
+              {CURRENCY_LABELS[currency]}
+            </option>
+          ))}
+        </select>
+      </label>
+
       <label className="auth-field expense-filter-field" htmlFor="expense-filter-year">
         <span>Year</span>
         <select defaultValue={filters.year ?? ""} id="expense-filter-year" name="year">
@@ -113,6 +126,7 @@ export function ExpenseFiltersForm({
         filters.projectId ||
         filters.vendorId ||
         filters.status ||
+        filters.currency ||
         filters.year ||
         filters.month ? (
           <Link className="auth-link" href={clearHref}>

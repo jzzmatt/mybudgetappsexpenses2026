@@ -10,6 +10,7 @@ import {
   EXPENSE_PRIORITIES,
   EXPENSE_STATUSES,
 } from "@/lib/expenses/types";
+import { EXPENSE_CURRENCIES } from "@/lib/currency/types";
 
 const optionalUuid = z.preprocess(
   (value) => (typeof value === "string" && value.trim() ? value.trim() : null),
@@ -42,6 +43,7 @@ const expenseSchema = z.object({
   paid_amount: z.coerce
     .number({ error: "Paid amount must be a number." })
     .min(0, "Paid amount cannot be negative."),
+  currency: z.enum(EXPENSE_CURRENCIES, { error: "Select a valid currency." }),
   payment_method: optionalEnum(EXPENSE_PAYMENT_METHODS),
   priority: optionalEnum(EXPENSE_PRIORITIES),
   status: z.enum(EXPENSE_STATUSES, { error: "Select a valid status." }),
@@ -71,6 +73,7 @@ function parseExpenseFormData(formData: FormData) {
     vendor_id: formData.get("vendor_id") ?? undefined,
     budget_amount: formData.get("budget_amount"),
     paid_amount: formData.get("paid_amount"),
+    currency: formData.get("currency"),
     payment_method: formData.get("payment_method") ?? undefined,
     priority: formData.get("priority") ?? undefined,
     status: formData.get("status"),
@@ -105,6 +108,7 @@ export async function createExpenseAction(formData: FormData) {
     description: parsed.data.description,
     budget_amount: parsed.data.budget_amount,
     paid_amount: parsed.data.paid_amount,
+    currency: parsed.data.currency,
     payment_method: parsed.data.payment_method,
     priority: parsed.data.priority,
     status: parsed.data.status,
@@ -116,6 +120,7 @@ export async function createExpenseAction(formData: FormData) {
   }
 
   revalidatePath("/expenses");
+  revalidatePath("/dashboard");
   redirect("/expenses");
 }
 
@@ -148,6 +153,7 @@ export async function updateExpenseAction(expenseId: string, formData: FormData)
       description: parsed.data.description,
       budget_amount: parsed.data.budget_amount,
       paid_amount: parsed.data.paid_amount,
+      currency: parsed.data.currency,
       payment_method: parsed.data.payment_method,
       priority: parsed.data.priority,
       status: parsed.data.status,
@@ -160,6 +166,7 @@ export async function updateExpenseAction(expenseId: string, formData: FormData)
   }
 
   revalidatePath("/expenses");
+  revalidatePath("/dashboard");
   redirect("/expenses");
 }
 
@@ -174,5 +181,6 @@ export async function deleteExpenseAction(expenseId: string) {
   }
 
   revalidatePath("/expenses");
+  revalidatePath("/dashboard");
   return { success: true };
 }

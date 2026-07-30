@@ -67,6 +67,7 @@ export function ExpenseList({ expenses, filters, hasActiveFilters }: ExpenseList
               <th scope="col">Category</th>
               <th scope="col">Project</th>
               <th scope="col">Vendor</th>
+              <th scope="col">Currency</th>
               <SortableHeader field="budget_amount" filters={filters} label="Budget" />
               <SortableHeader field="paid_amount" filters={filters} label="Paid" />
               <SortableHeader field="balance" filters={filters} label="Balance" />
@@ -82,9 +83,10 @@ export function ExpenseList({ expenses, filters, hasActiveFilters }: ExpenseList
                 <td>{expense.category?.name ?? "—"}</td>
                 <td>{expense.project?.name ?? "—"}</td>
                 <td>{expense.vendor?.name ?? "—"}</td>
-                <td>{formatCurrency(expense.budget_amount)}</td>
-                <td>{formatCurrency(expense.paid_amount)}</td>
-                <td>{formatCurrency(expense.balance)}</td>
+                <td>{expense.currency}</td>
+                <td>{formatCurrency(expense.budget_amount, expense.currency)}</td>
+                <td>{formatCurrency(expense.paid_amount, expense.currency)}</td>
+                <td>{formatCurrency(expense.balance, expense.currency)}</td>
                 <td>
                   <span className={`status-badge status-${expense.status}`}>
                     {formatLabel(expense.status)}

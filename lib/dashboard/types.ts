@@ -1,3 +1,5 @@
+import type { ExpenseCurrency } from "@/lib/currency/types";
+
 export type DashboardKpis = {
   totalBudget: number;
   totalPaid: number;
@@ -21,6 +23,7 @@ export type MonthlyChartDatum = {
 export type DashboardData = {
   year: number;
   month: number | null;
+  currency: ExpenseCurrency;
   periodLabel: string;
   kpis: DashboardKpis;
   categoryData: CategoryChartDatum[];
@@ -30,4 +33,5 @@ export type DashboardData = {
 export type DashboardPeriod = {
   year: number;
   month: number | null;
+  currency: ExpenseCurrency;
 };

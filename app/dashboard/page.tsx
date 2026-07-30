@@ -30,7 +30,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
   return (
     <AppShell
       actions={<DashboardPeriodForm period={period} />}
-      description={`Overview for ${dashboardData?.periodLabel ?? "selected period"}.`}
+      description={`Overview for ${dashboardData?.periodLabel ?? "selected period"} in ${dashboardData?.currency ?? period.currency}.`}
       title="Dashboard"
     >
       {loadError ? (
@@ -40,12 +40,16 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
       ) : null}
       {dashboardData ? (
         <>
-          <DashboardKpiCards kpis={dashboardData.kpis} />
+          <DashboardKpiCards currency={dashboardData.currency} kpis={dashboardData.kpis} />
           <div className="dashboard-charts-row">
-            <BudgetVsPaidChart data={dashboardData.categoryData} />
-            <CategoryChart data={dashboardData.categoryData} />
+            <BudgetVsPaidChart currency={dashboardData.currency} data={dashboardData.categoryData} />
+            <CategoryChart currency={dashboardData.currency} data={dashboardData.categoryData} />
           </div>
-          <MonthlyChart data={dashboardData.monthlyData} year={dashboardData.year} />
+          <MonthlyChart
+            currency={dashboardData.currency}
+            data={dashboardData.monthlyData}
+            year={dashboardData.year}
+          />
         </>
       ) : null}
     </AppShell>
