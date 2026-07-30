@@ -130,4 +130,64 @@ select {
 .align-end { justify-self: end; font-size: 14px; }
 .auth-footer { margin: 0; color: var(--muted-foreground); font-size: 14px; text-align: center; }
 .auth-form .button,
-.dashboard-card .button { min-height: 44px; padding: 10px 16px; }
+.dashboard-card .button { min-height: 44px; padding: 10px 16px; width: 100%; }
+
+.auth-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 14px;
+}
+
+.auth-remember {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted-foreground);
+  font-weight: 500;
+}
+
+.auth-remember input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+}
+
+.auth-divider {
+  position: relative;
+  margin: 4px 0;
+  color: var(--muted-foreground);
+  font-size: 14px;
+  text-align: center;
+}
+
+.auth-divider::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: 0;
+  left: 0;
+  border-top: 1px solid var(--border);
+}
+
+.auth-divider span {
+  position: relative;
+  padding: 0 12px;
+  background: var(--surface);
+}
+
+.auth-oauth {
+  display: grid;
+  gap: 12px;
+}
+
+.button-outline {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--foreground);
+}
+
+.button-outline:hover {
+  background: #f9fafb;
+}

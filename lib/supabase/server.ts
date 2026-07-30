@@ -1,5 +1,5 @@
-import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
+import { auth } from "@clerk/nextjs/server";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
 export function isSupabaseConfigured() {
   return Boolean(
@@ -19,22 +19,12 @@ function getPublicEnvironment() {
   return { url, publishableKey };
 }
 
-export async function createSupabaseServerClient() {
-  const cookieStore = await cookies();
+export async function createSupabaseServerClient(): Promise<SupabaseClient> {
   const { url, publishableKey } = getPublicEnvironment();
 
-  return createServerClient(url, publishableKey, {
-    cookies: {
-      getAll: () => cookieStore.getAll(),
-      setAll: (cookiesToSet) => {
-        try {
-          cookiesToSet.forEach(({ name, value, options }) =>
-            cookieStore.set(name, value, options),
-          );
-        } catch {
-          // Server Components cannot set cookies. The proxy refreshes sessions.
-        }
-      },
+  return createClient(url, publishableKey, {
+    async accessToken() {
+      return (await auth()).getToken();
     },
   });
 }
