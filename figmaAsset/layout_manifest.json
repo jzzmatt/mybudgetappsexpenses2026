@@ -1,0 +1,27 @@
+{
+  "source": { "fileKey": "m7BoDc2ZW6aLacovnsFkUL", "page": "Page 1", "pageNodeId": "0:1" },
+  "frames": [
+    { "id": "10:4", "name": "Dashboard - Desktop", "bounds": { "x": 2016, "y": 0, "width": 1440, "height": 1024 }, "layout": "row", "children": [
+      { "id": "10:5", "name": "Sidebar", "size": "260x1024", "layout": "column; justify-between; padding 24px 20px", "children": ["Logo (gap 12)", "Navigation (column; gap 4; item padding 10px 12px; active Dashboard)", "UserInfo (gap 12)"] },
+      { "id": "10:40", "name": "ContentArea", "size": "1180x1024", "layout": "column; flex 1", "children": [
+        { "id": "10:41", "name": "Header", "size": "1180x72", "layout": "row; justify-between; padding 0 32px", "children": ["menu + Dashboard", "month selector + notification + avatar"] },
+        { "id": "10:55", "name": "Content", "layout": "column; gap 24; padding 24px 32px 32px", "children": [
+          { "id": "10:56", "name": "KPI Cards", "layout": "row; gap 20", "children": ["Total Budget", "Total Paid", "Remaining Budget", "Pending Expenses"] },
+          { "id": "10:85", "name": "Charts Row", "layout": "row; gap 24", "children": ["Budget vs Paid Chart", "Budget Allocation Chart"] },
+          { "id": "10:119", "name": "Monthly Expenses Chart", "layout": "card; chart height 160" },
+          { "id": "10:157", "name": "Tables Row", "layout": "row; gap 24", "children": ["Recent Expenses", "Budget by Project"] }
+        ] }
+      ] }
+    ] },
+    { "id": "10:1192", "name": "Reports - Mobile", "bounds": { "x": 11136, "y": 0, "width": 390, "height": 844 }, "layout": "column", "children": ["top bar (60px)", "content (724px): title, period/generate row, 2x2 KPI cards, bar chart, consumption progress list", "bottom navigation (60px)"] },
+    { "id": "31:4", "name": "BudgetApp - Sign In", "bounds": { "x": 4500, "y": -1500, "width": 1440, "height": 900 }, "layout": "row", "children": ["Branding Panel (560px): logo, illustration, tagline", "Form Panel (880px): Form Card 420x594; header, fields, options, primary button, divider, Google button, sign-up row"] },
+    { "id": "37:2", "name": "BudgetApp - Sign In (Mobile)", "bounds": { "x": 6020, "y": -1500, "width": 390, "height": 728 }, "layout": "column", "children": ["centered logo", "Form Card 342x540: header, email/password fields, options, button, divider, Google button, sign-up row"] }
+  ],
+  "componentPatterns": [
+    { "name": "Card", "style": "white, 1px #e5e7eb border, 12px radius, card shadow, 20px padding" },
+    { "name": "Navigation item", "style": "row, 12px gap, 8px radius; active uses rgba(0,99,177,0.15) and #60a5fa icon" },
+    { "name": "Status badge", "style": "12px radius, 8px horizontal/2px vertical padding; Paid, Partial, Pending" },
+    { "name": "Progress bar", "style": "8px height, 4px radius, #e5e7eb track" }
+  ],
+  "variantsObserved": { "navigation": ["active", "default"], "expenseStatus": ["Paid", "Partial", "Pending"], "auth": ["desktop", "mobile"] }
+}

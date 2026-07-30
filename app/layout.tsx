@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Budget App",
-  description: "A fresh, minimal starter application",
+  description: "Personal expense and budget management.",
 };
 
 export default function RootLayout({
