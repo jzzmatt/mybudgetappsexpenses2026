@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { currentUser } from "@clerk/nextjs/server";
 import { Card } from "@/components/ui/card";
 import { LogoutButton } from "./logout-button";
@@ -21,9 +22,9 @@ export default async function DashboardPage() {
         <h1>Signed in</h1>
         <p>You are signed in as {email}.</p>
         <p className="dashboard-links">
-          <a className="auth-link" href="/categories">
+          <Link className="auth-link" href="/categories">
             Manage categories
-          </a>
+          </Link>
         </p>
         <LogoutButton />
       </Card>
