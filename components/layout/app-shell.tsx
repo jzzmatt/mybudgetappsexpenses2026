@@ -4,6 +4,7 @@ import Link from "next/link";
 const navItems = [
   { href: "/dashboard", label: "Dashboard" },
   { href: "/categories", label: "Categories" },
+  { href: "/projects", label: "Projects" },
 ];
 
 type AppShellProps = {

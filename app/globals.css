@@ -402,6 +402,43 @@ select {
   outline: 2px solid color-mix(in srgb, var(--primary) 20%, transparent);
 }
 
+.auth-field select {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 11px 12px;
+  background: var(--surface);
+  color: var(--foreground);
+}
+
+.auth-field select:focus {
+  border-color: var(--primary);
+  outline: 2px solid color-mix(in srgb, var(--primary) 20%, transparent);
+}
+
+.status-badge {
+  display: inline-block;
+  border-radius: var(--radius-pill, 20px);
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.status-active {
+  background: var(--success-pale, #f0fdf4);
+  color: var(--success, #107c10);
+}
+
+.status-paused {
+  background: var(--warning-pale, #fffbeb);
+  color: #b45309;
+}
+
+.status-completed {
+  background: var(--primary-pale, #eff6ff);
+  color: var(--primary);
+}
+
 .category-form-actions {
   display: flex;
   flex-wrap: wrap;
