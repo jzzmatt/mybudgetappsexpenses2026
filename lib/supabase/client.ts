@@ -1,4 +1,5 @@
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { createBrowserClient } from "@supabase/ssr";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 function getPublicEnvironment() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -20,5 +21,5 @@ function getPublicEnvironment() {
 export function createSupabaseClient(): SupabaseClient {
   const { url, publishableKey } = getPublicEnvironment();
 
-  return createClient(url, publishableKey);
+  return createBrowserClient(url, publishableKey);
 }
