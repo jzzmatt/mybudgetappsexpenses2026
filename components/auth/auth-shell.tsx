@@ -11,7 +11,7 @@ export function AuthShell({ title, description, children }: AuthShellProps) {
   return (
     <main className="auth-page">
       <Card className="auth-card">
-        <p className="auth-brand">Budget App</p>
+        <p className="auth-brand">BudgetApp</p>
         <h1>{title}</h1>
         <p className="auth-description">{description}</p>
         {children}
