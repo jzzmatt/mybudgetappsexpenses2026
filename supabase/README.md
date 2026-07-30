@@ -21,14 +21,17 @@ npx supabase db push
 
 After migrations, run `supabase/seed.sql` in the SQL Editor.
 
-1. Sign in to the app once with Clerk and copy your user id (format: `user_...`).
-2. In `supabase/seed.sql`, replace `user_seed_demo` with your Clerk user id, **or** run this before the seed block:
+The default Clerk user id in the seed file is:
+
+`user_3HEC2u3iI0PzsKUUZyF3si8TOqn`
+
+To seed a different account, run this before the seed block:
 
 ```sql
 select set_config('app.seed_clerk_user_id', 'user_YOUR_CLERK_ID', false);
 ```
 
-3. Execute `supabase/seed.sql`.
+To move old demo data from `user_seed_demo` to your Clerk account, run `supabase/scripts/reassign-seed-user.sql`.
 
 ## Clerk + RLS
 

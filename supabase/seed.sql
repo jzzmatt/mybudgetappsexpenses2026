@@ -1,9 +1,13 @@
 -- Demo seed data for Budget App (Phase 03)
--- Replace the user id below with your Clerk user id before running, or set SEED_CLERK_USER_ID when using the seed script.
+-- Default Clerk user id for this project. Override with:
+-- select set_config('app.seed_clerk_user_id', 'user_YOUR_ID', false);
 
 do $$
 declare
-  seed_user_id text := coalesce(current_setting('app.seed_clerk_user_id', true), 'user_seed_demo');
+  seed_user_id text := coalesce(
+    current_setting('app.seed_clerk_user_id', true),
+    'user_3HEC2u3iI0PzsKUUZyF3si8TOqn'
+  );
   infra_id uuid;
   marketing_id uuid;
   operations_id uuid;
@@ -16,7 +20,7 @@ declare
   cloud_vendor_id uuid;
 begin
   insert into public.users (id, email, full_name)
-  values (seed_user_id, 'demo@budgetapp.local', 'Junior Mateus')
+  values (seed_user_id, 'mateusjunior.ns@gmail.com', 'Junior Mateus')
   on conflict (id) do update
   set email = excluded.email,
       full_name = excluded.full_name,
@@ -60,11 +64,22 @@ begin
   select id into cloud_vendor_id from public.vendors where user_id = seed_user_id and name = 'Cloud Provider';
 
   insert into public.budgets (user_id, category_id, project_id, name, amount, month, year)
-  values
-    (seed_user_id, technology_id, alpha_id, 'Alpha Platform Technology Budget', 250000, 7, 2026),
-    (seed_user_id, marketing_id, beta_id, 'Beta Launch Marketing Budget', 150000, 7, 2026),
-    (seed_user_id, infra_id, gamma_id, 'Gamma System Infrastructure Budget', 320000, 7, 2026),
-    (seed_user_id, operations_id, delta_id, 'Delta Portal Operations Budget', 180000, 7, 2026);
+  select seed_user_id, seed.category_id, seed.project_id, seed.name, seed.amount, seed.month, seed.year
+  from (
+    values
+      (technology_id, alpha_id, 'Alpha Platform Technology Budget', 250000::numeric, 7, 2026),
+      (marketing_id, beta_id, 'Beta Launch Marketing Budget', 150000::numeric, 7, 2026),
+      (infra_id, gamma_id, 'Gamma System Infrastructure Budget', 320000::numeric, 7, 2026),
+      (operations_id, delta_id, 'Delta Portal Operations Budget', 180000::numeric, 7, 2026)
+  ) as seed(category_id, project_id, name, amount, month, year)
+  where not exists (
+    select 1
+    from public.budgets existing
+    where existing.user_id = seed_user_id
+      and existing.name = seed.name
+      and existing.year = seed.year
+      and existing.month = seed.month
+  );
 
   insert into public.expenses (
     user_id,
@@ -82,10 +97,34 @@ begin
     status,
     notes
   )
-  values
-    (seed_user_id, '2026-07-15', 7, 2026, technology_id, alpha_id, cloud_vendor_id, 'Cloud Infrastructure', 45000, 45000, 'bank_transfer', 'high', 'paid', null),
-    (seed_user_id, '2026-07-12', 7, 2026, marketing_id, beta_id, null, 'Marketing Campaign', 28500, 15000, 'card', 'medium', 'partial', null),
-    (seed_user_id, '2026-07-10', 7, 2026, operations_id, delta_id, null, 'Office Supplies', 3200, 3200, 'card', 'low', 'paid', null),
-    (seed_user_id, '2026-07-08', 7, 2026, hr_id, gamma_id, null, 'Team Building', 12000, 0, 'bank_transfer', 'medium', 'pending', null),
-    (seed_user_id, '2026-07-05', 7, 2026, technology_id, alpha_id, cloud_vendor_id, 'Software License', 8750, 8750, 'card', 'high', 'paid', null);
+  select
+    seed_user_id,
+    seed.date,
+    seed.month,
+    seed.year,
+    seed.category_id,
+    seed.project_id,
+    seed.vendor_id,
+    seed.description,
+    seed.budget_amount,
+    seed.paid_amount,
+    seed.payment_method,
+    seed.priority,
+    seed.status,
+    seed.notes
+  from (
+    values
+      ('2026-07-15'::date, 7, 2026, technology_id, alpha_id, cloud_vendor_id, 'Cloud Infrastructure', 45000::numeric, 45000::numeric, 'bank_transfer', 'high', 'paid', null::text),
+      ('2026-07-12'::date, 7, 2026, marketing_id, beta_id, null::uuid, 'Marketing Campaign', 28500::numeric, 15000::numeric, 'card', 'medium', 'partial', null::text),
+      ('2026-07-10'::date, 7, 2026, operations_id, delta_id, null::uuid, 'Office Supplies', 3200::numeric, 3200::numeric, 'card', 'low', 'paid', null::text),
+      ('2026-07-08'::date, 7, 2026, hr_id, gamma_id, null::uuid, 'Team Building', 12000::numeric, 0::numeric, 'bank_transfer', 'medium', 'pending', null::text),
+      ('2026-07-05'::date, 7, 2026, technology_id, alpha_id, cloud_vendor_id, 'Software License', 8750::numeric, 8750::numeric, 'card', 'high', 'paid', null::text)
+  ) as seed(date, month, year, category_id, project_id, vendor_id, description, budget_amount, paid_amount, payment_method, priority, status, notes)
+  where not exists (
+    select 1
+    from public.expenses existing
+    where existing.user_id = seed_user_id
+      and existing.description = seed.description
+      and existing.date = seed.date
+  );
 end $$;

@@ -20,6 +20,11 @@ export default async function DashboardPage() {
         <p className="auth-brand">BudgetApp</p>
         <h1>Signed in</h1>
         <p>You are signed in as {email}.</p>
+        <p className="dashboard-links">
+          <a className="auth-link" href="/categories">
+            Manage categories
+          </a>
+        </p>
         <LogoutButton />
       </Card>
     </main>
