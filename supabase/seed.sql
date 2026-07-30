@@ -63,15 +63,15 @@ begin
 
   select id into cloud_vendor_id from public.vendors where user_id = seed_user_id and name = 'Cloud Provider';
 
-  insert into public.budgets (user_id, category_id, project_id, name, amount, month, year)
-  select seed_user_id, seed.category_id, seed.project_id, seed.name, seed.amount, seed.month, seed.year
+  insert into public.budgets (user_id, category_id, project_id, name, amount, currency, month, year)
+  select seed_user_id, seed.category_id, seed.project_id, seed.name, seed.amount, seed.currency, seed.month, seed.year
   from (
     values
-      (technology_id, alpha_id, 'Alpha Platform Technology Budget', 250000::numeric, 7, 2026),
-      (marketing_id, beta_id, 'Beta Launch Marketing Budget', 150000::numeric, 7, 2026),
-      (infra_id, gamma_id, 'Gamma System Infrastructure Budget', 320000::numeric, 7, 2026),
-      (operations_id, delta_id, 'Delta Portal Operations Budget', 180000::numeric, 7, 2026)
-  ) as seed(category_id, project_id, name, amount, month, year)
+      (technology_id, alpha_id, 'Alpha Platform Technology Budget', 250000::numeric, 'KZ', 7, 2026),
+      (marketing_id, beta_id, 'Beta Launch Marketing Budget', 150000::numeric, 'KZ', 7, 2026),
+      (infra_id, gamma_id, 'Gamma System Infrastructure Budget', 320000::numeric, 'KZ', 7, 2026),
+      (operations_id, delta_id, 'Delta Portal Operations Budget', 180000::numeric, 'KZ', 7, 2026)
+  ) as seed(category_id, project_id, name, amount, currency, month, year)
   where not exists (
     select 1
     from public.budgets existing
