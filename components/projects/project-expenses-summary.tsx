@@ -37,6 +37,12 @@ export function ProjectExpensesSummary({ project, totals }: ProjectExpensesSumma
         value: formatCurrency(totalsForCurrency.totalPaid, currency),
         variant: "paid" as const,
       },
+      {
+        key: `remaining-${currency}`,
+        label: multiCurrency ? `Total Remaining (${currency})` : "Total Remaining",
+        value: formatCurrency(totalsForCurrency.totalBalance, currency),
+        variant: "remaining" as const,
+      },
     ];
   });
 
@@ -68,6 +74,12 @@ export function ProjectExpensesSummary({ project, totals }: ProjectExpensesSumma
         value: formatCurrency(0),
         variant: "paid" as const,
       },
+      {
+        key: "remaining-empty",
+        label: "Total Remaining",
+        value: formatCurrency(0),
+        variant: "remaining" as const,
+      },
     );
   }
 
@@ -75,7 +87,13 @@ export function ProjectExpensesSummary({ project, totals }: ProjectExpensesSumma
     <div className="budget-summary-grid">
       {items.map((item) => (
         <Card
-          className={`budget-summary-card${item.variant === "paid" ? " project-expenses-paid-card" : ""}`}
+          className={`budget-summary-card${
+            item.variant === "paid"
+              ? " project-expenses-paid-card"
+              : item.variant === "remaining"
+                ? " project-expenses-remaining-card"
+                : ""
+          }`}
           key={item.key}
         >
           <p className="budget-summary-label">{item.label}</p>
