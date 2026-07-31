@@ -42,6 +42,9 @@ export function ProjectList({ projects, search }: ProjectListProps) {
             </div>
             <p className="list-mobile-card-meta">{project.description || "No description"}</p>
             <div className="list-mobile-card-actions">
+              <Link className="auth-link" href={`/projects/${project.id}/expenses`}>
+                Expenses
+              </Link>
               <Link className="auth-link" href={`/projects/${project.id}/edit`}>
                 Edit
               </Link>
@@ -73,6 +76,9 @@ export function ProjectList({ projects, search }: ProjectListProps) {
                     </span>
                   </td>
                   <td className="category-table-actions">
+                    <Link className="auth-link" href={`/projects/${project.id}/expenses`}>
+                      Expenses
+                    </Link>
                     <Link className="auth-link" href={`/projects/${project.id}/edit`}>
                       Edit
                     </Link>
