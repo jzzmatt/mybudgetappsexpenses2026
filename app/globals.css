@@ -916,6 +916,106 @@ select {
   font-weight: 700;
 }
 
+.reports-period-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.reports-generate-button {
+  white-space: nowrap;
+}
+
+.reports-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.reports-summary-card {
+  padding: 20px;
+}
+
+.reports-summary-label {
+  margin: 0 0 8px;
+  color: var(--muted-foreground);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.reports-summary-value {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.reports-summary-value-full {
+  display: block;
+}
+
+.reports-summary-value-compact {
+  display: none;
+}
+
+.reports-content-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+
+.reports-chart-card {
+  height: 100%;
+}
+
+.reports-chart-container {
+  height: 280px;
+}
+
+.reports-consumption-card {
+  padding: 20px;
+}
+
+.reports-consumption-card h2 {
+  margin: 0 0 16px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.reports-consumption-list {
+  display: grid;
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.reports-consumption-item-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.reports-consumption-percent {
+  color: var(--primary);
+  font-size: 13px;
+}
+
+.reports-monthly-chart {
+  display: block;
+}
+
+.reports-ai-link {
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: 14px;
+}
+
 .category-toolbar {
   display: flex;
   flex-wrap: wrap;
@@ -1653,6 +1753,26 @@ select {
   .budget-summary-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  .reports-summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .reports-summary-value-full {
+    display: none;
+  }
+
+  .reports-summary-value-compact {
+    display: block;
+  }
+
+  .reports-content-row {
+    grid-template-columns: 1fr;
+  }
+
+  .reports-monthly-chart {
+    display: none;
+  }
 }
 
 @media (max-width: 560px) {
@@ -1661,6 +1781,10 @@ select {
   }
 
   .budget-summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .reports-summary-grid {
     grid-template-columns: 1fr;
   }
 
