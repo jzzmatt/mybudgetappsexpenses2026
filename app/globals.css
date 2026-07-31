@@ -115,7 +115,7 @@ select {
   font-weight: 400;
 }
 
-.auth-field input:focus {
+.auth-field input:focus-visible {
   border-color: var(--primary);
   outline: 2px solid color-mix(in srgb, var(--primary) 20%, transparent);
 }
@@ -425,7 +425,7 @@ select {
   resize: vertical;
 }
 
-.category-form textarea:focus {
+.category-form textarea:focus-visible {
   border-color: var(--primary);
   outline: 2px solid color-mix(in srgb, var(--primary) 20%, transparent);
 }
@@ -439,7 +439,7 @@ select {
   color: var(--foreground);
 }
 
-.auth-field select:focus {
+.auth-field select:focus-visible {
   border-color: var(--primary);
   outline: 2px solid color-mix(in srgb, var(--primary) 20%, transparent);
 }
