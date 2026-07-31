@@ -1,5 +1,6 @@
 import { ExpenseFiltersForm } from "@/components/expenses/expense-filters-form";
 import { ExpenseSearchForm } from "@/components/expenses/expense-search-form";
+import { PasteExpenseButton } from "@/components/expenses/paste-expense-button";
 import { ListToolbarCard } from "@/components/layout/list-toolbar-card";
 import type { Category } from "@/lib/categories/types";
 import type { ExpenseFilters } from "@/lib/expenses/types";
@@ -28,6 +29,7 @@ export function ExpenseToolbar({ filters, categories, projects, vendors }: Expen
     <div className="expense-toolbar">
       <ListToolbarCard>
         <ExpenseSearchForm filters={filters} />
+        <PasteExpenseButton />
       </ListToolbarCard>
       <details className="list-filters-panel" open={hasActiveFilters}>
         <summary className="list-filters-trigger">Filters</summary>

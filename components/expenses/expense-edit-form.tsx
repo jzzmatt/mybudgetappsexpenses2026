@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { AuthField } from "@/components/auth/auth-field";
+import { CopyExpenseButton } from "@/components/expenses/copy-expense-button";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { updateExpenseAction } from "@/lib/expenses/actions";
@@ -164,6 +165,7 @@ export function ExpenseEditForm({ expense, categories, projects, vendors }: Expe
         </label>
         <div className="category-form-actions">
           <Button type="submit">Save changes</Button>
+          <CopyExpenseButton expense={expense} />
           <Link className="auth-link" href="/expenses">
             Cancel
           </Link>
