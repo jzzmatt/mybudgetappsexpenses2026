@@ -1,5 +1,7 @@
+import { DashboardBudgetByProject } from "@/components/dashboard/dashboard-budget-by-project";
 import { DashboardChartsSection } from "@/components/dashboard/dashboard-charts-section";
 import { DashboardKpiCards } from "@/components/dashboard/dashboard-kpi-cards";
+import { DashboardRecentExpenses } from "@/components/dashboard/dashboard-recent-expenses";
 import { DashboardPeriodForm } from "@/components/dashboard/dashboard-period-form";
 import { AppShell } from "@/components/layout/app-shell";
 import { parseDashboardPeriod } from "@/lib/dashboard/params";
@@ -28,7 +30,6 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
   return (
     <AppShell
       actions={<DashboardPeriodForm period={period} />}
-      description={`Overview for ${dashboardData?.periodLabel ?? "selected period"} in ${dashboardData?.currency ?? period.currency}.`}
       title="Dashboard"
     >
       {loadError ? (
@@ -37,15 +38,29 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
         </p>
       ) : null}
       {dashboardData ? (
-        <>
-          <DashboardKpiCards currency={dashboardData.currency} kpis={dashboardData.kpis} />
+        <div className="dashboard-page-content">
+          <DashboardKpiCards
+            currency={dashboardData.currency}
+            kpiTrends={dashboardData.kpiTrends}
+            kpis={dashboardData.kpis}
+          />
           <DashboardChartsSection
             categoryData={dashboardData.categoryData}
             currency={dashboardData.currency}
             monthlyData={dashboardData.monthlyData}
             year={dashboardData.year}
           />
-        </>
+          <div className="dashboard-tables-row">
+            <DashboardRecentExpenses
+              currency={dashboardData.currency}
+              expenses={dashboardData.recentExpenses}
+            />
+            <DashboardBudgetByProject
+              currency={dashboardData.currency}
+              projects={dashboardData.projectBudgets}
+            />
+          </div>
+        </div>
       ) : null}
     </AppShell>
   );
