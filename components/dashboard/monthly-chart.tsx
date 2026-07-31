@@ -55,7 +55,7 @@ export function MonthlyChart({ data, year, currency }: MonthlyChartProps) {
   if (!hasData) {
     return (
       <Card className="dashboard-chart-card dashboard-chart-card-wide">
-        <h2>Monthly expenses ({year})</h2>
+        <h2>Monthly Expenses</h2>
         <p className="dashboard-chart-empty">No expense data for this year.</p>
       </Card>
     );

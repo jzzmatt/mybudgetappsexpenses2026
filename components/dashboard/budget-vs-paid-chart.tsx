@@ -52,7 +52,7 @@ export function BudgetVsPaidChart({ data, currency }: BudgetVsPaidChartProps) {
   if (data.length === 0) {
     return (
       <Card className="dashboard-chart-card">
-        <h2>Budget vs paid by category</h2>
+        <h2>Budget vs Paid by Category</h2>
         <p className="dashboard-chart-empty">No expense data for this period.</p>
       </Card>
     );
@@ -60,7 +60,7 @@ export function BudgetVsPaidChart({ data, currency }: BudgetVsPaidChartProps) {
 
   return (
     <Card className="dashboard-chart-card">
-      <h2>Budget vs paid by category</h2>
+      <h2>Budget vs Paid by Category</h2>
       <div
         aria-label="Bar chart comparing budget and paid amounts by category"
         className="dashboard-chart-container"

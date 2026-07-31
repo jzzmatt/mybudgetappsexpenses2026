@@ -2,23 +2,15 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-
-const navItems = [
-  { href: "/dashboard", label: "Dashboard" },
-  { href: "/categories", label: "Categories" },
-  { href: "/projects", label: "Projects" },
-  { href: "/vendors", label: "Vendors" },
-  { href: "/expenses", label: "Expenses" },
-  { href: "/budgets", label: "Budgets" },
-  { href: "/ai-report", label: "AI Report" },
-];
+import { NavIcon } from "@/components/layout/nav-icon";
+import { primaryNavItems } from "@/components/layout/nav-items";
 
 export function AppSidebarNav() {
   const pathname = usePathname();
 
   return (
     <nav aria-label="Main navigation" className="app-sidebar-nav">
-      {navItems.map((item) => {
+      {primaryNavItems.map((item) => {
         const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
 
         return (
@@ -28,7 +20,8 @@ export function AppSidebarNav() {
             href={item.href}
             key={item.href}
           >
-            {item.label}
+            <NavIcon name={item.icon} />
+            <span>{item.label}</span>
           </Link>
         );
       })}

@@ -43,7 +43,7 @@ export function CategoryChart({ data, currency }: CategoryChartProps) {
   if (data.length === 0) {
     return (
       <Card className="dashboard-chart-card">
-        <h2>Budget allocation by category</h2>
+        <h2>Budget Allocation by Category</h2>
         <p className="dashboard-chart-empty">No expense data for this period.</p>
       </Card>
     );
@@ -56,7 +56,7 @@ export function CategoryChart({ data, currency }: CategoryChartProps) {
 
   return (
     <Card className="dashboard-chart-card">
-      <h2>Budget allocation by category</h2>
+      <h2>Budget Allocation by Category</h2>
       <div
         aria-label="Donut chart showing budget allocation by category"
         className="dashboard-chart-container dashboard-chart-container-pie"

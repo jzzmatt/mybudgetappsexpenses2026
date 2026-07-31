@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
+import { AppBottomNav } from "@/components/layout/app-bottom-nav";
 import { AppSidebarNav } from "@/components/layout/app-sidebar-nav";
+import { AppSidebarUser } from "@/components/layout/app-sidebar-user";
 
 type AppShellProps = {
   title: string;
@@ -15,12 +17,15 @@ export function AppShell({ title, description, actions, children }: AppShellProp
         Skip to main content
       </a>
       <aside className="app-sidebar">
-        <p className="app-sidebar-brand">MY Expense Tracker</p>
-        <AppSidebarNav />
+        <div className="app-sidebar-top">
+          <p className="app-sidebar-brand">MY Expense Tracker</p>
+          <AppSidebarNav />
+        </div>
+        <AppSidebarUser />
       </aside>
       <div className="app-main">
         <header className="app-header">
-          <div>
+          <div className="app-header-copy">
             <h1>{title}</h1>
             {description ? <p>{description}</p> : null}
           </div>
@@ -30,6 +35,7 @@ export function AppShell({ title, description, actions, children }: AppShellProp
           {children}
         </main>
       </div>
+      <AppBottomNav />
     </div>
   );
 }
