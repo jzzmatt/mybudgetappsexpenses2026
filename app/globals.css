@@ -922,6 +922,19 @@ select {
   color: var(--success, #107c10);
 }
 
+.project-expenses-remaining-card {
+  background: #fffbeb;
+  border-color: color-mix(in srgb, #d97706 18%, var(--border));
+}
+
+.project-expenses-remaining-card .budget-summary-label {
+  color: #b45309;
+}
+
+.project-expenses-remaining-card .budget-summary-value {
+  color: #92400e;
+}
+
 .budget-section-header {
   margin-bottom: 12px;
 }
