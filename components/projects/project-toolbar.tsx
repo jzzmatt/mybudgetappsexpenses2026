@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { ProjectSearchForm } from "@/components/projects/project-search-form";
+import { ListToolbarCard } from "@/components/layout/list-toolbar-card";
 
 type ProjectToolbarProps = {
   search?: string;
@@ -7,11 +7,8 @@ type ProjectToolbarProps = {
 
 export function ProjectToolbar({ search }: ProjectToolbarProps) {
   return (
-    <div className="category-toolbar">
+    <ListToolbarCard>
       <ProjectSearchForm defaultValue={search} />
-      <Link className="button button-small" href="/projects/new">
-        New project
-      </Link>
-    </div>
+    </ListToolbarCard>
   );
 }

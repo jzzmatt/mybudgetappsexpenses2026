@@ -6,7 +6,7 @@ type ProjectSearchFormProps = {
 
 export function ProjectSearchForm({ defaultValue }: ProjectSearchFormProps) {
   return (
-    <form action="/projects" className="category-search-form" method="get" role="search">
+    <form action="/projects" className="list-search-form" method="get" role="search">
       <label className="sr-only" htmlFor="project-search">
         Search projects
       </label>

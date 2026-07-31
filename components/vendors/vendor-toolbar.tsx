@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { ListToolbarCard } from "@/components/layout/list-toolbar-card";
 import { VendorSearchForm } from "@/components/vendors/vendor-search-form";
 
 type VendorToolbarProps = {
@@ -7,11 +7,8 @@ type VendorToolbarProps = {
 
 export function VendorToolbar({ search }: VendorToolbarProps) {
   return (
-    <div className="category-toolbar">
+    <ListToolbarCard>
       <VendorSearchForm defaultValue={search} />
-      <Link className="button button-small" href="/vendors/new">
-        New vendor
-      </Link>
-    </div>
+    </ListToolbarCard>
   );
 }

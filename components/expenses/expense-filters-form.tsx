@@ -25,7 +25,7 @@ export function ExpenseFiltersForm({
   const clearHref = "/expenses";
 
   return (
-    <form action="/expenses" className="expense-filters-form" method="get">
+    <form action="/expenses" className="list-filters-form" method="get">
       {filters.search ? <input name="q" type="hidden" value={filters.search} /> : null}
       {filters.sort ? <input name="sort" type="hidden" value={filters.sort} /> : null}
       {filters.order ? <input name="order" type="hidden" value={filters.order} /> : null}

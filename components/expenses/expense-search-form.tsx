@@ -14,7 +14,7 @@ export function ExpenseSearchForm({ filters }: ExpenseSearchFormProps) {
   })}`;
 
   return (
-    <form action="/expenses" className="category-search-form" method="get" role="search">
+    <form action="/expenses" className="list-search-form" method="get" role="search">
       {filters.categoryId ? <input name="category" type="hidden" value={filters.categoryId} /> : null}
       {filters.projectId ? <input name="project" type="hidden" value={filters.projectId} /> : null}
       {filters.vendorId ? <input name="vendor" type="hidden" value={filters.vendorId} /> : null}

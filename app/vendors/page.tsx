@@ -1,7 +1,8 @@
-import Link from "next/link";
+import { AppShell } from "@/components/layout/app-shell";
+import { ListPageContent } from "@/components/layout/list-page-content";
+import { PageActionButton } from "@/components/layout/page-action-button";
 import { VendorList } from "@/components/vendors/vendor-list";
 import { VendorToolbar } from "@/components/vendors/vendor-toolbar";
-import { AppShell } from "@/components/layout/app-shell";
 import { getVendors } from "@/lib/vendors/queries";
 import type { Vendor } from "@/lib/vendors/types";
 
@@ -25,19 +26,19 @@ export default async function VendorsPage({ searchParams }: VendorsPageProps) {
   }
 
   return (
-    <AppShell description="Manage suppliers and service providers." title="Vendors">
+    <AppShell
+      actions={<PageActionButton href="/vendors/new">Add vendor</PageActionButton>}
+      title="Vendors"
+    >
       {loadError ? (
         <p className="form-error page-error" role="alert">
           {loadError}
         </p>
       ) : null}
-      <VendorToolbar search={q} />
-      <VendorList vendors={vendors} search={q} />
-      <p className="category-footer-link">
-        <Link className="auth-link" href="/dashboard">
-          Back to dashboard
-        </Link>
-      </p>
+      <ListPageContent>
+        <VendorToolbar search={q} />
+        <VendorList vendors={vendors} search={q} />
+      </ListPageContent>
     </AppShell>
   );
 }

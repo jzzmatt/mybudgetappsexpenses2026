@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { CategorySearchForm } from "@/components/categories/category-search-form";
+import { ListToolbarCard } from "@/components/layout/list-toolbar-card";
 
 type CategoryToolbarProps = {
   search?: string;
@@ -7,11 +7,8 @@ type CategoryToolbarProps = {
 
 export function CategoryToolbar({ search }: CategoryToolbarProps) {
   return (
-    <div className="category-toolbar">
+    <ListToolbarCard>
       <CategorySearchForm defaultValue={search} />
-      <Link className="button button-small" href="/categories/new">
-        New category
-      </Link>
-    </div>
+    </ListToolbarCard>
   );
 }

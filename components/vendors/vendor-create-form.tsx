@@ -1,13 +1,16 @@
 import Link from "next/link";
 import { AuthField } from "@/components/auth/auth-field";
+import { ResourceFormLayout } from "@/components/layout/resource-form-layout";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { createVendorAction } from "@/lib/vendors/actions";
 
 export function VendorCreateForm() {
   return (
-    <Card className="category-form-card">
-      <form action={createVendorAction} className="category-form">
+    <ResourceFormLayout
+      description="Add a vendor or supplier for your expense records."
+      title="Vendor details"
+    >
+      <form action={createVendorAction} className="resource-form">
         <AuthField
           autoComplete="off"
           id="vendor-name"
@@ -23,13 +26,13 @@ export function VendorCreateForm() {
           name="contact_info"
           placeholder="e.g. billing@cloud.example"
         />
-        <div className="category-form-actions">
+        <div className="resource-form-actions">
           <Button type="submit">Create vendor</Button>
           <Link className="auth-link" href="/vendors">
             Cancel
           </Link>
         </div>
       </form>
-    </Card>
+    </ResourceFormLayout>
   );
 }

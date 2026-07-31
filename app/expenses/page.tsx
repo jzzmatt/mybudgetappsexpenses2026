@@ -1,8 +1,9 @@
-import Link from "next/link";
 import { ExpenseList } from "@/components/expenses/expense-list";
 import { ExpensePagination } from "@/components/expenses/expense-pagination";
 import { ExpenseToolbar } from "@/components/expenses/expense-toolbar";
 import { AppShell } from "@/components/layout/app-shell";
+import { ListPageContent } from "@/components/layout/list-page-content";
+import { PageActionButton } from "@/components/layout/page-action-button";
 import { getCategories } from "@/lib/categories/queries";
 import type { Category } from "@/lib/categories/types";
 import { parseExpenseSearchParams } from "@/lib/expenses/params";
@@ -60,34 +61,34 @@ export default async function ExpensesPage({ searchParams }: ExpensesPageProps) 
   );
 
   return (
-    <AppShell description="Track spending with search, filters, and pagination." title="Expenses">
+    <AppShell
+      actions={<PageActionButton href="/expenses/new">Add expense</PageActionButton>}
+      title="Expenses"
+    >
       {loadError ? (
         <p className="form-error page-error" role="alert">
           {loadError}
         </p>
       ) : null}
-      <ExpenseToolbar
-        categories={categories}
-        filters={filters}
-        projects={projects}
-        vendors={vendors}
-      />
-      <ExpenseList
-        expenses={result.expenses}
-        filters={filters}
-        hasActiveFilters={hasActiveFilters}
-      />
-      <ExpensePagination
-        filters={filters}
-        page={result.page}
-        totalCount={result.totalCount}
-        totalPages={result.totalPages}
-      />
-      <p className="category-footer-link">
-        <Link className="auth-link" href="/dashboard">
-          Back to dashboard
-        </Link>
-      </p>
+      <ListPageContent>
+        <ExpenseToolbar
+          categories={categories}
+          filters={filters}
+          projects={projects}
+          vendors={vendors}
+        />
+        <ExpenseList
+          expenses={result.expenses}
+          filters={filters}
+          hasActiveFilters={hasActiveFilters}
+        />
+        <ExpensePagination
+          filters={filters}
+          page={result.page}
+          totalCount={result.totalCount}
+          totalPages={result.totalPages}
+        />
+      </ListPageContent>
     </AppShell>
   );
 }

@@ -42,14 +42,14 @@ function SortableHeader({
 export function ExpenseList({ expenses, filters, hasActiveFilters }: ExpenseListProps) {
   if (expenses.length === 0) {
     return (
-      <Card className="category-empty-card">
+      <Card className="list-empty-card">
         <h2>No expenses found</h2>
         <p>
           {hasActiveFilters
             ? "No expenses match your current search or filters. Try adjusting them or create a new expense."
             : "Create your first expense to start tracking spending."}
         </p>
-        <Link className="auth-link" href="/expenses/new">
+        <Link className="button button-small" href="/expenses/new">
           Create expense
         </Link>
       </Card>
@@ -57,56 +57,100 @@ export function ExpenseList({ expenses, filters, hasActiveFilters }: ExpenseList
   }
 
   return (
-    <Card className="category-table-card">
-      <div className="category-table-wrap">
-        <table className="category-table expense-table">
-          <caption className="sr-only">Expenses</caption>
-          <thead>
-            <tr>
-              <SortableHeader field="date" filters={filters} label="Date" />
-              <SortableHeader field="description" filters={filters} label="Description" />
-              <th scope="col">Category</th>
-              <th scope="col">Project</th>
-              <th scope="col">Vendor</th>
-              <th scope="col">Currency</th>
-              <SortableHeader field="budget_amount" filters={filters} label="Budget" />
-              <SortableHeader field="paid_amount" filters={filters} label="Paid" />
-              <SortableHeader field="balance" filters={filters} label="Balance" />
-              <SortableHeader field="status" filters={filters} label="Status" />
-              <th scope="col">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {expenses.map((expense) => (
-              <tr key={expense.id}>
-                <td>{formatExpenseDate(expense.date)}</td>
-                <td>{expense.description}</td>
-                <td>{expense.category?.name ?? "—"}</td>
-                <td>{expense.project?.name ?? "—"}</td>
-                <td>{expense.vendor?.name ?? "—"}</td>
-                <td>{expense.currency}</td>
-                <td>{formatCurrency(expense.budget_amount, expense.currency)}</td>
-                <td>{formatCurrency(expense.paid_amount, expense.currency)}</td>
-                <td>{formatCurrency(expense.balance, expense.currency)}</td>
-                <td>
-                  <span className={`status-badge status-${expense.status}`}>
-                    {formatLabel(expense.status)}
-                  </span>
-                </td>
-                <td className="category-table-actions">
-                  <Link className="auth-link" href={`/expenses/${expense.id}/edit`}>
-                    Edit
-                  </Link>
-                  <DeleteExpenseButton
-                    expenseDescription={expense.description}
-                    expenseId={expense.id}
-                  />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+    <>
+      <div className="list-mobile-cards">
+        {expenses.map((expense) => (
+          <Card className="list-mobile-card" key={expense.id}>
+            <div className="list-mobile-card-header">
+              <div>
+                <h3>{expense.description}</h3>
+                <p className="list-mobile-card-date">{formatExpenseDate(expense.date)}</p>
+              </div>
+              <span className={`status-badge status-${expense.status}`}>
+                {formatLabel(expense.status)}
+              </span>
+            </div>
+            <dl className="list-mobile-card-details">
+              <div>
+                <dt>Category</dt>
+                <dd>{expense.category?.name ?? "—"}</dd>
+              </div>
+              <div>
+                <dt>Amount</dt>
+                <dd>{formatCurrency(expense.paid_amount, expense.currency)}</dd>
+              </div>
+              <div>
+                <dt>Project</dt>
+                <dd>{expense.project?.name ?? "—"}</dd>
+              </div>
+              <div>
+                <dt>Vendor</dt>
+                <dd>{expense.vendor?.name ?? "—"}</dd>
+              </div>
+            </dl>
+            <div className="list-mobile-card-actions">
+              <Link className="auth-link" href={`/expenses/${expense.id}/edit`}>
+                Edit
+              </Link>
+              <DeleteExpenseButton
+                expenseDescription={expense.description}
+                expenseId={expense.id}
+              />
+            </div>
+          </Card>
+        ))}
       </div>
-    </Card>
+      <Card className="category-table-card list-desktop-table">
+        <div className="category-table-wrap">
+          <table className="category-table list-table expense-table">
+            <caption className="sr-only">Expenses</caption>
+            <thead>
+              <tr>
+                <SortableHeader field="date" filters={filters} label="Date" />
+                <SortableHeader field="description" filters={filters} label="Description" />
+                <th scope="col">Category</th>
+                <th scope="col">Project</th>
+                <th scope="col">Vendor</th>
+                <th scope="col">Currency</th>
+                <SortableHeader field="budget_amount" filters={filters} label="Budget" />
+                <SortableHeader field="paid_amount" filters={filters} label="Paid" />
+                <SortableHeader field="balance" filters={filters} label="Balance" />
+                <SortableHeader field="status" filters={filters} label="Status" />
+                <th scope="col">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {expenses.map((expense) => (
+                <tr key={expense.id}>
+                  <td>{formatExpenseDate(expense.date)}</td>
+                  <td>{expense.description}</td>
+                  <td>{expense.category?.name ?? "—"}</td>
+                  <td>{expense.project?.name ?? "—"}</td>
+                  <td>{expense.vendor?.name ?? "—"}</td>
+                  <td>{expense.currency}</td>
+                  <td>{formatCurrency(expense.budget_amount, expense.currency)}</td>
+                  <td>{formatCurrency(expense.paid_amount, expense.currency)}</td>
+                  <td>{formatCurrency(expense.balance, expense.currency)}</td>
+                  <td>
+                    <span className={`status-badge status-${expense.status}`}>
+                      {formatLabel(expense.status)}
+                    </span>
+                  </td>
+                  <td className="category-table-actions">
+                    <Link className="auth-link" href={`/expenses/${expense.id}/edit`}>
+                      Edit
+                    </Link>
+                    <DeleteExpenseButton
+                      expenseDescription={expense.description}
+                      expenseId={expense.id}
+                    />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </Card>
+    </>
   );
 }

@@ -1,7 +1,8 @@
-import Link from "next/link";
 import { CategoryList } from "@/components/categories/category-list";
 import { CategoryToolbar } from "@/components/categories/category-toolbar";
 import { AppShell } from "@/components/layout/app-shell";
+import { ListPageContent } from "@/components/layout/list-page-content";
+import { PageActionButton } from "@/components/layout/page-action-button";
 import { getCategories } from "@/lib/categories/queries";
 import type { Category } from "@/lib/categories/types";
 
@@ -26,7 +27,7 @@ export default async function CategoriesPage({ searchParams }: CategoriesPagePro
 
   return (
     <AppShell
-      description="Organize expenses and budgets by category."
+      actions={<PageActionButton href="/categories/new">Add category</PageActionButton>}
       title="Categories"
     >
       {loadError ? (
@@ -34,13 +35,10 @@ export default async function CategoriesPage({ searchParams }: CategoriesPagePro
           {loadError}
         </p>
       ) : null}
-      <CategoryToolbar search={q} />
-      <CategoryList categories={categories} search={q} />
-      <p className="category-footer-link">
-        <Link className="auth-link" href="/dashboard">
-          Back to dashboard
-        </Link>
-      </p>
+      <ListPageContent>
+        <CategoryToolbar search={q} />
+        <CategoryList categories={categories} search={q} />
+      </ListPageContent>
     </AppShell>
   );
 }

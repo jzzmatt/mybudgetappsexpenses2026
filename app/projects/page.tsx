@@ -1,7 +1,8 @@
-import Link from "next/link";
+import { AppShell } from "@/components/layout/app-shell";
+import { ListPageContent } from "@/components/layout/list-page-content";
+import { PageActionButton } from "@/components/layout/page-action-button";
 import { ProjectList } from "@/components/projects/project-list";
 import { ProjectToolbar } from "@/components/projects/project-toolbar";
-import { AppShell } from "@/components/layout/app-shell";
 import { getProjects } from "@/lib/projects/queries";
 import type { Project } from "@/lib/projects/types";
 
@@ -25,19 +26,19 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
   }
 
   return (
-    <AppShell description="Track budgets and expenses by project." title="Projects">
+    <AppShell
+      actions={<PageActionButton href="/projects/new">Add project</PageActionButton>}
+      title="Projects"
+    >
       {loadError ? (
         <p className="form-error page-error" role="alert">
           {loadError}
         </p>
       ) : null}
-      <ProjectToolbar search={q} />
-      <ProjectList projects={projects} search={q} />
-      <p className="category-footer-link">
-        <Link className="auth-link" href="/dashboard">
-          Back to dashboard
-        </Link>
-      </p>
+      <ListPageContent>
+        <ProjectToolbar search={q} />
+        <ProjectList projects={projects} search={q} />
+      </ListPageContent>
     </AppShell>
   );
 }
