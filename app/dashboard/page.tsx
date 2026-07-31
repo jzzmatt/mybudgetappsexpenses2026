@@ -3,7 +3,6 @@ import { DashboardChartsSection } from "@/components/dashboard/dashboard-charts-
 import { DashboardKpiCards } from "@/components/dashboard/dashboard-kpi-cards";
 import { DashboardRecentExpenses } from "@/components/dashboard/dashboard-recent-expenses";
 import { DashboardPeriodForm } from "@/components/dashboard/dashboard-period-form";
-import { LogoutButton } from "@/app/dashboard/logout-button";
 import { AppShell } from "@/components/layout/app-shell";
 import { parseDashboardPeriod } from "@/lib/dashboard/params";
 import { getDashboardData } from "@/lib/dashboard/queries";
@@ -32,12 +31,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
 
   return (
     <AppShell
-      actions={
-        <>
-          <DashboardPeriodForm period={period} />
-          <LogoutButton />
-        </>
-      }
+      actions={<DashboardPeriodForm period={period} />}
       title="Dashboard"
     >
       {loadError ? (
