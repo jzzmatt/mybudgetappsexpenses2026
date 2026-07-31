@@ -34,7 +34,13 @@ export function DeleteProjectButton({ projectId, projectName }: DeleteProjectBut
   };
 
   return (
-    <Button className="button-danger button-small" disabled={isPending} onClick={onDelete} type="button">
+    <Button
+      aria-label={`Delete ${projectName}`}
+      className="button-danger button-small"
+      disabled={isPending}
+      onClick={onDelete}
+      type="button"
+    >
       {isPending ? "Deleting…" : "Delete"}
     </Button>
   );

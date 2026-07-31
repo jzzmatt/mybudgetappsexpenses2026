@@ -34,7 +34,13 @@ export function DeleteVendorButton({ vendorId, vendorName }: DeleteVendorButtonP
   };
 
   return (
-    <Button className="button-danger button-small" disabled={isPending} onClick={onDelete} type="button">
+    <Button
+      aria-label={`Delete ${vendorName}`}
+      className="button-danger button-small"
+      disabled={isPending}
+      onClick={onDelete}
+      type="button"
+    >
       {isPending ? "Deleting…" : "Delete"}
     </Button>
   );

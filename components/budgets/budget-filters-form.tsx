@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { buildBudgetQueryString } from "@/lib/budgets/params";
 import type { BudgetFilters } from "@/lib/budgets/types";
 import { CURRENCY_LABELS, EXPENSE_CURRENCIES } from "@/lib/currency/types";
 import type { Category } from "@/lib/categories/types";

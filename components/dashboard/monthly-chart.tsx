@@ -64,7 +64,11 @@ export function MonthlyChart({ data, year, currency }: MonthlyChartProps) {
   return (
     <Card className="dashboard-chart-card dashboard-chart-card-wide">
       <h2>Monthly expenses ({year})</h2>
-      <div className="dashboard-chart-container dashboard-chart-container-monthly">
+      <div
+        aria-label={`Bar chart of monthly expenses for ${year}`}
+        className="dashboard-chart-container dashboard-chart-container-monthly"
+        role="img"
+      >
         <ResponsiveContainer height="100%" width="100%">
           <BarChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
             <CartesianGrid stroke="#e5e7eb" strokeDasharray="3 3" vertical={false} />

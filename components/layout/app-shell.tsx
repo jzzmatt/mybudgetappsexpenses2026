@@ -1,15 +1,5 @@
 import type { ReactNode } from "react";
-import Link from "next/link";
-
-const navItems = [
-  { href: "/dashboard", label: "Dashboard" },
-  { href: "/categories", label: "Categories" },
-  { href: "/projects", label: "Projects" },
-  { href: "/vendors", label: "Vendors" },
-  { href: "/expenses", label: "Expenses" },
-  { href: "/budgets", label: "Budgets" },
-  { href: "/ai-report", label: "AI Report" },
-];
+import { AppSidebarNav } from "@/components/layout/app-sidebar-nav";
 
 type AppShellProps = {
   title: string;
@@ -21,15 +11,12 @@ type AppShellProps = {
 export function AppShell({ title, description, actions, children }: AppShellProps) {
   return (
     <div className="app-shell">
+      <a className="skip-link" href="#main-content">
+        Skip to main content
+      </a>
       <aside className="app-sidebar">
         <p className="app-sidebar-brand">MY Expense Tracker</p>
-        <nav className="app-sidebar-nav" aria-label="Main navigation">
-          {navItems.map((item) => (
-            <Link className="app-sidebar-link" href={item.href} key={item.href}>
-              {item.label}
-            </Link>
-          ))}
-        </nav>
+        <AppSidebarNav />
       </aside>
       <div className="app-main">
         <header className="app-header">
@@ -39,7 +26,9 @@ export function AppShell({ title, description, actions, children }: AppShellProp
           </div>
           {actions ? <div className="app-header-actions">{actions}</div> : null}
         </header>
-        <div className="app-content">{children}</div>
+        <main className="app-content" id="main-content">
+          {children}
+        </main>
       </div>
     </div>
   );

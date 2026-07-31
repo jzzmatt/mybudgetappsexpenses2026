@@ -1,8 +1,4 @@
-import {
-  DEFAULT_EXPENSE_CURRENCY,
-  isExpenseCurrency,
-  type ExpenseCurrency,
-} from "@/lib/currency/types";
+import { DEFAULT_EXPENSE_CURRENCY, isExpenseCurrency } from "@/lib/currency/types";
 import type { AiReportFilters } from "@/lib/ai-report/types";
 
 type RawSearchParams = Record<string, string | string[] | undefined>;

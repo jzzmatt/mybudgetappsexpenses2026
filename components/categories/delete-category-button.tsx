@@ -34,7 +34,13 @@ export function DeleteCategoryButton({ categoryId, categoryName }: DeleteCategor
   };
 
   return (
-    <Button className="button-danger button-small" disabled={isPending} onClick={onDelete} type="button">
+    <Button
+      aria-label={`Delete ${categoryName}`}
+      className="button-danger button-small"
+      disabled={isPending}
+      onClick={onDelete}
+      type="button"
+    >
       {isPending ? "Deleting…" : "Delete"}
     </Button>
   );

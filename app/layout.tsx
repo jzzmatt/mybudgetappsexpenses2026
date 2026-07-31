@@ -7,6 +7,11 @@ export const metadata: Metadata = {
   description: "Personal expense and budget management.",
 };
 
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
