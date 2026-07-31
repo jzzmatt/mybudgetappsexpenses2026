@@ -1,4 +1,5 @@
 import { currentUser } from "@clerk/nextjs/server";
+import { LogoutButton } from "@/components/layout/logout-button";
 
 export async function AppSidebarUser() {
   const user = await currentUser();
@@ -24,6 +25,7 @@ export async function AppSidebarUser() {
         <p className="app-sidebar-user-name">{fullName}</p>
         <p className="app-sidebar-user-role">Administrator</p>
       </div>
+      <LogoutButton variant="sidebar" />
     </div>
   );
 }
