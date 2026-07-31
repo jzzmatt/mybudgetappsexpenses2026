@@ -28,6 +28,7 @@ export default async function ExpensesPage({ searchParams }: ExpensesPageProps) 
     page: 1,
     pageSize: 10,
     totalPages: 1,
+    totalBudgetByCurrency: {},
   };
   let loadError: string | undefined;
 
@@ -81,6 +82,7 @@ export default async function ExpensesPage({ searchParams }: ExpensesPageProps) 
           expenses={result.expenses}
           filters={filters}
           hasActiveFilters={hasActiveFilters}
+          totalBudgetByCurrency={result.totalBudgetByCurrency}
         />
         <ExpensePagination
           filters={filters}

@@ -1,5 +1,7 @@
 import type { ExpenseCurrency } from "@/lib/currency/types";
 
+export type ExpenseBudgetTotals = Partial<Record<ExpenseCurrency, number>>;
+
 export const EXPENSE_STATUSES = ["pending", "partial", "paid"] as const;
 export const EXPENSE_PRIORITIES = ["low", "medium", "high"] as const;
 export const EXPENSE_PAYMENT_METHODS = ["card", "bank_transfer", "cash", "check", "other"] as const;
@@ -9,6 +11,7 @@ export const EXPENSE_SORT_FIELDS = [
   "budget_amount",
   "paid_amount",
   "balance",
+  "percentage",
   "status",
 ] as const;
 
@@ -72,4 +75,5 @@ export type ExpenseListResult = {
   page: number;
   pageSize: number;
   totalPages: number;
+  totalBudgetByCurrency: ExpenseBudgetTotals;
 };
