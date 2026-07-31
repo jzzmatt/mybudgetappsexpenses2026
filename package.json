@@ -2,21 +2,27 @@
   "name": "budgetapp",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "node scripts/verify-env.mjs && next build",
     "start": "next start",
     "lint": "eslint"
   },
   "dependencies": {
     "@clerk/nextjs": "^7.6.3",
     "@hookform/resolvers": "^5.5.7",
-    "@supabase/ssr": "^0.12.4",
     "@supabase/supabase-js": "^2.111.0",
+    "jspdf": "^4.2.1",
+    "jspdf-autotable": "^5.0.8",
     "next": "16.2.12",
+    "openai": "^7.2.0",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "react-hook-form": "^7.83.0",
+    "recharts": "^2.15.4",
     "zod": "^4.4.3"
   },
   "devDependencies": {
