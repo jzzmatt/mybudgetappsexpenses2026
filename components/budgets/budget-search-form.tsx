@@ -7,7 +7,7 @@ type BudgetSearchFormProps = {
 
 export function BudgetSearchForm({ defaultValue, hiddenFields }: BudgetSearchFormProps) {
   return (
-    <form action="/budgets" className="category-search-form" method="get" role="search">
+    <form action="/budgets" className="list-search-form" method="get" role="search">
       {hiddenFields
         ? Object.entries(hiddenFields).map(([name, value]) => (
             <input key={name} name={name} type="hidden" value={value} />

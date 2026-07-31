@@ -858,6 +858,64 @@ select {
   outline: 2px solid color-mix(in srgb, var(--primary) 20%, transparent);
 }
 
+.budget-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.budget-summary-card {
+  padding: 20px;
+}
+
+.budget-summary-label {
+  margin: 0 0 8px;
+  color: var(--muted-foreground);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.budget-summary-value {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.budget-section-header {
+  margin-bottom: 12px;
+}
+
+.budget-section-header h2 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.budget-section-header-table {
+  padding: 20px 20px 0;
+}
+
+.budget-table-card {
+  padding: 0;
+  overflow: hidden;
+}
+
+.budget-consumption-section {
+  display: none;
+  gap: 12px;
+}
+
+.budget-consumption-card .budget-progress {
+  margin-bottom: 12px;
+}
+
+.budget-consumption-percent {
+  color: var(--primary);
+  font-size: 14px;
+  font-weight: 700;
+}
+
 .category-toolbar {
   display: flex;
   flex-wrap: wrap;
@@ -1584,13 +1642,25 @@ select {
     display: grid;
   }
 
+  .budget-consumption-section {
+    display: grid;
+  }
+
   .resource-form-grid {
     grid-template-columns: 1fr;
+  }
+
+  .budget-summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 @media (max-width: 560px) {
   .dashboard-kpi-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .budget-summary-grid {
     grid-template-columns: 1fr;
   }
 
