@@ -1,10 +1,13 @@
-import { LoginShell } from "@/components/auth/login-shell";
+import { AuthPageShell } from "@/components/auth/auth-page-shell";
 import { LoginForm } from "@/components/auth/login-form";
 
 export default function LoginPage() {
   return (
-    <LoginShell>
+    <AuthPageShell
+      description="Welcome back! Please enter your details."
+      title="Sign in to your account"
+    >
       <LoginForm />
-    </LoginShell>
+    </AuthPageShell>
   );
 }
