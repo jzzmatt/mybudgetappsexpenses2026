@@ -34,14 +34,24 @@ export function ExpensePagination({ filters, page, totalPages, totalCount }: Exp
             Previous
           </Link>
         ) : (
-          <span className="button button-outline button-small expense-pagination-disabled">Previous</span>
+          <span
+            aria-disabled="true"
+            className="button button-outline button-small expense-pagination-disabled"
+          >
+            Previous
+          </span>
         )}
         {nextHref ? (
           <Link className="button button-outline button-small" href={nextHref}>
             Next
           </Link>
         ) : (
-          <span className="button button-outline button-small expense-pagination-disabled">Next</span>
+          <span
+            aria-disabled="true"
+            className="button button-outline button-small expense-pagination-disabled"
+          >
+            Next
+          </span>
         )}
       </div>
     </nav>

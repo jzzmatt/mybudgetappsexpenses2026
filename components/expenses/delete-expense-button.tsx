@@ -36,7 +36,13 @@ export function DeleteExpenseButton({ expenseId, expenseDescription }: DeleteExp
   };
 
   return (
-    <Button className="button-danger button-small" disabled={isPending} onClick={onDelete} type="button">
+    <Button
+      aria-label={`Delete ${expenseDescription}`}
+      className="button-danger button-small"
+      disabled={isPending}
+      onClick={onDelete}
+      type="button"
+    >
       {isPending ? "Deleting…" : "Delete"}
     </Button>
   );

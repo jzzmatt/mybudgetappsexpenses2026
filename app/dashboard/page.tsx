@@ -1,8 +1,6 @@
-import { BudgetVsPaidChart } from "@/components/dashboard/budget-vs-paid-chart";
-import { CategoryChart } from "@/components/dashboard/category-chart";
+import { DashboardChartsSection } from "@/components/dashboard/dashboard-charts-section";
 import { DashboardKpiCards } from "@/components/dashboard/dashboard-kpi-cards";
 import { DashboardPeriodForm } from "@/components/dashboard/dashboard-period-form";
-import { MonthlyChart } from "@/components/dashboard/monthly-chart";
 import { AppShell } from "@/components/layout/app-shell";
 import { parseDashboardPeriod } from "@/lib/dashboard/params";
 import { getDashboardData } from "@/lib/dashboard/queries";
@@ -41,13 +39,10 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
       {dashboardData ? (
         <>
           <DashboardKpiCards currency={dashboardData.currency} kpis={dashboardData.kpis} />
-          <div className="dashboard-charts-row">
-            <BudgetVsPaidChart currency={dashboardData.currency} data={dashboardData.categoryData} />
-            <CategoryChart currency={dashboardData.currency} data={dashboardData.categoryData} />
-          </div>
-          <MonthlyChart
+          <DashboardChartsSection
+            categoryData={dashboardData.categoryData}
             currency={dashboardData.currency}
-            data={dashboardData.monthlyData}
+            monthlyData={dashboardData.monthlyData}
             year={dashboardData.year}
           />
         </>

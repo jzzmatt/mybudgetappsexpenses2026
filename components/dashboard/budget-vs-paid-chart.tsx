@@ -61,7 +61,11 @@ export function BudgetVsPaidChart({ data, currency }: BudgetVsPaidChartProps) {
   return (
     <Card className="dashboard-chart-card">
       <h2>Budget vs paid by category</h2>
-      <div className="dashboard-chart-container">
+      <div
+        aria-label="Bar chart comparing budget and paid amounts by category"
+        className="dashboard-chart-container"
+        role="img"
+      >
         <ResponsiveContainer height="100%" width="100%">
           <BarChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
             <CartesianGrid stroke="#e5e7eb" strokeDasharray="3 3" vertical={false} />

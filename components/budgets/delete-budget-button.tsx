@@ -34,7 +34,13 @@ export function DeleteBudgetButton({ budgetId, budgetName }: DeleteBudgetButtonP
   };
 
   return (
-    <Button className="button-danger button-small" disabled={isPending} onClick={onDelete} type="button">
+    <Button
+      aria-label={`Delete ${budgetName}`}
+      className="button-danger button-small"
+      disabled={isPending}
+      onClick={onDelete}
+      type="button"
+    >
       {isPending ? "Deleting…" : "Delete"}
     </Button>
   );

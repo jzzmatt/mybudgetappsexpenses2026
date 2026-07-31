@@ -57,7 +57,11 @@ export function CategoryChart({ data, currency }: CategoryChartProps) {
   return (
     <Card className="dashboard-chart-card">
       <h2>Budget allocation by category</h2>
-      <div className="dashboard-chart-container dashboard-chart-container-pie">
+      <div
+        aria-label="Donut chart showing budget allocation by category"
+        className="dashboard-chart-container dashboard-chart-container-pie"
+        role="img"
+      >
         <ResponsiveContainer height="100%" width="100%">
           <PieChart>
             <Pie

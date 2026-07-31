@@ -29,6 +29,7 @@ export function VendorList({ vendors, search }: VendorListProps) {
     <Card className="category-table-card">
       <div className="category-table-wrap">
         <table className="category-table">
+          <caption className="sr-only">Vendors</caption>
           <thead>
             <tr>
               <th scope="col">Name</th>

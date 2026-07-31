@@ -33,6 +33,7 @@ export function ProjectList({ projects, search }: ProjectListProps) {
     <Card className="category-table-card">
       <div className="category-table-wrap">
         <table className="category-table">
+          <caption className="sr-only">Projects</caption>
           <thead>
             <tr>
               <th scope="col">Name</th>

@@ -30,7 +30,7 @@ function SortableHeader({
   })}`;
 
   return (
-    <th scope="col">
+    <th aria-sort={isActive ? (filters.order === "asc" ? "ascending" : "descending") : "none"} scope="col">
       <Link className={`expense-sort-link${isActive ? " expense-sort-link-active" : ""}`} href={href}>
         {label}
         {isActive ? (filters.order === "asc" ? " ↑" : " ↓") : null}
@@ -60,6 +60,7 @@ export function ExpenseList({ expenses, filters, hasActiveFilters }: ExpenseList
     <Card className="category-table-card">
       <div className="category-table-wrap">
         <table className="category-table expense-table">
+          <caption className="sr-only">Expenses</caption>
           <thead>
             <tr>
               <SortableHeader field="date" filters={filters} label="Date" />

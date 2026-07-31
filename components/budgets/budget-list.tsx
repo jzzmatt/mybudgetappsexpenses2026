@@ -44,6 +44,7 @@ export function BudgetList({ budgets, hasActiveFilters }: BudgetListProps) {
     <Card className="category-table-card">
       <div className="category-table-wrap">
         <table className="category-table budget-table">
+          <caption className="sr-only">Budgets</caption>
           <thead>
             <tr>
               <th scope="col">Name</th>
