@@ -1,6 +1,7 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { isExpenseCurrency, type ExpenseCurrency } from "@/lib/currency/types";
 import { ensureUserRecord } from "@/lib/users/ensure-user";
-import type { Project } from "@/lib/projects/types";
+import type { Project, ProjectExpenseTotals } from "@/lib/projects/types";
 
 export async function getProjects(search?: string): Promise<Project[]> {
   await ensureUserRecord();
@@ -43,4 +44,41 @@ export async function getProjectById(id: string): Promise<Project | null> {
   }
 
   return data;
+}
+
+export async function getProjectExpenseTotals(projectId: string): Promise<ProjectExpenseTotals> {
+  await ensureUserRecord();
+
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("expenses")
+    .select("budget_amount, paid_amount, balance, currency")
+    .eq("project_id", projectId);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  const byCurrency: ProjectExpenseTotals["byCurrency"] = {};
+  const currencies = new Set<string>();
+
+  for (const row of data ?? []) {
+    if (!isExpenseCurrency(row.currency)) {
+      continue;
+    }
+
+    const currency = row.currency as ExpenseCurrency;
+    const current = byCurrency[currency] ?? { totalBudget: 0, totalPaid: 0, totalBalance: 0 };
+
+    current.totalBudget += Number(row.budget_amount);
+    current.totalPaid += Number(row.paid_amount);
+    current.totalBalance += Number(row.balance);
+    byCurrency[currency] = current;
+    currencies.add(currency);
+  }
+
+  return {
+    byCurrency,
+    currencies: Array.from(currencies).sort(),
+  };
 }

@@ -13,3 +13,14 @@ export type ProjectInput = {
   description?: string | null;
   status: string;
 };
+
+export type ProjectExpenseCurrencyTotals = {
+  totalBudget: number;
+  totalPaid: number;
+  totalBalance: number;
+};
+
+export type ProjectExpenseTotals = {
+  byCurrency: Partial<Record<string, ProjectExpenseCurrencyTotals>>;
+  currencies: string[];
+};

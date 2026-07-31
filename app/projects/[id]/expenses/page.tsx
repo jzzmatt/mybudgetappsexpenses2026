@@ -5,10 +5,12 @@ import { ExpensePagination } from "@/components/expenses/expense-pagination";
 import { AppShell } from "@/components/layout/app-shell";
 import { ListPageContent } from "@/components/layout/list-page-content";
 import { PageActionButton } from "@/components/layout/page-action-button";
+import { ProjectExpensesSummary } from "@/components/projects/project-expenses-summary";
 import { parseExpenseSearchParams } from "@/lib/expenses/params";
 import { getExpenses } from "@/lib/expenses/queries";
 import type { ExpenseListResult } from "@/lib/expenses/types";
-import { getProjectById } from "@/lib/projects/queries";
+import { getProjectById, getProjectExpenseTotals } from "@/lib/projects/queries";
+import type { ProjectExpenseTotals } from "@/lib/projects/types";
 
 type ProjectExpensesPageProps = {
   params: Promise<{ id: string }>;
@@ -38,9 +40,10 @@ export default async function ProjectExpensesPage({ params, searchParams }: Proj
     totalPages: 1,
   };
   let loadError: string | undefined;
+  let totals: ProjectExpenseTotals = { byCurrency: {}, currencies: [] };
 
   try {
-    result = await getExpenses(filters);
+    [result, totals] = await Promise.all([getExpenses(filters), getProjectExpenseTotals(id)]);
   } catch (error) {
     loadError =
       error instanceof Error
@@ -67,6 +70,7 @@ export default async function ProjectExpensesPage({ params, searchParams }: Proj
             Back to projects
           </Link>
         </p>
+        <ProjectExpensesSummary project={project} totals={totals} />
         <ExpenseList
           basePath={basePath}
           emptyMessage={`No expenses are linked to ${project.name} yet.`}
