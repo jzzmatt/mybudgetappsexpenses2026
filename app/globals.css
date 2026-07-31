@@ -681,6 +681,35 @@ select {
   min-width: 180px;
 }
 
+.report-controls-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.report-control-field {
+  min-width: 140px;
+  margin: 0;
+}
+
+.report-actions-row {
+  display: flex;
+  justify-content: flex-end;
+  margin: 20px 0;
+}
+
+.report-export-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.report-table td:first-child {
+  white-space: normal;
+  min-width: 160px;
+}
+
 .category-form-actions {
   display: flex;
   flex-wrap: wrap;

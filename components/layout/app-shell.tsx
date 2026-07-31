@@ -8,6 +8,7 @@ const navItems = [
   { href: "/vendors", label: "Vendors" },
   { href: "/expenses", label: "Expenses" },
   { href: "/budgets", label: "Budgets" },
+  { href: "/reports", label: "Reports" },
 ];
 
 type AppShellProps = {
