@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { ExpenseFiltersForm } from "@/components/expenses/expense-filters-form";
 import { ExpenseSearchForm } from "@/components/expenses/expense-search-form";
+import { ListToolbarCard } from "@/components/layout/list-toolbar-card";
 import type { Category } from "@/lib/categories/types";
 import type { ExpenseFilters } from "@/lib/expenses/types";
 import type { Project } from "@/lib/projects/types";
@@ -14,20 +14,32 @@ type ExpenseToolbarProps = {
 };
 
 export function ExpenseToolbar({ filters, categories, projects, vendors }: ExpenseToolbarProps) {
+  const hasActiveFilters = Boolean(
+    filters.categoryId ||
+      filters.projectId ||
+      filters.vendorId ||
+      filters.status ||
+      filters.currency ||
+      filters.year ||
+      filters.month,
+  );
+
   return (
     <div className="expense-toolbar">
-      <div className="category-toolbar">
+      <ListToolbarCard>
         <ExpenseSearchForm filters={filters} />
-        <Link className="button button-small" href="/expenses/new">
-          New expense
-        </Link>
-      </div>
-      <ExpenseFiltersForm
-        categories={categories}
-        filters={filters}
-        projects={projects}
-        vendors={vendors}
-      />
+      </ListToolbarCard>
+      <details className="list-filters-panel" open={hasActiveFilters}>
+        <summary className="list-filters-trigger">Filters</summary>
+        <ListToolbarCard>
+          <ExpenseFiltersForm
+            categories={categories}
+            filters={filters}
+            projects={projects}
+            vendors={vendors}
+          />
+        </ListToolbarCard>
+      </details>
     </div>
   );
 }

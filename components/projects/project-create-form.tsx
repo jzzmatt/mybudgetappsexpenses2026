@@ -1,13 +1,16 @@
 import Link from "next/link";
 import { AuthField } from "@/components/auth/auth-field";
+import { ResourceFormLayout } from "@/components/layout/resource-form-layout";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { createProjectAction } from "@/lib/projects/actions";
 
 export function ProjectCreateForm() {
   return (
-    <Card className="category-form-card">
-      <form action={createProjectAction} className="category-form">
+    <ResourceFormLayout
+      description="Create a project to group related expenses and budgets."
+      title="Project details"
+    >
+      <form action={createProjectAction} className="resource-form">
         <AuthField
           autoComplete="off"
           id="project-name"
@@ -33,13 +36,13 @@ export function ProjectCreateForm() {
             <option value="completed">Completed</option>
           </select>
         </label>
-        <div className="category-form-actions">
+        <div className="resource-form-actions">
           <Button type="submit">Create project</Button>
           <Link className="auth-link" href="/projects">
             Cancel
           </Link>
         </div>
       </form>
-    </Card>
+    </ResourceFormLayout>
   );
 }

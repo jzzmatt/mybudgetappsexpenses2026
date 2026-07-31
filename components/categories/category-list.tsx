@@ -11,14 +11,14 @@ type CategoryListProps = {
 export function CategoryList({ categories, search }: CategoryListProps) {
   if (categories.length === 0) {
     return (
-      <Card className="category-empty-card">
+      <Card className="list-empty-card">
         <h2>No categories found</h2>
         <p>
           {search
             ? `No categories match "${search}". Try a different search or create a new category.`
             : "Create your first category to organize expenses and budgets."}
         </p>
-        <Link className="auth-link" href="/categories/new">
+        <Link className="button button-small" href="/categories/new">
           Create category
         </Link>
       </Card>
@@ -26,33 +26,51 @@ export function CategoryList({ categories, search }: CategoryListProps) {
   }
 
   return (
-    <Card className="category-table-card">
-      <div className="category-table-wrap">
-        <table className="category-table">
-          <caption className="sr-only">Categories</caption>
-          <thead>
-            <tr>
-              <th scope="col">Name</th>
-              <th scope="col">Description</th>
-              <th scope="col">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {categories.map((category) => (
-              <tr key={category.id}>
-                <td>{category.name}</td>
-                <td>{category.description || "—"}</td>
-                <td className="category-table-actions">
-                  <Link className="auth-link" href={`/categories/${category.id}/edit`}>
-                    Edit
-                  </Link>
-                  <DeleteCategoryButton categoryId={category.id} categoryName={category.name} />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+    <>
+      <div className="list-mobile-cards">
+        {categories.map((category) => (
+          <Card className="list-mobile-card" key={category.id}>
+            <div className="list-mobile-card-header">
+              <h3>{category.name}</h3>
+            </div>
+            <p className="list-mobile-card-meta">{category.description || "No description"}</p>
+            <div className="list-mobile-card-actions">
+              <Link className="auth-link" href={`/categories/${category.id}/edit`}>
+                Edit
+              </Link>
+              <DeleteCategoryButton categoryId={category.id} categoryName={category.name} />
+            </div>
+          </Card>
+        ))}
       </div>
-    </Card>
+      <Card className="category-table-card list-desktop-table">
+        <div className="category-table-wrap">
+          <table className="category-table list-table">
+            <caption className="sr-only">Categories</caption>
+            <thead>
+              <tr>
+                <th scope="col">Name</th>
+                <th scope="col">Description</th>
+                <th scope="col">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {categories.map((category) => (
+                <tr key={category.id}>
+                  <td>{category.name}</td>
+                  <td>{category.description || "—"}</td>
+                  <td className="category-table-actions">
+                    <Link className="auth-link" href={`/categories/${category.id}/edit`}>
+                      Edit
+                    </Link>
+                    <DeleteCategoryButton categoryId={category.id} categoryName={category.name} />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </Card>
+    </>
   );
 }

@@ -6,7 +6,7 @@ type VendorSearchFormProps = {
 
 export function VendorSearchForm({ defaultValue }: VendorSearchFormProps) {
   return (
-    <form action="/vendors" className="category-search-form" method="get" role="search">
+    <form action="/vendors" className="list-search-form" method="get" role="search">
       <label className="sr-only" htmlFor="vendor-search">
         Search vendors
       </label>

@@ -1,13 +1,16 @@
 import Link from "next/link";
 import { AuthField } from "@/components/auth/auth-field";
+import { ResourceFormLayout } from "@/components/layout/resource-form-layout";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { createCategoryAction } from "@/lib/categories/actions";
 
 export function CategoryCreateForm() {
   return (
-    <Card className="category-form-card">
-      <form action={createCategoryAction} className="category-form">
+    <ResourceFormLayout
+      description="Add a category to organize expenses and budgets."
+      title="Category details"
+    >
+      <form action={createCategoryAction} className="resource-form">
         <AuthField
           autoComplete="off"
           id="category-name"
@@ -25,13 +28,13 @@ export function CategoryCreateForm() {
             rows={4}
           />
         </label>
-        <div className="category-form-actions">
+        <div className="resource-form-actions">
           <Button type="submit">Create category</Button>
           <Link className="auth-link" href="/categories">
             Cancel
           </Link>
         </div>
       </form>
-    </Card>
+    </ResourceFormLayout>
   );
 }

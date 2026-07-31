@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { ExpenseCreateForm } from "@/components/expenses/expense-create-form";
 import { AppShell } from "@/components/layout/app-shell";
 import { getCategories } from "@/lib/categories/queries";
@@ -18,18 +17,13 @@ export default async function NewExpensePage({ searchParams }: NewExpensePagePro
   ]);
 
   return (
-    <AppShell description="Add a new expense record." title="New expense">
+    <AppShell title="New expense">
       {error ? (
         <p className="form-error page-error" role="alert">
           {error}
         </p>
       ) : null}
       <ExpenseCreateForm categories={categories} projects={projects} vendors={vendors} />
-      <p className="category-footer-link">
-        <Link className="auth-link" href="/expenses">
-          Back to expenses
-        </Link>
-      </p>
     </AppShell>
   );
 }

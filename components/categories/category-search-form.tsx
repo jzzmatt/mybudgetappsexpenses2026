@@ -6,7 +6,7 @@ type CategorySearchFormProps = {
 
 export function CategorySearchForm({ defaultValue }: CategorySearchFormProps) {
   return (
-    <form action="/categories" className="category-search-form" method="get" role="search">
+    <form action="/categories" className="list-search-form" method="get" role="search">
       <label className="sr-only" htmlFor="category-search">
         Search categories
       </label>
