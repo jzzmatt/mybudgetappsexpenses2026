@@ -7,6 +7,7 @@ import { LogoutButton } from "@/app/dashboard/logout-button";
 import { AppShell } from "@/components/layout/app-shell";
 import { parseDashboardPeriod } from "@/lib/dashboard/params";
 import { getDashboardData } from "@/lib/dashboard/queries";
+import { getUserPreferredCurrency } from "@/lib/budgets/queries";
 
 type DashboardPageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -14,7 +15,8 @@ type DashboardPageProps = {
 
 export default async function DashboardPage({ searchParams }: DashboardPageProps) {
   const params = await searchParams;
-  const period = parseDashboardPeriod(params);
+  const preferredCurrency = await getUserPreferredCurrency();
+  const period = parseDashboardPeriod(params, preferredCurrency);
 
   let loadError: string | undefined;
   let dashboardData;

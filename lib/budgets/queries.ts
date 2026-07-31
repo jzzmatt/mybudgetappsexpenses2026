@@ -1,4 +1,5 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { DEFAULT_EXPENSE_CURRENCY, isExpenseCurrency, type ExpenseCurrency } from "@/lib/currency/types";
 import { ensureUserRecord } from "@/lib/users/ensure-user";
 import type {
   Budget,
@@ -172,4 +173,26 @@ export async function getBudgetById(id: string): Promise<BudgetWithUsage | null>
   }
 
   return data ? attachUsage(normalizeBudget(data as Record<string, unknown>), expenses) : null;
+}
+
+export async function getUserPreferredCurrency(): Promise<ExpenseCurrency> {
+  await ensureUserRecord();
+
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("budgets")
+    .select("currency")
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  if (data?.currency && isExpenseCurrency(data.currency)) {
+    return data.currency;
+  }
+
+  return DEFAULT_EXPENSE_CURRENCY;
 }

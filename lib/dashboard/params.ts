@@ -1,5 +1,9 @@
 import type { DashboardPeriod } from "@/lib/dashboard/types";
-import { DEFAULT_EXPENSE_CURRENCY, isExpenseCurrency } from "@/lib/currency/types";
+import {
+  DEFAULT_EXPENSE_CURRENCY,
+  isExpenseCurrency,
+  type ExpenseCurrency,
+} from "@/lib/currency/types";
 
 type RawSearchParams = Record<string, string | string[] | undefined>;
 
@@ -17,7 +21,10 @@ function parsePositiveInt(value: string | undefined): number | undefined {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : undefined;
 }
 
-export function parseDashboardPeriod(params: RawSearchParams): DashboardPeriod {
+export function parseDashboardPeriod(
+  params: RawSearchParams,
+  defaultCurrency: ExpenseCurrency = DEFAULT_EXPENSE_CURRENCY,
+): DashboardPeriod {
   const now = new Date();
   const year = parsePositiveInt(getParam(params, "year")) ?? now.getFullYear();
   const monthParam = getParam(params, "month");
@@ -38,7 +45,7 @@ export function parseDashboardPeriod(params: RawSearchParams): DashboardPeriod {
   return {
     year: year >= 2000 && year <= 2100 ? year : now.getFullYear(),
     month,
-    currency: isExpenseCurrency(currencyParam) ? currencyParam : DEFAULT_EXPENSE_CURRENCY,
+    currency: isExpenseCurrency(currencyParam) ? currencyParam : defaultCurrency,
   };
 }
 

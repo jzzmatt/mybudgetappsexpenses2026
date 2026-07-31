@@ -78,6 +78,7 @@ export async function createBudgetAction(formData: FormData) {
   }
 
   revalidatePath("/budgets");
+  revalidatePath("/dashboard");
   redirect("/budgets");
 }
 
@@ -109,6 +110,7 @@ export async function updateBudgetAction(budgetId: string, formData: FormData) {
   }
 
   revalidatePath("/budgets");
+  revalidatePath("/dashboard");
   redirect("/budgets");
 }
 
@@ -123,5 +125,6 @@ export async function deleteBudgetAction(budgetId: string) {
   }
 
   revalidatePath("/budgets");
+  revalidatePath("/dashboard");
   return { success: true };
 }
