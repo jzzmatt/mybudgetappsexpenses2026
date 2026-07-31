@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { ensureUserRecord } from "@/lib/users/ensure-user";
+import { getExpenseById } from "@/lib/expenses/queries";
 import {
   EXPENSE_PAYMENT_METHODS,
   EXPENSE_PRIORITIES,
@@ -168,6 +169,52 @@ export async function updateExpenseAction(expenseId: string, formData: FormData)
   revalidatePath("/expenses");
   revalidatePath("/dashboard");
   redirect("/expenses");
+}
+
+function withCopySuffix(description: string) {
+  const suffix = " (Copy)";
+
+  if (description.endsWith(suffix)) {
+    return description;
+  }
+
+  return `${description}${suffix}`;
+}
+
+export async function duplicateExpenseAction(expenseId: string) {
+  const expense = await getExpenseById(expenseId);
+
+  if (!expense) {
+    return { error: "Expense not found." };
+  }
+
+  const userId = await ensureUserRecord();
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase.from("expenses").insert({
+    user_id: userId,
+    date: expense.date,
+    month: expense.month,
+    year: expense.year,
+    category_id: expense.category_id,
+    project_id: expense.project_id,
+    vendor_id: expense.vendor_id,
+    description: withCopySuffix(expense.description),
+    budget_amount: expense.budget_amount,
+    paid_amount: expense.paid_amount,
+    currency: expense.currency,
+    payment_method: expense.payment_method,
+    priority: expense.priority,
+    status: expense.status,
+    notes: expense.notes,
+  });
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  revalidatePath("/expenses");
+  revalidatePath("/dashboard");
+  return { success: true };
 }
 
 export async function deleteExpenseAction(expenseId: string) {
