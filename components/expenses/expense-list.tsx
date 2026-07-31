@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { CopyExpenseButton } from "@/components/expenses/copy-expense-button";
 import { DeleteExpenseButton } from "@/components/expenses/delete-expense-button";
 import { Card } from "@/components/ui/card";
 import { formatCurrency, formatExpenseDate, formatLabel } from "@/lib/expenses/format";
@@ -92,6 +93,7 @@ export function ExpenseList({ expenses, filters, hasActiveFilters }: ExpenseList
               <Link className="auth-link" href={`/expenses/${expense.id}/edit`}>
                 Edit
               </Link>
+              <CopyExpenseButton expense={expense} />
               <DeleteExpenseButton
                 expenseDescription={expense.description}
                 expenseId={expense.id}
@@ -140,6 +142,7 @@ export function ExpenseList({ expenses, filters, hasActiveFilters }: ExpenseList
                     <Link className="auth-link" href={`/expenses/${expense.id}/edit`}>
                       Edit
                     </Link>
+                    <CopyExpenseButton expense={expense} />
                     <DeleteExpenseButton
                       expenseDescription={expense.description}
                       expenseId={expense.id}

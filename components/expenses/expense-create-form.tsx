@@ -3,6 +3,7 @@ import { AuthField } from "@/components/auth/auth-field";
 import { ResourceFormLayout } from "@/components/layout/resource-form-layout";
 import { Button } from "@/components/ui/button";
 import { createExpenseAction } from "@/lib/expenses/actions";
+import type { ExpenseClipboardData } from "@/lib/expenses/clipboard";
 import {
   EXPENSE_PAYMENT_METHODS,
   EXPENSE_PRIORITIES,
@@ -18,21 +19,31 @@ type ExpenseCreateFormProps = {
   categories: Category[];
   projects: Project[];
   vendors: Vendor[];
+  initialValues?: ExpenseClipboardData;
 };
 
-export function ExpenseCreateForm({ categories, projects, vendors }: ExpenseCreateFormProps) {
+export function ExpenseCreateForm({
+  categories,
+  projects,
+  vendors,
+  initialValues,
+}: ExpenseCreateFormProps) {
   const today = new Date().toISOString().slice(0, 10);
 
   return (
     <ResourceFormLayout
-      description="Record a new expense with budget, payment, and classification details."
+      description={
+        initialValues
+          ? "Review the pasted expense details and save when ready."
+          : "Record a new expense with budget, payment, and classification details."
+      }
       title="Expense details"
     >
       <form action={createExpenseAction} className="resource-form resource-form-grid">
         <section className="resource-form-section">
           <h3>Basic information</h3>
           <AuthField
-            defaultValue={today}
+            defaultValue={initialValues?.date ?? today}
             id="expense-date"
             label="Date"
             name="date"
@@ -41,6 +52,7 @@ export function ExpenseCreateForm({ categories, projects, vendors }: ExpenseCrea
           />
           <AuthField
             autoComplete="off"
+            defaultValue={initialValues?.description}
             id="expense-description"
             label="Description"
             name="description"
@@ -49,7 +61,11 @@ export function ExpenseCreateForm({ categories, projects, vendors }: ExpenseCrea
           />
           <label className="auth-field" htmlFor="expense-category">
             <span>Category</span>
-            <select id="expense-category" name="category_id">
+            <select
+              defaultValue={initialValues?.category_id ?? ""}
+              id="expense-category"
+              name="category_id"
+            >
               <option value="">No category</option>
               {categories.map((category) => (
                 <option key={category.id} value={category.id}>
@@ -60,7 +76,7 @@ export function ExpenseCreateForm({ categories, projects, vendors }: ExpenseCrea
           </label>
           <label className="auth-field" htmlFor="expense-project">
             <span>Project</span>
-            <select id="expense-project" name="project_id">
+            <select defaultValue={initialValues?.project_id ?? ""} id="expense-project" name="project_id">
               <option value="">No project</option>
               {projects.map((project) => (
                 <option key={project.id} value={project.id}>
@@ -71,7 +87,7 @@ export function ExpenseCreateForm({ categories, projects, vendors }: ExpenseCrea
           </label>
           <label className="auth-field" htmlFor="expense-vendor">
             <span>Vendor</span>
-            <select id="expense-vendor" name="vendor_id">
+            <select defaultValue={initialValues?.vendor_id ?? ""} id="expense-vendor" name="vendor_id">
               <option value="">No vendor</option>
               {vendors.map((vendor) => (
                 <option key={vendor.id} value={vendor.id}>
@@ -86,7 +102,12 @@ export function ExpenseCreateForm({ categories, projects, vendors }: ExpenseCrea
           <h3>Amounts &amp; status</h3>
           <label className="auth-field" htmlFor="expense-currency">
             <span>Currency</span>
-            <select defaultValue={DEFAULT_EXPENSE_CURRENCY} id="expense-currency" name="currency" required>
+            <select
+              defaultValue={initialValues?.currency ?? DEFAULT_EXPENSE_CURRENCY}
+              id="expense-currency"
+              name="currency"
+              required
+            >
               {EXPENSE_CURRENCIES.map((currency) => (
                 <option key={currency} value={currency}>
                   {CURRENCY_LABELS[currency]}
@@ -95,6 +116,7 @@ export function ExpenseCreateForm({ categories, projects, vendors }: ExpenseCrea
             </select>
           </label>
           <AuthField
+            defaultValue={initialValues?.budget_amount}
             id="expense-budget"
             inputMode="decimal"
             label="Budget amount"
@@ -106,7 +128,7 @@ export function ExpenseCreateForm({ categories, projects, vendors }: ExpenseCrea
             type="number"
           />
           <AuthField
-            defaultValue="0"
+            defaultValue={initialValues?.paid_amount ?? "0"}
             id="expense-paid"
             inputMode="decimal"
             label="Paid amount"
@@ -119,7 +141,11 @@ export function ExpenseCreateForm({ categories, projects, vendors }: ExpenseCrea
           />
           <label className="auth-field" htmlFor="expense-payment-method">
             <span>Payment method</span>
-            <select id="expense-payment-method" name="payment_method">
+            <select
+              defaultValue={initialValues?.payment_method ?? ""}
+              id="expense-payment-method"
+              name="payment_method"
+            >
               <option value="">Not specified</option>
               {EXPENSE_PAYMENT_METHODS.map((method) => (
                 <option key={method} value={method}>
@@ -130,7 +156,7 @@ export function ExpenseCreateForm({ categories, projects, vendors }: ExpenseCrea
           </label>
           <label className="auth-field" htmlFor="expense-priority">
             <span>Priority</span>
-            <select id="expense-priority" name="priority">
+            <select defaultValue={initialValues?.priority ?? ""} id="expense-priority" name="priority">
               <option value="">Not specified</option>
               {EXPENSE_PRIORITIES.map((priority) => (
                 <option key={priority} value={priority}>
@@ -141,7 +167,12 @@ export function ExpenseCreateForm({ categories, projects, vendors }: ExpenseCrea
           </label>
           <label className="auth-field" htmlFor="expense-status">
             <span>Status</span>
-            <select defaultValue="pending" id="expense-status" name="status" required>
+            <select
+              defaultValue={initialValues?.status ?? "pending"}
+              id="expense-status"
+              name="status"
+              required
+            >
               {EXPENSE_STATUSES.map((status) => (
                 <option key={status} value={status}>
                   {formatLabel(status)}
@@ -151,12 +182,18 @@ export function ExpenseCreateForm({ categories, projects, vendors }: ExpenseCrea
           </label>
           <label className="auth-field resource-form-span-2" htmlFor="expense-notes">
             <span>Notes</span>
-            <textarea id="expense-notes" name="notes" placeholder="Optional notes" rows={4} />
+            <textarea
+              defaultValue={initialValues?.notes}
+              id="expense-notes"
+              name="notes"
+              placeholder="Optional notes"
+              rows={4}
+            />
           </label>
         </section>
 
         <div className="resource-form-actions resource-form-span-2">
-          <Button type="submit">Create expense</Button>
+          <Button type="submit">{initialValues ? "Create pasted expense" : "Create expense"}</Button>
           <Link className="auth-link" href="/expenses">
             Cancel
           </Link>
