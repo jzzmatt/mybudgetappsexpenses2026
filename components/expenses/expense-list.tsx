@@ -10,25 +10,35 @@ type ExpenseListProps = {
   expenses: ExpenseWithRelations[];
   filters: ExpenseFilters;
   hasActiveFilters: boolean;
+  basePath?: string;
+  emptyMessage?: string;
+  hideProjectColumn?: boolean;
 };
 
 function SortableHeader({
+  basePath,
   field,
   label,
   filters,
+  omitProjectId,
 }: {
+  basePath: string;
   field: ExpenseSortField;
   label: string;
   filters: ExpenseFilters;
+  omitProjectId?: boolean;
 }) {
   const isActive = (filters.sort ?? "date") === field;
   const nextOrder = isActive && filters.order !== "asc" ? "asc" : "desc";
-  const href = `/expenses${buildExpenseQueryString({
-    ...filters,
-    sort: field,
-    order: nextOrder,
-    page: undefined,
-  })}`;
+  const href = `${basePath}${buildExpenseQueryString(
+    {
+      ...filters,
+      sort: field,
+      order: nextOrder,
+      page: undefined,
+    },
+    { omitProjectId },
+  )}`;
 
   return (
     <th aria-sort={isActive ? (filters.order === "asc" ? "ascending" : "descending") : "none"} scope="col">
@@ -40,16 +50,24 @@ function SortableHeader({
   );
 }
 
-export function ExpenseList({ expenses, filters, hasActiveFilters }: ExpenseListProps) {
+export function ExpenseList({
+  expenses,
+  filters,
+  hasActiveFilters,
+  basePath = "/expenses",
+  emptyMessage,
+  hideProjectColumn = false,
+}: ExpenseListProps) {
+  const omitProjectId = basePath.startsWith("/projects/") && basePath.endsWith("/expenses");
+  const defaultEmptyMessage = hasActiveFilters
+    ? "No expenses match your current search or filters. Try adjusting them or create a new expense."
+    : "Create your first expense to start tracking spending.";
+
   if (expenses.length === 0) {
     return (
       <Card className="list-empty-card">
         <h2>No expenses found</h2>
-        <p>
-          {hasActiveFilters
-            ? "No expenses match your current search or filters. Try adjusting them or create a new expense."
-            : "Create your first expense to start tracking spending."}
-        </p>
+        <p>{emptyMessage ?? defaultEmptyMessage}</p>
         <Link className="button button-small" href="/expenses/new">
           Create expense
         </Link>
@@ -80,10 +98,12 @@ export function ExpenseList({ expenses, filters, hasActiveFilters }: ExpenseList
                 <dt>Amount</dt>
                 <dd>{formatCurrency(expense.paid_amount, expense.currency)}</dd>
               </div>
-              <div>
-                <dt>Project</dt>
-                <dd>{expense.project?.name ?? "—"}</dd>
-              </div>
+              {hideProjectColumn ? null : (
+                <div>
+                  <dt>Project</dt>
+                  <dd>{expense.project?.name ?? "—"}</dd>
+                </div>
+              )}
               <div>
                 <dt>Vendor</dt>
                 <dd>{expense.vendor?.name ?? "—"}</dd>
@@ -108,16 +128,52 @@ export function ExpenseList({ expenses, filters, hasActiveFilters }: ExpenseList
             <caption className="sr-only">Expenses</caption>
             <thead>
               <tr>
-                <SortableHeader field="date" filters={filters} label="Date" />
-                <SortableHeader field="description" filters={filters} label="Description" />
+                <SortableHeader
+                  basePath={basePath}
+                  field="date"
+                  filters={filters}
+                  label="Date"
+                  omitProjectId={omitProjectId}
+                />
+                <SortableHeader
+                  basePath={basePath}
+                  field="description"
+                  filters={filters}
+                  label="Description"
+                  omitProjectId={omitProjectId}
+                />
                 <th scope="col">Category</th>
-                <th scope="col">Project</th>
+                {hideProjectColumn ? null : <th scope="col">Project</th>}
                 <th scope="col">Vendor</th>
                 <th scope="col">Currency</th>
-                <SortableHeader field="budget_amount" filters={filters} label="Budget" />
-                <SortableHeader field="paid_amount" filters={filters} label="Paid" />
-                <SortableHeader field="balance" filters={filters} label="Balance" />
-                <SortableHeader field="status" filters={filters} label="Status" />
+                <SortableHeader
+                  basePath={basePath}
+                  field="budget_amount"
+                  filters={filters}
+                  label="Budget"
+                  omitProjectId={omitProjectId}
+                />
+                <SortableHeader
+                  basePath={basePath}
+                  field="paid_amount"
+                  filters={filters}
+                  label="Paid"
+                  omitProjectId={omitProjectId}
+                />
+                <SortableHeader
+                  basePath={basePath}
+                  field="balance"
+                  filters={filters}
+                  label="Balance"
+                  omitProjectId={omitProjectId}
+                />
+                <SortableHeader
+                  basePath={basePath}
+                  field="status"
+                  filters={filters}
+                  label="Status"
+                  omitProjectId={omitProjectId}
+                />
                 <th scope="col">Actions</th>
               </tr>
             </thead>
@@ -127,7 +183,7 @@ export function ExpenseList({ expenses, filters, hasActiveFilters }: ExpenseList
                   <td>{formatExpenseDate(expense.date)}</td>
                   <td>{expense.description}</td>
                   <td>{expense.category?.name ?? "—"}</td>
-                  <td>{expense.project?.name ?? "—"}</td>
+                  {hideProjectColumn ? null : <td>{expense.project?.name ?? "—"}</td>}
                   <td>{expense.vendor?.name ?? "—"}</td>
                   <td>{expense.currency}</td>
                   <td>{formatCurrency(expense.budget_amount, expense.currency)}</td>

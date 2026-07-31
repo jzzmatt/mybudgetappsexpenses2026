@@ -64,7 +64,10 @@ export function parseExpenseSearchParams(params: RawSearchParams): ExpenseFilter
   };
 }
 
-export function buildExpenseQueryString(filters: ExpenseFilters): string {
+export function buildExpenseQueryString(
+  filters: ExpenseFilters,
+  options?: { omitProjectId?: boolean },
+): string {
   const params = new URLSearchParams();
 
   if (filters.search) {
@@ -75,7 +78,7 @@ export function buildExpenseQueryString(filters: ExpenseFilters): string {
     params.set("category", filters.categoryId);
   }
 
-  if (filters.projectId) {
+  if (filters.projectId && !options?.omitProjectId) {
     params.set("project", filters.projectId);
   }
 
