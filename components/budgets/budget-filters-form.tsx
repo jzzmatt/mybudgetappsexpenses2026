@@ -15,7 +15,7 @@ const yearOptions = Array.from({ length: 6 }, (_, index) => currentYear - index)
 
 export function BudgetFiltersForm({ filters, categories, projects }: BudgetFiltersFormProps) {
   return (
-    <form action="/budgets" className="expense-filters-form" method="get">
+    <form action="/budgets" className="list-filters-form" method="get">
       {filters.search ? <input name="q" type="hidden" value={filters.search} /> : null}
 
       <label className="auth-field expense-filter-field" htmlFor="budget-filter-category">

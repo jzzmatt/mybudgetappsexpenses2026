@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { BudgetCreateForm } from "@/components/budgets/budget-create-form";
 import { AppShell } from "@/components/layout/app-shell";
 import { getCategories } from "@/lib/categories/queries";
@@ -13,18 +12,13 @@ export default async function NewBudgetPage({ searchParams }: NewBudgetPageProps
   const [categories, projects] = await Promise.all([getCategories(), getProjects()]);
 
   return (
-    <AppShell description="Add a new budget to track spending limits." title="New budget">
+    <AppShell title="New budget">
       {error ? (
         <p className="form-error page-error" role="alert">
           {error}
         </p>
       ) : null}
       <BudgetCreateForm categories={categories} projects={projects} />
-      <p className="category-footer-link">
-        <Link className="auth-link" href="/budgets">
-          Back to budgets
-        </Link>
-      </p>
     </AppShell>
   );
 }

@@ -1,7 +1,9 @@
-import Link from "next/link";
 import { BudgetList } from "@/components/budgets/budget-list";
+import { BudgetSummaryCards } from "@/components/budgets/budget-summary-cards";
 import { BudgetToolbar } from "@/components/budgets/budget-toolbar";
 import { AppShell } from "@/components/layout/app-shell";
+import { ListPageContent } from "@/components/layout/list-page-content";
+import { PageActionButton } from "@/components/layout/page-action-button";
 import { getCategories } from "@/lib/categories/queries";
 import type { Category } from "@/lib/categories/types";
 import { parseBudgetSearchParams } from "@/lib/budgets/params";
@@ -47,21 +49,19 @@ export default async function BudgetsPage({ searchParams }: BudgetsPageProps) {
 
   return (
     <AppShell
-      description="Set spending limits and track remaining balance with progress."
-      title="Budgets"
+      actions={<PageActionButton href="/budgets/new">Add budget</PageActionButton>}
+      title="Budget"
     >
       {loadError ? (
         <p className="form-error page-error" role="alert">
           {loadError}
         </p>
       ) : null}
-      <BudgetToolbar categories={categories} filters={filters} projects={projects} />
-      <BudgetList budgets={budgets} hasActiveFilters={hasActiveFilters} />
-      <p className="category-footer-link">
-        <Link className="auth-link" href="/dashboard">
-          Back to dashboard
-        </Link>
-      </p>
+      <ListPageContent>
+        <BudgetSummaryCards budgets={budgets} currency={filters.currency} />
+        <BudgetToolbar categories={categories} filters={filters} projects={projects} />
+        <BudgetList budgets={budgets} hasActiveFilters={hasActiveFilters} />
+      </ListPageContent>
     </AppShell>
   );
 }

@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { BudgetFiltersForm } from "@/components/budgets/budget-filters-form";
 import { BudgetSearchForm } from "@/components/budgets/budget-search-form";
+import { ListToolbarCard } from "@/components/layout/list-toolbar-card";
 import type { BudgetFilters } from "@/lib/budgets/types";
 import type { Category } from "@/lib/categories/types";
 import type { Project } from "@/lib/projects/types";
@@ -20,18 +20,24 @@ export function BudgetToolbar({ filters, categories, projects }: BudgetToolbarPr
   if (filters.year) hiddenFields.year = String(filters.year);
   if (filters.month) hiddenFields.month = String(filters.month);
 
+  const hasActiveFilters = Boolean(
+    filters.categoryId || filters.projectId || filters.currency || filters.year || filters.month,
+  );
+
   return (
     <div className="expense-toolbar">
-      <div className="category-toolbar">
+      <ListToolbarCard>
         <BudgetSearchForm
           defaultValue={filters.search}
           hiddenFields={Object.keys(hiddenFields).length ? hiddenFields : undefined}
         />
-        <Link className="button button-small" href="/budgets/new">
-          New budget
-        </Link>
-      </div>
-      <BudgetFiltersForm categories={categories} filters={filters} projects={projects} />
+      </ListToolbarCard>
+      <details className="list-filters-panel" open={hasActiveFilters}>
+        <summary className="list-filters-trigger">Filters</summary>
+        <ListToolbarCard>
+          <BudgetFiltersForm categories={categories} filters={filters} projects={projects} />
+        </ListToolbarCard>
+      </details>
     </div>
   );
 }
