@@ -2,14 +2,26 @@ import Link from "next/link";
 import { CopyExpenseButton } from "@/components/expenses/copy-expense-button";
 import { DeleteExpenseButton } from "@/components/expenses/delete-expense-button";
 import { Card } from "@/components/ui/card";
-import { formatCurrency, formatExpenseDate, formatLabel } from "@/lib/expenses/format";
+import {
+  calculateExpenseBudgetPercentage,
+  formatCurrency,
+  formatExpenseDate,
+  formatExpensePercentage,
+  formatLabel,
+} from "@/lib/expenses/format";
 import { buildExpenseQueryString } from "@/lib/expenses/params";
-import type { ExpenseFilters, ExpenseSortField, ExpenseWithRelations } from "@/lib/expenses/types";
+import type {
+  ExpenseBudgetTotals,
+  ExpenseFilters,
+  ExpenseSortField,
+  ExpenseWithRelations,
+} from "@/lib/expenses/types";
 
 type ExpenseListProps = {
   expenses: ExpenseWithRelations[];
   filters: ExpenseFilters;
   hasActiveFilters: boolean;
+  totalBudgetByCurrency: ExpenseBudgetTotals;
   basePath?: string;
   emptyMessage?: string;
   hideProjectColumn?: boolean;
@@ -54,6 +66,7 @@ export function ExpenseList({
   expenses,
   filters,
   hasActiveFilters,
+  totalBudgetByCurrency,
   basePath = "/expenses",
   emptyMessage,
   hideProjectColumn = false,
@@ -97,6 +110,18 @@ export function ExpenseList({
               <div>
                 <dt>Amount</dt>
                 <dd>{formatCurrency(expense.paid_amount, expense.currency)}</dd>
+              </div>
+              <div>
+                <dt>Percentage</dt>
+                <dd>
+                  {formatExpensePercentage(
+                    calculateExpenseBudgetPercentage(
+                      expense.budget_amount,
+                      expense.currency,
+                      totalBudgetByCurrency,
+                    ),
+                  )}
+                </dd>
               </div>
               {hideProjectColumn ? null : (
                 <div>
@@ -155,6 +180,13 @@ export function ExpenseList({
                 />
                 <SortableHeader
                   basePath={basePath}
+                  field="percentage"
+                  filters={filters}
+                  label="Percentage"
+                  omitProjectId={omitProjectId}
+                />
+                <SortableHeader
+                  basePath={basePath}
                   field="paid_amount"
                   filters={filters}
                   label="Paid"
@@ -187,6 +219,15 @@ export function ExpenseList({
                   <td>{expense.vendor?.name ?? "—"}</td>
                   <td>{expense.currency}</td>
                   <td>{formatCurrency(expense.budget_amount, expense.currency)}</td>
+                  <td>
+                    {formatExpensePercentage(
+                      calculateExpenseBudgetPercentage(
+                        expense.budget_amount,
+                        expense.currency,
+                        totalBudgetByCurrency,
+                      ),
+                    )}
+                  </td>
                   <td>{formatCurrency(expense.paid_amount, expense.currency)}</td>
                   <td>{formatCurrency(expense.balance, expense.currency)}</td>
                   <td>

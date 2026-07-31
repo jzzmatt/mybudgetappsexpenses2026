@@ -38,6 +38,7 @@ export default async function ProjectExpensesPage({ params, searchParams }: Proj
     page: 1,
     pageSize: 10,
     totalPages: 1,
+    totalBudgetByCurrency: {},
   };
   let loadError: string | undefined;
   let totals: ProjectExpenseTotals = { byCurrency: {}, currencies: [] };
@@ -78,6 +79,7 @@ export default async function ProjectExpensesPage({ params, searchParams }: Proj
           filters={filters}
           hasActiveFilters={hasActiveFilters}
           hideProjectColumn
+          totalBudgetByCurrency={result.totalBudgetByCurrency}
         />
         <ExpensePagination
           basePath={basePath}

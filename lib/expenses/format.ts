@@ -15,3 +15,29 @@ export function formatLabel(value: string) {
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join(" ");
 }
+
+export function calculateExpenseBudgetPercentage(
+  budgetAmount: number,
+  currency: string,
+  totalBudgetByCurrency: Record<string, number | undefined>,
+) {
+  const totalBudget = totalBudgetByCurrency[currency] ?? 0;
+
+  if (totalBudget <= 0) {
+    return 0;
+  }
+
+  return (budgetAmount / totalBudget) * 100;
+}
+
+export function formatExpensePercentage(value: number) {
+  if (!Number.isFinite(value) || value <= 0) {
+    return "0%";
+  }
+
+  if (value < 0.1) {
+    return "<0.1%";
+  }
+
+  return `${value.toFixed(1)}%`;
+}
