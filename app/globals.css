@@ -909,6 +909,19 @@ select {
   letter-spacing: -0.02em;
 }
 
+.project-expenses-paid-card {
+  background: var(--success-pale, #f0fdf4);
+  border-color: color-mix(in srgb, var(--success, #107c10) 18%, var(--border));
+}
+
+.project-expenses-paid-card .budget-summary-label {
+  color: var(--success, #107c10);
+}
+
+.project-expenses-paid-card .budget-summary-value {
+  color: var(--success, #107c10);
+}
+
 .budget-section-header {
   margin-bottom: 12px;
 }

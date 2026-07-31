@@ -22,14 +22,20 @@ export function ProjectExpensesSummary({ project, totals }: ProjectExpensesSumma
       return [];
     }
 
-    const label =
-      totals.currencies.length > 1 ? `Total Budget (${currency})` : "Total Budget";
+    const multiCurrency = totals.currencies.length > 1;
 
     return [
       {
         key: `budget-${currency}`,
-        label,
+        label: multiCurrency ? `Total Budget (${currency})` : "Total Budget",
         value: formatCurrency(totalsForCurrency.totalBudget, currency),
+        variant: "default" as const,
+      },
+      {
+        key: `paid-${currency}`,
+        label: multiCurrency ? `Total Paid (${currency})` : "Total Paid",
+        value: formatCurrency(totalsForCurrency.totalPaid, currency),
+        variant: "paid" as const,
       },
     ];
   });
@@ -43,22 +49,35 @@ export function ProjectExpensesSummary({ project, totals }: ProjectExpensesSumma
           {formatLabel(project.status)}
         </span>
       ),
+      variant: "default" as const,
     },
     ...budgetItems,
   ];
 
   if (budgetItems.length === 0) {
-    items.push({
-      key: "budget-empty",
-      label: "Total Budget",
-      value: formatCurrency(0),
-    });
+    items.push(
+      {
+        key: "budget-empty",
+        label: "Total Budget",
+        value: formatCurrency(0),
+        variant: "default" as const,
+      },
+      {
+        key: "paid-empty",
+        label: "Total Paid",
+        value: formatCurrency(0),
+        variant: "paid" as const,
+      },
+    );
   }
 
   return (
     <div className="budget-summary-grid">
       {items.map((item) => (
-        <Card className="budget-summary-card" key={item.key}>
+        <Card
+          className={`budget-summary-card${item.variant === "paid" ? " project-expenses-paid-card" : ""}`}
+          key={item.key}
+        >
           <p className="budget-summary-label">{item.label}</p>
           <p className="budget-summary-value">{item.value}</p>
         </Card>
