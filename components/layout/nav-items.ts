@@ -12,7 +12,7 @@ export const primaryNavItems: NavItem[] = [
   { href: "/categories", label: "Categories", icon: "categories" },
   { href: "/projects", label: "Projects", icon: "projects" },
   { href: "/vendors", label: "Vendors", icon: "vendors" },
-  { href: "/ai-report", label: "Reports", icon: "reports" },
+  { href: "/reports", label: "Reports", icon: "reports" },
 ];
 
 export const mobileNavItems: NavItem[] = [
