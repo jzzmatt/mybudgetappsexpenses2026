@@ -1,12 +1,12 @@
 import Link from "next/link";
 import { CopyExpenseButton } from "@/components/expenses/copy-expense-button";
 import { DeleteExpenseButton } from "@/components/expenses/delete-expense-button";
+import { ExpensePercentageBar } from "@/components/expenses/expense-percentage-bar";
 import { Card } from "@/components/ui/card";
 import {
   calculateExpenseBudgetPercentage,
   formatCurrency,
   formatExpenseDate,
-  formatExpensePercentage,
   formatLabel,
 } from "@/lib/expenses/format";
 import { buildExpenseQueryString } from "@/lib/expenses/params";
@@ -62,6 +62,17 @@ function SortableHeader({
   );
 }
 
+function getExpensePercentage(
+  expense: ExpenseWithRelations,
+  totalBudgetByCurrency: ExpenseBudgetTotals,
+) {
+  return calculateExpenseBudgetPercentage(
+    expense.budget_amount,
+    expense.currency,
+    totalBudgetByCurrency,
+  );
+}
+
 export function ExpenseList({
   expenses,
   filters,
@@ -114,13 +125,9 @@ export function ExpenseList({
               <div>
                 <dt>Percentage</dt>
                 <dd>
-                  {formatExpensePercentage(
-                    calculateExpenseBudgetPercentage(
-                      expense.budget_amount,
-                      expense.currency,
-                      totalBudgetByCurrency,
-                    ),
-                  )}
+                  <ExpensePercentageBar
+                    percent={getExpensePercentage(expense, totalBudgetByCurrency)}
+                  />
                 </dd>
               </div>
               {hideProjectColumn ? null : (
@@ -219,14 +226,10 @@ export function ExpenseList({
                   <td>{expense.vendor?.name ?? "—"}</td>
                   <td>{expense.currency}</td>
                   <td>{formatCurrency(expense.budget_amount, expense.currency)}</td>
-                  <td>
-                    {formatExpensePercentage(
-                      calculateExpenseBudgetPercentage(
-                        expense.budget_amount,
-                        expense.currency,
-                        totalBudgetByCurrency,
-                      ),
-                    )}
+                  <td className="expense-percentage-cell">
+                    <ExpensePercentageBar
+                      percent={getExpensePercentage(expense, totalBudgetByCurrency)}
+                    />
                   </td>
                   <td>{formatCurrency(expense.paid_amount, expense.currency)}</td>
                   <td>{formatCurrency(expense.balance, expense.currency)}</td>

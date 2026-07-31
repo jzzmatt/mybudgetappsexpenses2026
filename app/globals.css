@@ -1546,6 +1546,42 @@ select {
   font-weight: 600;
 }
 
+.expense-percentage-cell {
+  min-width: 140px;
+}
+
+.expense-percentage-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 120px;
+}
+
+.expense-percentage-track {
+  flex: 1;
+  height: 8px;
+  border-radius: 4px;
+  background: #e5e7eb;
+  overflow: hidden;
+}
+
+.expense-percentage-fill {
+  height: 100%;
+  border-radius: 4px;
+  background: var(--primary);
+}
+
+.expense-percentage-fill-high {
+  background: #dc2626;
+}
+
+.expense-percentage-label {
+  min-width: 42px;
+  color: var(--muted-foreground);
+  font-size: 12px;
+  font-weight: 600;
+}
+
 .budget-usage-summary {
   display: grid;
   gap: 12px;
