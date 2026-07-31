@@ -1,12 +1,11 @@
-import { Suspense } from "react";
-import { ExpenseCreateFormLoader } from "@/components/expenses/expense-create-form-loader";
+import { ExpenseCreateForm } from "@/components/expenses/expense-create-form";
 import { AppShell } from "@/components/layout/app-shell";
 import { getCategories } from "@/lib/categories/queries";
 import { getProjects } from "@/lib/projects/queries";
 import { getVendors } from "@/lib/vendors/queries";
 
 type NewExpensePageProps = {
-  searchParams: Promise<{ error?: string; paste?: string }>;
+  searchParams: Promise<{ error?: string }>;
 };
 
 export default async function NewExpensePage({ searchParams }: NewExpensePageProps) {
@@ -24,9 +23,7 @@ export default async function NewExpensePage({ searchParams }: NewExpensePagePro
           {error}
         </p>
       ) : null}
-      <Suspense fallback={<p>Loading form…</p>}>
-        <ExpenseCreateFormLoader categories={categories} projects={projects} vendors={vendors} />
-      </Suspense>
+      <ExpenseCreateForm categories={categories} projects={projects} vendors={vendors} />
     </AppShell>
   );
 }

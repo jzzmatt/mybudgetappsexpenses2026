@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useTransition } from "react";
 import { Button } from "@/components/ui/button";
-import { expenseToClipboardData, writeExpenseClipboard } from "@/lib/expenses/clipboard";
+import { duplicateExpenseAction } from "@/lib/expenses/actions";
 import type { ExpenseWithRelations } from "@/lib/expenses/types";
 
 type CopyExpenseButtonProps = {
@@ -10,22 +11,31 @@ type CopyExpenseButtonProps = {
 };
 
 export function CopyExpenseButton({ expense }: CopyExpenseButtonProps) {
-  const [copied, setCopied] = useState(false);
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
 
   const onCopy = () => {
-    writeExpenseClipboard(expenseToClipboardData(expense));
-    setCopied(true);
-    window.setTimeout(() => setCopied(false), 2000);
+    startTransition(async () => {
+      const result = await duplicateExpenseAction(expense.id);
+
+      if (result?.error) {
+        window.alert(result.error);
+        return;
+      }
+
+      router.refresh();
+    });
   };
 
   return (
     <Button
-      aria-label={`Copy ${expense.description}`}
+      aria-label={`Duplicate ${expense.description}`}
       className="button-outline button-small"
+      disabled={isPending}
       onClick={onCopy}
       type="button"
     >
-      {copied ? "Copied" : "Copy"}
+      {isPending ? "Copying…" : "Copy"}
     </Button>
   );
 }
