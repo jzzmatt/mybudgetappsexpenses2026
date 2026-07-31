@@ -182,6 +182,219 @@ select {
   gap: 12px;
 }
 
+.login-page {
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+  align-items: center;
+  background: var(--background);
+  padding: 32px 24px;
+}
+
+.login-branding {
+  display: none;
+}
+
+.login-mobile-logo {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.login-form-panel {
+  display: flex;
+  width: 100%;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.login-card {
+  width: min(100%, 342px);
+  padding: 32px 24px;
+}
+
+.login-card-logo {
+  display: none;
+}
+
+.login-card h1 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  text-align: center;
+}
+
+.login-description {
+  margin: 8px 0 24px;
+  color: var(--muted-foreground);
+  font-size: 14px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.login-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.login-logo-text {
+  color: var(--foreground);
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.login-branding-logo {
+  align-self: flex-start;
+}
+
+.login-illustration {
+  position: relative;
+  width: min(100%, 360px);
+  height: 320px;
+  margin: auto 0;
+}
+
+.login-illustration-backdrop {
+  position: absolute;
+  inset: 24px 20px 40px;
+  border-radius: 24px;
+  background: linear-gradient(145deg, #dbeafe 0%, #ede9fe 55%, #f5f3ff 100%);
+}
+
+.login-illustration-card {
+  position: absolute;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+}
+
+.login-illustration-card--secondary {
+  top: 48px;
+  right: 0;
+  left: 28px;
+  padding: 20px;
+}
+
+.login-illustration-card--primary {
+  right: 28px;
+  bottom: 0;
+  left: 0;
+  padding: 24px;
+}
+
+.login-illustration-label {
+  display: block;
+  color: var(--muted-foreground);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.login-illustration-value {
+  display: block;
+  margin-top: 4px;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.login-illustration-balance {
+  display: block;
+  margin-top: 4px;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.login-illustration-change {
+  display: inline-flex;
+  margin-top: 8px;
+  border-radius: var(--radius-pill, 20px);
+  background: var(--success-pale, #f0fdf4);
+  padding: 4px 10px;
+  color: var(--success);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.login-illustration-chart {
+  height: 56px;
+  margin-top: 16px;
+  border-radius: var(--radius-md);
+  background:
+    linear-gradient(to top, color-mix(in srgb, var(--primary) 18%, transparent) 0 42%, transparent 42% 100%),
+    linear-gradient(to right, transparent 0%, color-mix(in srgb, var(--primary) 12%, transparent) 100%);
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 280 56'%3E%3Cpath d='M0 44 L40 36 L80 40 L120 24 L160 30 L200 14 L240 20 L280 8' fill='none' stroke='black' stroke-width='3'/%3E%3C/svg%3E");
+  mask-size: 100% 100%;
+  mask-repeat: no-repeat;
+}
+
+.login-tagline {
+  max-width: 360px;
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.login-card .auth-form .button,
+.login-card .auth-oauth .button {
+  min-height: 44px;
+  width: 100%;
+}
+
+.button-google {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+@media (min-width: 900px) {
+  .login-page {
+    flex-direction: row;
+    align-items: stretch;
+    padding: 0;
+  }
+
+  .login-branding {
+    display: flex;
+    width: min(39%, 560px);
+    flex-direction: column;
+    flex-shrink: 0;
+    padding: 48px 56px;
+  }
+
+  .login-mobile-logo {
+    display: none;
+  }
+
+  .login-form-panel {
+    flex: 1;
+    padding: 48px 32px;
+  }
+
+  .login-card {
+    width: min(100%, 420px);
+    padding: 40px;
+  }
+
+  .login-card-logo {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 24px;
+  }
+
+  .login-card h1 {
+    font-size: 24px;
+  }
+}
+
 .button-outline {
   border: 1px solid var(--border);
   background: var(--surface);
