@@ -258,7 +258,8 @@ export async function getDashboardData(period: DashboardPeriod): Promise<Dashboa
     .eq("status", "pending")
     .eq("year", period.year)
     .eq("currency", period.currency)
-    .order("date", { ascending: false });
+    .order("date", { ascending: false })
+    .limit(5);
 
   if (period.month !== null) {
     pendingQuery = pendingQuery.eq("month", period.month);
