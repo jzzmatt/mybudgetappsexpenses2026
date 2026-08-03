@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { MobileNavSignOut } from "@/components/layout/mobile-nav-sign-out";
 import { mobileNavItems, primaryNavItems } from "@/components/layout/nav-items";
 import { NavIcon } from "@/components/layout/nav-icon";
 
@@ -57,6 +58,7 @@ export function AppBottomNav() {
               {item.label}
             </Link>
           ))}
+          <MobileNavSignOut />
         </div>
       </details>
     </nav>

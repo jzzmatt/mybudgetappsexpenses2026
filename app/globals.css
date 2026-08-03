@@ -47,6 +47,9 @@ select {
 }
 
 .button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border: 0;
   border-radius: var(--radius-md);
   background: var(--primary);
@@ -186,11 +189,12 @@ select {
 
 .login-page {
   display: flex;
-  min-height: 100vh;
+  min-height: 100dvh;
   flex-direction: column;
   align-items: center;
   background: var(--background);
-  padding: 32px 24px;
+  padding: 32px 24px calc(32px + env(safe-area-inset-bottom));
+  overflow-y: auto;
 }
 
 .login-branding {
@@ -210,6 +214,7 @@ select {
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 .login-card {
@@ -644,6 +649,10 @@ select {
 }
 
 .app-bottom-nav {
+  display: none;
+}
+
+.app-mobile-sign-out {
   display: none;
 }
 
@@ -1867,6 +1876,35 @@ select {
   .app-bottom-nav-menu a:hover,
   .app-bottom-nav-menu a:focus-visible {
     background: #f3f4f6;
+  }
+
+  .app-mobile-sign-out {
+    display: block;
+    width: 100%;
+  }
+
+  .app-mobile-sign-out .button {
+    width: 100%;
+    min-height: 44px;
+  }
+
+  .app-bottom-nav-signout {
+    width: 100%;
+    border: 0;
+    border-radius: var(--radius-md);
+    background: transparent;
+    color: #dc2626;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 10px 12px;
+    text-align: left;
+  }
+
+  .app-bottom-nav-signout:hover,
+  .app-bottom-nav-signout:focus-visible {
+    background: #fef2f2;
+    outline: none;
   }
 
   .dashboard-period-form,

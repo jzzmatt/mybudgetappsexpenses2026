@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { AppBottomNav } from "@/components/layout/app-bottom-nav";
+import { AppMobileSignOut } from "@/components/layout/app-mobile-sign-out";
 import { AppSidebarNav } from "@/components/layout/app-sidebar-nav";
 import { AppSidebarUser } from "@/components/layout/app-sidebar-user";
 
@@ -29,7 +30,10 @@ export function AppShell({ title, description, actions, children }: AppShellProp
             <h1>{title}</h1>
             {description ? <p>{description}</p> : null}
           </div>
-          {actions ? <div className="app-header-actions">{actions}</div> : null}
+          <div className="app-header-actions">
+            {actions}
+            <AppMobileSignOut />
+          </div>
         </header>
         <main className="app-content" id="main-content">
           {children}
