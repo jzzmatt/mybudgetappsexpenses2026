@@ -781,6 +781,11 @@ select {
   font-weight: 600;
 }
 
+.list-mobile-card-amount {
+  color: var(--foreground);
+  white-space: nowrap;
+}
+
 .list-mobile-card-actions {
   display: flex;
   flex-wrap: wrap;

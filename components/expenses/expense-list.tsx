@@ -119,8 +119,22 @@ export function ExpenseList({
                 <dd>{expense.category?.name ?? "—"}</dd>
               </div>
               <div>
-                <dt>Amount</dt>
-                <dd>{formatCurrency(expense.paid_amount, expense.currency)}</dd>
+                <dt>Budget</dt>
+                <dd className="list-mobile-card-amount">
+                  {formatCurrency(Number(expense.budget_amount), expense.currency)}
+                </dd>
+              </div>
+              <div>
+                <dt>Paid</dt>
+                <dd className="list-mobile-card-amount">
+                  {formatCurrency(Number(expense.paid_amount), expense.currency)}
+                </dd>
+              </div>
+              <div>
+                <dt>Balance</dt>
+                <dd className="list-mobile-card-amount">
+                  {formatCurrency(Number(expense.balance), expense.currency)}
+                </dd>
               </div>
               <div>
                 <dt>Percentage</dt>
