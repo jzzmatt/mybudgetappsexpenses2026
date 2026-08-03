@@ -14,7 +14,7 @@ export function DashboardPendingExpenses({ currency, expenses }: DashboardPendin
   return (
     <Card className="dashboard-table-card">
       <div className="dashboard-table-header">
-        <h2>Pending Expenses</h2>
+        <h2>Top 5 Pending Expenses</h2>
         <Link className="auth-link dashboard-table-link" href="/expenses?status=pending">
           View all
         </Link>
@@ -25,7 +25,7 @@ export function DashboardPendingExpenses({ currency, expenses }: DashboardPendin
         <div className="dashboard-table-scroll">
           <div className="category-table-wrap">
             <table className="category-table dashboard-table">
-              <caption className="sr-only">Pending expenses</caption>
+              <caption className="sr-only">Top 5 pending expenses</caption>
               <thead>
                 <tr>
                   <th scope="col">Date</th>
