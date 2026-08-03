@@ -36,6 +36,14 @@ export type DashboardRecentExpense = {
   status: string;
 };
 
+export type DashboardPendingExpense = {
+  id: string;
+  date: string;
+  description: string;
+  category: string;
+  amount: number;
+};
+
 export type DashboardProjectBudget = {
   project: string;
   budget: number;
@@ -53,6 +61,7 @@ export type DashboardData = {
   categoryData: CategoryChartDatum[];
   monthlyData: MonthlyChartDatum[];
   recentExpenses: DashboardRecentExpense[];
+  pendingExpenses: DashboardPendingExpense[];
   projectBudgets: DashboardProjectBudget[];
 };
 

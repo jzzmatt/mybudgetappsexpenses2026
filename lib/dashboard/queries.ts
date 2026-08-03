@@ -8,6 +8,7 @@ import type {
   DashboardPeriod,
   DashboardProjectBudget,
   DashboardRecentExpense,
+  DashboardPendingExpense,
   MonthlyChartDatum,
 } from "@/lib/dashboard/types";
 
@@ -27,6 +28,14 @@ type RecentExpenseRow = {
   description: string;
   paid_amount: number;
   status: string;
+  category: { name: string } | { name: string }[] | null;
+};
+
+type PendingExpenseRow = {
+  id: string;
+  date: string;
+  description: string;
+  budget_amount: number;
   category: { name: string } | { name: string }[] | null;
 };
 
@@ -170,6 +179,16 @@ function mapRecentExpenses(rows: RecentExpenseRow[]): DashboardRecentExpense[] {
   }));
 }
 
+function mapPendingExpenses(rows: PendingExpenseRow[]): DashboardPendingExpense[] {
+  return rows.map((expense) => ({
+    id: expense.id,
+    date: expense.date,
+    description: expense.description,
+    category: getRelationName(expense.category, "Uncategorized"),
+    amount: Number(expense.budget_amount),
+  }));
+}
+
 function aggregateProjectBudgets(rows: ProjectExpenseRow[]): DashboardProjectBudget[] {
   const grouped = new Map<string, DashboardProjectBudget>();
 
@@ -233,6 +252,18 @@ export async function getDashboardData(period: DashboardPeriod): Promise<Dashboa
     recentQuery = recentQuery.eq("month", period.month);
   }
 
+  let pendingQuery = supabase
+    .from("expenses")
+    .select("id, date, description, budget_amount, category:categories(name)")
+    .eq("status", "pending")
+    .eq("year", period.year)
+    .eq("currency", period.currency)
+    .order("date", { ascending: false });
+
+  if (period.month !== null) {
+    pendingQuery = pendingQuery.eq("month", period.month);
+  }
+
   let projectQuery = supabase
     .from("expenses")
     .select("budget_amount, paid_amount, project:projects(name)")
@@ -243,11 +274,18 @@ export async function getDashboardData(period: DashboardPeriod): Promise<Dashboa
     projectQuery = projectQuery.eq("month", period.month);
   }
 
-  const [{ data: recentData, error: recentError }, { data: projectData, error: projectError }] =
-    await Promise.all([recentQuery, projectQuery]);
+  const [
+    { data: recentData, error: recentError },
+    { data: pendingData, error: pendingError },
+    { data: projectData, error: projectError },
+  ] = await Promise.all([recentQuery, pendingQuery, projectQuery]);
 
   if (recentError) {
     throw new Error(recentError.message);
+  }
+
+  if (pendingError) {
+    throw new Error(pendingError.message);
   }
 
   if (projectError) {
@@ -267,6 +305,7 @@ export async function getDashboardData(period: DashboardPeriod): Promise<Dashboa
     categoryData: aggregateCategoryData(expenses),
     monthlyData: aggregateMonthlyData(yearlyExpenses, period.year),
     recentExpenses: mapRecentExpenses((recentData ?? []) as RecentExpenseRow[]),
+    pendingExpenses: mapPendingExpenses((pendingData ?? []) as PendingExpenseRow[]),
     projectBudgets: aggregateProjectBudgets((projectData ?? []) as ProjectExpenseRow[]),
   };
 }

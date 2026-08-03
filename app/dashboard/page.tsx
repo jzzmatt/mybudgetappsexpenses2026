@@ -1,6 +1,7 @@
 import { DashboardBudgetByProject } from "@/components/dashboard/dashboard-budget-by-project";
 import { DashboardChartsSection } from "@/components/dashboard/dashboard-charts-section";
 import { DashboardKpiCards } from "@/components/dashboard/dashboard-kpi-cards";
+import { DashboardPendingExpenses } from "@/components/dashboard/dashboard-pending-expenses";
 import { DashboardRecentExpenses } from "@/components/dashboard/dashboard-recent-expenses";
 import { DashboardPeriodForm } from "@/components/dashboard/dashboard-period-form";
 import { AppShell } from "@/components/layout/app-shell";
@@ -56,6 +57,10 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
             <DashboardRecentExpenses
               currency={dashboardData.currency}
               expenses={dashboardData.recentExpenses}
+            />
+            <DashboardPendingExpenses
+              currency={dashboardData.currency}
+              expenses={dashboardData.pendingExpenses}
             />
             <DashboardBudgetByProject
               currency={dashboardData.currency}
