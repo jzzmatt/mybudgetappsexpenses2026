@@ -16,7 +16,7 @@ export function CategoryList({ categories, search }: CategoryListProps) {
         <p>
           {search
             ? `No categories match "${search}". Try a different search or create a new category.`
-            : "Create your first category to organize expenses and budgets."}
+            : "Create your first category to organize and classify expenses across all projects."}
         </p>
         <Link className="button button-small" href="/categories/new">
           Create category

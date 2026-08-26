@@ -7,7 +7,7 @@ import { createVendorAction } from "@/lib/vendors/actions";
 export function VendorCreateForm() {
   return (
     <ResourceFormLayout
-      description="Add a vendor or supplier for your expense records."
+      description="Add a vendor or supplier reusable across all your project workspaces."
       title="Vendor details"
     >
       <form action={createVendorAction} className="resource-form">

@@ -5,16 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { ensureUserRecord } from "@/lib/users/ensure-user";
-
-const vendorSchema = z.object({
-  name: z.string().trim().min(1, "Name is required.").max(100, "Name must be 100 characters or fewer."),
-  contact_info: z
-    .string()
-    .trim()
-    .max(200, "Contact info must be 200 characters or fewer.")
-    .optional()
-    .transform((value) => value || null),
-});
+import { vendorSchema } from "@/lib/vendors/schema";
 
 function formatZodError(error: z.ZodError) {
   return error.issues[0]?.message ?? "Invalid vendor data.";

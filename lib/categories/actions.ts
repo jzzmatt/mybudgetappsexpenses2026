@@ -5,16 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { ensureUserRecord } from "@/lib/users/ensure-user";
-
-const categorySchema = z.object({
-  name: z.string().trim().min(1, "Name is required.").max(100, "Name must be 100 characters or fewer."),
-  description: z
-    .string()
-    .trim()
-    .max(500, "Description must be 500 characters or fewer.")
-    .optional()
-    .transform((value) => value || null),
-});
+import { categorySchema } from "@/lib/categories/schema";
 
 function formatZodError(error: z.ZodError) {
   return error.issues[0]?.message ?? "Invalid category data.";
