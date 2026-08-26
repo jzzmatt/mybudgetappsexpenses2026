@@ -4,7 +4,14 @@ import { ensureUserRecord } from "@/lib/users/ensure-user";
 import { calculateProjectFinancialSummary } from "@/lib/projects/calculations";
 import type { CategoryChartDatum, MonthlyChartDatum } from "@/lib/dashboard/types";
 import type { Expense, ExpenseRelation, ExpenseWithRelations } from "@/lib/expenses/types";
-import type { Project, ProjectExpenseTotals, ProjectOverviewData } from "@/lib/projects/types";
+import type {
+  Project,
+  ProjectCategoryAnalysis,
+  ProjectExpenseTotals,
+  ProjectOverviewData,
+  ProjectReportData,
+  ProjectVendorAnalysis,
+} from "@/lib/projects/types";
 
 const MONTH_LABELS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
@@ -176,6 +183,113 @@ export async function getProjectOverview(projectId: string): Promise<ProjectOver
     categoryData,
     monthlyData,
     recentExpenses,
+  };
+}
+
+export async function getProjectReportData(projectId: string): Promise<ProjectReportData | null> {
+  await ensureUserRecord();
+
+  const project = await getProjectById(projectId);
+  if (!project) {
+    return null;
+  }
+
+  const supabase = await createSupabaseServerClient();
+
+  const { data: rawExpenses, error } = await supabase
+    .from("expenses")
+    .select(expenseSelect)
+    .eq("project_id", projectId)
+    .order("date", { ascending: false });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  const expenses = (rawExpenses ?? []).map((row) => normalizeExpense(row as Record<string, unknown>));
+  const financials = calculateProjectFinancialSummary(project, expenses);
+
+  // Group by category for analysis & charts
+  const categoryMap = new Map<string, { count: number; budget: number; paid: number }>();
+  for (const exp of expenses) {
+    const catName = exp.category?.name || "Uncategorized";
+    const existing = categoryMap.get(catName) ?? { count: 0, budget: 0, paid: 0 };
+    existing.count += 1;
+    existing.budget += Number(exp.budget_amount) || 0;
+    existing.paid += Number(exp.paid_amount) || 0;
+    categoryMap.set(catName, existing);
+  }
+
+  const categoryAnalysis: ProjectCategoryAnalysis[] = Array.from(categoryMap.entries())
+    .map(([category, stats]) => ({
+      category,
+      expenseCount: stats.count,
+      budget: stats.budget,
+      paid: stats.paid,
+      remaining: stats.budget - stats.paid,
+      percentOfBudget:
+        financials.totalExpenseBudget > 0 ? (stats.budget / financials.totalExpenseBudget) * 100 : 0,
+    }))
+    .sort((a, b) => b.budget - a.budget);
+
+  const categoryChartData: CategoryChartDatum[] = categoryAnalysis.map((item) => ({
+    category: item.category,
+    budget: item.budget,
+    paid: item.paid,
+  }));
+
+  // Group by vendor
+  const vendorMap = new Map<string, { count: number; budget: number; paid: number }>();
+  for (const exp of expenses) {
+    const vendorName = exp.vendor?.name || "Unassigned";
+    const existing = vendorMap.get(vendorName) ?? { count: 0, budget: 0, paid: 0 };
+    existing.count += 1;
+    existing.budget += Number(exp.budget_amount) || 0;
+    existing.paid += Number(exp.paid_amount) || 0;
+    vendorMap.set(vendorName, existing);
+  }
+
+  const vendorAnalysis: ProjectVendorAnalysis[] = Array.from(vendorMap.entries())
+    .map(([vendor, stats]) => ({
+      vendor,
+      expenseCount: stats.count,
+      budget: stats.budget,
+      paid: stats.paid,
+      remaining: stats.budget - stats.paid,
+    }))
+    .sort((a, b) => b.paid - a.paid);
+
+  // Group by month for current year
+  const currentYear = new Date().getFullYear();
+  const monthlyMap = new Map<number, MonthlyChartDatum>();
+  for (let m = 1; m <= 12; m += 1) {
+    monthlyMap.set(m, {
+      month: MONTH_LABELS[m - 1],
+      monthNumber: m,
+      budget: 0,
+      paid: 0,
+    });
+  }
+  for (const exp of expenses) {
+    if (exp.year === currentYear) {
+      const existing = monthlyMap.get(exp.month);
+      if (existing) {
+        existing.budget += Number(exp.budget_amount) || 0;
+        existing.paid += Number(exp.paid_amount) || 0;
+      }
+    }
+  }
+  const monthlyChartData = Array.from(monthlyMap.values());
+
+  return {
+    project,
+    financials,
+    categoryAnalysis,
+    vendorAnalysis,
+    categoryChartData,
+    monthlyChartData,
+    expenses,
+    generatedAt: new Date().toISOString(),
   };
 }
 

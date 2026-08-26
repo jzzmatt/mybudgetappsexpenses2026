@@ -10,6 +10,8 @@ import { projectSchema } from "@/lib/projects/schema";
 import { projectScopedExpenseSchema } from "@/lib/expenses/schema";
 import { categorySchema } from "@/lib/categories/schema";
 import { vendorSchema } from "@/lib/vendors/schema";
+import { generateProjectReportPdf } from "@/lib/projects/export-pdf";
+import type { ProjectReportData } from "@/lib/projects/types";
 
 describe("Project Domain Calculations & Financial Formulas", () => {
   it("calculates individual expense derived metrics correctly", () => {
@@ -194,5 +196,72 @@ describe("Project & Expense Domain Schemas", () => {
 
     assert.equal(valid.name, "AWS");
     assert.equal(valid.contact_info, "billing@aws.amazon.com");
+  });
+
+  it("generates a valid project PDF report buffer without throwing", () => {
+    const mockReportData: ProjectReportData = {
+      project: {
+        id: "proj-1",
+        user_id: "user-1",
+        name: "Infrastructure Modernization",
+        description: "Core cloud servers",
+        budget_amount: 50000,
+        currency: "KZ",
+        status: "active",
+        created_at: "",
+        updated_at: "",
+      },
+      financials: {
+        projectBudget: 50000,
+        totalExpenseBudget: 35000,
+        totalPaid: 20000,
+        totalExpenseRemaining: 15000,
+        availableBudget: 15000,
+        projectPaidPercent: 40,
+        allocatedPercent: 70,
+        isOverspent: false,
+        expenseCount: 2,
+        currency: "KZ",
+      },
+      categoryAnalysis: [
+        { category: "Hosting", expenseCount: 2, budget: 35000, paid: 20000, remaining: 15000, percentOfBudget: 100 },
+      ],
+      vendorAnalysis: [
+        { vendor: "AWS", expenseCount: 2, budget: 35000, paid: 20000, remaining: 15000 },
+      ],
+      categoryChartData: [{ category: "Hosting", budget: 35000, paid: 20000 }],
+      monthlyChartData: [{ month: "Aug", monthNumber: 8, budget: 35000, paid: 20000 }],
+      expenses: [
+        {
+          id: "exp-1",
+          user_id: "user-1",
+          date: "2026-08-01",
+          month: 8,
+          year: 2026,
+          project_id: "proj-1",
+          category_id: null,
+          vendor_id: null,
+          description: "Production Cluster",
+          currency: "KZ",
+          budget_amount: 25000,
+          paid_amount: 15000,
+          balance: 10000,
+          payment_method: "bank_transfer",
+          priority: "high",
+          status: "partial",
+          notes: null,
+          created_at: "",
+          updated_at: "",
+          category: { id: "cat-1", name: "Hosting" },
+          project: { id: "proj-1", name: "Infrastructure Modernization" },
+          vendor: { id: "v-1", name: "AWS" },
+        },
+      ],
+      generatedAt: new Date().toISOString(),
+    };
+
+    const pdfBuffer = generateProjectReportPdf(mockReportData);
+    assert.ok(pdfBuffer instanceof Uint8Array);
+    assert.ok(pdfBuffer.length > 100);
   });
 });
