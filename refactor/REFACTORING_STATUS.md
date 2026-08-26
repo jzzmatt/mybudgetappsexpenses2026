@@ -2,7 +2,7 @@
 
 | Phase | Status | Approved |
 |---|---|---|
-| 01 Discovery & Baseline | Pending | |
+| 01 Discovery & Baseline | Completed | |
 | 02 Project Domain Model | Pending | |
 | 03 Project Data Migration | Pending | |
 | 04 Projects Home & Creation | Pending | |
