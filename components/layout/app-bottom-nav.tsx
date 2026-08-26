@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { MobileNavSignOut } from "@/components/layout/mobile-nav-sign-out";
-import { mobileNavItems, primaryNavItems } from "@/components/layout/nav-items";
+import { primaryNavItems } from "@/components/layout/nav-items";
 import { NavIcon } from "@/components/layout/nav-icon";
 
 function isActivePath(pathname: string, href: string) {
@@ -12,13 +12,10 @@ function isActivePath(pathname: string, href: string) {
 
 export function AppBottomNav() {
   const pathname = usePathname();
-  const moreActive = primaryNavItems
-    .slice(3)
-    .some((item) => isActivePath(pathname, item.href));
 
   return (
     <nav aria-label="Mobile navigation" className="app-bottom-nav">
-      {mobileNavItems.map((item) => {
+      {primaryNavItems.map((item) => {
         const isActive = isActivePath(pathname, item.href);
 
         return (
@@ -35,8 +32,7 @@ export function AppBottomNav() {
       })}
       <details className="app-bottom-nav-more">
         <summary
-          aria-current={moreActive ? "page" : undefined}
-          className={`app-bottom-nav-link app-bottom-nav-more-trigger${moreActive ? " app-bottom-nav-link-active" : ""}`}
+          className="app-bottom-nav-link app-bottom-nav-more-trigger"
         >
           <svg aria-hidden="true" fill="none" height="18" viewBox="0 0 18 18" width="18">
             <path
@@ -46,18 +42,9 @@ export function AppBottomNav() {
               strokeWidth="1.5"
             />
           </svg>
-          <span>More</span>
+          <span>Account</span>
         </summary>
         <div className="app-bottom-nav-menu">
-          {primaryNavItems.slice(3).map((item) => (
-            <Link
-              aria-current={isActivePath(pathname, item.href) ? "page" : undefined}
-              href={item.href}
-              key={item.href}
-            >
-              {item.label}
-            </Link>
-          ))}
           <MobileNavSignOut />
         </div>
       </details>
