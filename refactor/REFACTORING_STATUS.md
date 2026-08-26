@@ -4,9 +4,8 @@
 |---|---|---|
 | 01 Discovery & Baseline | Completed | Yes |
 | 02 Project Domain Model | Completed | Yes |
-| 03 Project Data Migration | Completed | |
-| 04 Projects Home & Creation | Pending | |
-| 04 Projects Home & Creation | Pending | |
+| 03 Project Data Migration | Completed | Yes |
+| 04 Projects Home & Creation | Completed | |
 | 05 Project Workspace & Overview | Pending | |
 | 06 Project-Scoped Expenses | Pending | |
 | 07 Shared Categories & Vendors | Pending | |

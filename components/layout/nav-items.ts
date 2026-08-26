@@ -6,12 +6,12 @@ export type NavItem = {
 };
 
 export const primaryNavItems: NavItem[] = [
-  { href: "/dashboard", label: "Dashboard", icon: "dashboard", mobileLabel: "Home" },
+  { href: "/projects", label: "My Projects", icon: "projects", mobileLabel: "Projects" },
+  { href: "/categories", label: "Categories", icon: "categories" },
+  { href: "/vendors", label: "Vendors", icon: "vendors" },
+  { href: "/dashboard", label: "Dashboard", icon: "dashboard" },
   { href: "/expenses", label: "Expenses", icon: "expenses" },
   { href: "/budgets", label: "Budget", icon: "budget" },
-  { href: "/categories", label: "Categories", icon: "categories" },
-  { href: "/projects", label: "Projects", icon: "projects" },
-  { href: "/vendors", label: "Vendors", icon: "vendors" },
   { href: "/reports", label: "Reports", icon: "reports" },
 ];
 
@@ -19,5 +19,5 @@ export const mobileNavItems: NavItem[] = [
   primaryNavItems[0],
   primaryNavItems[1],
   primaryNavItems[2],
-  primaryNavItems[6],
+  primaryNavItems[3],
 ];

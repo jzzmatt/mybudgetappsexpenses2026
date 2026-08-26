@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { DeleteProjectButton } from "@/components/projects/delete-project-button";
 import { Card } from "@/components/ui/card";
+import { formatCurrency } from "@/lib/currency/format";
+import type { ExpenseCurrency } from "@/lib/currency/types";
 import type { Project } from "@/lib/projects/types";
 
 type ProjectListProps = {
@@ -20,7 +22,7 @@ export function ProjectList({ projects, search }: ProjectListProps) {
         <p>
           {search
             ? `No projects match "${search}". Try a different search or create a new project.`
-            : "Create your first project to track budgets and expenses."}
+            : "Create your first financial project workspace to track budgets and expenses."}
         </p>
         <Link className="button button-small" href="/projects/new">
           Create project
@@ -35,15 +37,20 @@ export function ProjectList({ projects, search }: ProjectListProps) {
         {projects.map((project) => (
           <Card className="list-mobile-card" key={project.id}>
             <div className="list-mobile-card-header">
-              <h3>{project.name}</h3>
+              <div>
+                <h3>{project.name}</h3>
+                <p className="list-mobile-card-date">
+                  Budget: {formatCurrency(project.budget_amount, project.currency as ExpenseCurrency)}
+                </p>
+              </div>
               <span className={`status-badge status-${project.status}`}>
                 {formatStatus(project.status)}
               </span>
             </div>
             <p className="list-mobile-card-meta">{project.description || "No description"}</p>
             <div className="list-mobile-card-actions">
-              <Link className="auth-link" href={`/projects/${project.id}/expenses`}>
-                Expenses
+              <Link className="button button-small" href={`/projects/${project.id}/expenses`}>
+                Open Project
               </Link>
               <Link className="auth-link" href={`/projects/${project.id}/edit`}>
                 Edit
@@ -60,6 +67,8 @@ export function ProjectList({ projects, search }: ProjectListProps) {
             <thead>
               <tr>
                 <th scope="col">Name</th>
+                <th scope="col">Budget</th>
+                <th scope="col">Currency</th>
                 <th scope="col">Description</th>
                 <th scope="col">Status</th>
                 <th scope="col">Actions</th>
@@ -68,7 +77,15 @@ export function ProjectList({ projects, search }: ProjectListProps) {
             <tbody>
               {projects.map((project) => (
                 <tr key={project.id}>
-                  <td>{project.name}</td>
+                  <td>
+                    <strong>
+                      <Link className="auth-link" href={`/projects/${project.id}/expenses`}>
+                        {project.name}
+                      </Link>
+                    </strong>
+                  </td>
+                  <td>{formatCurrency(project.budget_amount, project.currency as ExpenseCurrency)}</td>
+                  <td>{project.currency}</td>
                   <td>{project.description || "—"}</td>
                   <td>
                     <span className={`status-badge status-${project.status}`}>
@@ -76,8 +93,8 @@ export function ProjectList({ projects, search }: ProjectListProps) {
                     </span>
                   </td>
                   <td className="category-table-actions">
-                    <Link className="auth-link" href={`/projects/${project.id}/expenses`}>
-                      Expenses
+                    <Link className="button button-small" href={`/projects/${project.id}/expenses`}>
+                      Open Project
                     </Link>
                     <Link className="auth-link" href={`/projects/${project.id}/edit`}>
                       Edit
