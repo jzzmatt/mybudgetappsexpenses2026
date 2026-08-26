@@ -1,7 +1,23 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { isExpenseCurrency, type ExpenseCurrency } from "@/lib/currency/types";
+import { DEFAULT_EXPENSE_CURRENCY, isExpenseCurrency, type ExpenseCurrency } from "@/lib/currency/types";
 import { ensureUserRecord } from "@/lib/users/ensure-user";
 import type { Project, ProjectExpenseTotals } from "@/lib/projects/types";
+
+function normalizeProject(row: Record<string, unknown>): Project {
+  return {
+    id: String(row.id),
+    user_id: String(row.user_id),
+    name: String(row.name),
+    description: row.description ? String(row.description) : null,
+    budget_amount: Number(row.budget_amount) || 0,
+    currency: (isExpenseCurrency(row.currency as string)
+      ? (row.currency as ExpenseCurrency)
+      : DEFAULT_EXPENSE_CURRENCY),
+    status: String(row.status || "active"),
+    created_at: String(row.created_at || ""),
+    updated_at: String(row.updated_at || ""),
+  };
+}
 
 export async function getProjects(search?: string): Promise<Project[]> {
   await ensureUserRecord();
@@ -9,7 +25,7 @@ export async function getProjects(search?: string): Promise<Project[]> {
   const supabase = await createSupabaseServerClient();
   let query = supabase
     .from("projects")
-    .select("id, user_id, name, description, status, created_at, updated_at")
+    .select("id, user_id, name, description, budget_amount, currency, status, created_at, updated_at")
     .order("name", { ascending: true });
 
   const trimmedSearch = search?.trim();
@@ -26,7 +42,7 @@ export async function getProjects(search?: string): Promise<Project[]> {
     throw new Error(error.message);
   }
 
-  return data ?? [];
+  return (data ?? []).map((row) => normalizeProject(row as Record<string, unknown>));
 }
 
 export async function getProjectById(id: string): Promise<Project | null> {
@@ -35,7 +51,7 @@ export async function getProjectById(id: string): Promise<Project | null> {
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase
     .from("projects")
-    .select("id, user_id, name, description, status, created_at, updated_at")
+    .select("id, user_id, name, description, budget_amount, currency, status, created_at, updated_at")
     .eq("id", id)
     .maybeSingle();
 
@@ -43,7 +59,7 @@ export async function getProjectById(id: string): Promise<Project | null> {
     throw new Error(error.message);
   }
 
-  return data;
+  return data ? normalizeProject(data as Record<string, unknown>) : null;
 }
 
 export async function getProjectExpenseTotals(projectId: string): Promise<ProjectExpenseTotals> {

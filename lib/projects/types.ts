@@ -1,9 +1,16 @@
+import type { ExpenseCurrency } from "@/lib/currency/types";
+
+export const PROJECT_STATUSES = ["active", "paused", "completed"] as const;
+export type ProjectStatus = (typeof PROJECT_STATUSES)[number];
+
 export type Project = {
   id: string;
   user_id: string;
   name: string;
   description: string | null;
-  status: string;
+  budget_amount: number;
+  currency: ExpenseCurrency;
+  status: ProjectStatus | string;
   created_at: string;
   updated_at: string;
 };
@@ -11,7 +18,22 @@ export type Project = {
 export type ProjectInput = {
   name: string;
   description?: string | null;
-  status: string;
+  budget_amount: number;
+  currency: ExpenseCurrency;
+  status?: ProjectStatus | string;
+};
+
+export type ProjectFinancialSummary = {
+  projectBudget: number;
+  totalExpenseBudget: number;
+  totalPaid: number;
+  totalExpenseRemaining: number;
+  availableBudget: number;
+  projectPaidPercent: number;
+  allocatedPercent: number;
+  isOverspent: boolean;
+  expenseCount: number;
+  currency: ExpenseCurrency;
 };
 
 export type ProjectExpenseCurrencyTotals = {

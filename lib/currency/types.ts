@@ -1,13 +1,14 @@
-export const EXPENSE_CURRENCIES = ["USD", "EUR", "KZ"] as const;
+export const EXPENSE_CURRENCIES = ["KZ", "USD", "EUR", "AOA"] as const;
 
 export type ExpenseCurrency = (typeof EXPENSE_CURRENCIES)[number];
 
-export const DEFAULT_EXPENSE_CURRENCY: ExpenseCurrency = "USD";
+export const DEFAULT_EXPENSE_CURRENCY: ExpenseCurrency = "KZ";
 
 export const CURRENCY_LABELS: Record<ExpenseCurrency, string> = {
+  KZ: "KZ (Kz)",
+  AOA: "AOA (Kz)",
   USD: "USD ($)",
   EUR: "EUR (€)",
-  KZ: "KZ (Kz)",
 };
 
 export function isExpenseCurrency(value: string | undefined): value is ExpenseCurrency {

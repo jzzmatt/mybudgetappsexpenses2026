@@ -33,8 +33,8 @@ export type Expense = {
   date: string;
   month: number;
   year: number;
-  category_id: string | null;
   project_id: string | null;
+  category_id: string | null;
   vendor_id: string | null;
   description: string;
   currency: ExpenseCurrency;
@@ -43,16 +43,38 @@ export type Expense = {
   balance: number;
   payment_method: string | null;
   priority: string | null;
-  status: string;
+  status: ExpenseStatus | string;
   notes: string | null;
   created_at: string;
   updated_at: string;
+};
+
+export type ExpenseDerivedMetrics = {
+  remaining: number;
+  expensePaidPercent: number;
+  projectBudgetImpactPercent: number;
 };
 
 export type ExpenseWithRelations = Expense & {
   category: ExpenseRelation | null;
   project: ExpenseRelation | null;
   vendor: ExpenseRelation | null;
+  derived?: ExpenseDerivedMetrics;
+};
+
+export type ExpenseInput = {
+  project_id: string;
+  date: string;
+  description: string;
+  category_id?: string | null;
+  vendor_id?: string | null;
+  budget_amount: number;
+  paid_amount?: number;
+  currency?: ExpenseCurrency;
+  payment_method?: ExpensePaymentMethod | string | null;
+  priority?: ExpensePriority | string | null;
+  status?: ExpenseStatus | string;
+  notes?: string | null;
 };
 
 export type ExpenseFilters = {

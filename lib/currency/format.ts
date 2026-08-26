@@ -4,7 +4,7 @@ export function formatCurrency(
   amount: number,
   currency: ExpenseCurrency = DEFAULT_EXPENSE_CURRENCY,
 ) {
-  if (currency === "KZ") {
+  if (currency === "KZ" || currency === "AOA") {
     return `Kz ${amount.toLocaleString("en-US", {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
@@ -27,7 +27,7 @@ export function formatCompactCurrency(
 ) {
   const abs = Math.abs(amount);
 
-  if (currency === "KZ") {
+  if (currency === "KZ" || currency === "AOA") {
     if (abs >= 1_000_000) {
       return `Kz ${(amount / 1_000_000).toFixed(1)}M`;
     }
