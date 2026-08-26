@@ -59,7 +59,7 @@ export default async function ProjectReportsPage({ params }: ProjectReportsPageP
 
         <p className="reports-ai-link">
           Looking for AI-driven insights?{" "}
-          <Link className="auth-link" href={`/ai-report`}>
+          <Link className="auth-link" href={`/projects/${project.id}/ai-report`}>
             Generate AI Report
           </Link>
         </p>

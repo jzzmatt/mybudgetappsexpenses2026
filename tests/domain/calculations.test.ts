@@ -11,7 +11,9 @@ import { projectScopedExpenseSchema } from "@/lib/expenses/schema";
 import { categorySchema } from "@/lib/categories/schema";
 import { vendorSchema } from "@/lib/vendors/schema";
 import { generateProjectReportPdf } from "@/lib/projects/export-pdf";
+import { buildAiReportPdf } from "@/lib/ai-report/export-pdf";
 import type { ProjectReportData } from "@/lib/projects/types";
+import type { AiReportResult } from "@/lib/ai-report/types";
 
 describe("Project Domain Calculations & Financial Formulas", () => {
   it("calculates individual expense derived metrics correctly", () => {
@@ -261,6 +263,27 @@ describe("Project & Expense Domain Schemas", () => {
     };
 
     const pdfBuffer = generateProjectReportPdf(mockReportData);
+    assert.ok(pdfBuffer instanceof Uint8Array);
+    assert.ok(pdfBuffer.length > 100);
+  });
+
+  it("generates a valid project AI report PDF buffer without throwing", () => {
+    const mockAiReport: AiReportResult = {
+      title: "AI Financial Report: Infrastructure Modernization",
+      project_id: "proj-1",
+      project_name: "Infrastructure Modernization",
+      currency: "KZ",
+      executive_summary: "The project is on track with 70% budget allocation and low risk.",
+      spending_analysis: "Infrastructure is the primary cost center with AWS being the sole vendor.",
+      key_findings: ["Allocated 35k of 50k budget", "Paid out 20k to date"],
+      largest_items: ["Production Cluster (25,000 KZ)"],
+      pending_items: ["Production Cluster has 10,000 KZ unpaid balance"],
+      recommendations: ["Review reserved instance pricing on AWS to reduce monthly run rates"],
+      risk_alerts: ["Overspending risk if cluster scaling exceeds 15,000 KZ available budget"],
+      generated_at: new Date().toISOString(),
+    };
+
+    const pdfBuffer = buildAiReportPdf(mockAiReport);
     assert.ok(pdfBuffer instanceof Uint8Array);
     assert.ok(pdfBuffer.length > 100);
   });

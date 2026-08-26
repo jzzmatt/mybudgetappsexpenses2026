@@ -39,10 +39,17 @@ export function parseAiReportFilters(params: RawSearchParams): AiReportFilters {
 
 export function buildAiReportQueryString(filters: AiReportFilters, generate = false): string {
   const searchParams = new URLSearchParams();
-  searchParams.set("year", String(filters.year));
-  searchParams.set("currency", filters.currency);
+  if (filters.projectId) {
+    searchParams.set("project", filters.projectId);
+  }
+  if (filters.year) {
+    searchParams.set("year", String(filters.year));
+  }
+  if (filters.currency) {
+    searchParams.set("currency", filters.currency);
+  }
 
-  if (filters.month !== null) {
+  if (filters.month !== null && filters.month !== undefined) {
     searchParams.set("month", String(filters.month));
   } else {
     searchParams.set("month", "all");
@@ -56,8 +63,8 @@ export function buildAiReportQueryString(filters: AiReportFilters, generate = fa
 }
 
 export function getAiReportPeriodLabel(filters: AiReportFilters) {
-  if (filters.month === null) {
-    return String(filters.year);
+  if (!filters.year || filters.month === null || filters.month === undefined) {
+    return filters.year ? String(filters.year) : "All Time";
   }
 
   const date = new Date(filters.year, filters.month - 1, 1);
