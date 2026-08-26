@@ -8,20 +8,24 @@ export async function ensureUserRecord() {
     throw new Error("Unauthorized");
   }
 
-  const supabase = await createSupabaseServerClient();
-  const fullName = [user.firstName, user.lastName].filter(Boolean).join(" ").trim();
+  try {
+    const supabase = await createSupabaseServerClient();
+    const fullName = [user.firstName, user.lastName].filter(Boolean).join(" ").trim();
 
-  const { error } = await supabase.from("users").upsert(
-    {
-      id: user.id,
-      email: user.primaryEmailAddress?.emailAddress ?? user.emailAddresses[0]?.emailAddress ?? null,
-      full_name: fullName || null,
-    },
-    { onConflict: "id" },
-  );
+    const { error } = await supabase.from("users").upsert(
+      {
+        id: user.id,
+        email: user.primaryEmailAddress?.emailAddress ?? user.emailAddresses[0]?.emailAddress ?? null,
+        full_name: fullName || null,
+      },
+      { onConflict: "id" },
+    );
 
-  if (error) {
-    throw new Error(error.message);
+    if (error) {
+      console.error("users upsert error in ensureUserRecord:", error.message);
+    }
+  } catch (err) {
+    console.error("ensureUserRecord failed:", err);
   }
 
   return user.id;

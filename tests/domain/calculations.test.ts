@@ -99,6 +99,26 @@ describe("Project Domain Calculations & Financial Formulas", () => {
     assert.equal(summary.currency, "KZ");
   });
 
+  it("handles empty expenses array gracefully in calculateProjectFinancialSummary", () => {
+    const project = {
+      budget_amount: 5000,
+      currency: "AOA" as const,
+    };
+
+    const summary = calculateProjectFinancialSummary(project, []);
+
+    assert.equal(summary.projectBudget, 5000);
+    assert.equal(summary.totalExpenseBudget, 0);
+    assert.equal(summary.totalPaid, 0);
+    assert.equal(summary.totalExpenseRemaining, 0);
+    assert.equal(summary.availableBudget, 5000);
+    assert.equal(summary.projectPaidPercent, 0);
+    assert.equal(summary.allocatedPercent, 0);
+    assert.equal(summary.isOverspent, false);
+    assert.equal(summary.expenseCount, 0);
+    assert.equal(summary.currency, "AOA");
+  });
+
   it("detects overspending when total expense budget exceeds project budget", () => {
     const project = {
       budget_amount: 5000,
@@ -116,6 +136,26 @@ describe("Project Domain Calculations & Financial Formulas", () => {
     assert.equal(summary.availableBudget, -1000);
     assert.equal(summary.allocatedPercent, 120);
     assert.equal(summary.isOverspent, true);
+  });
+
+  it("handles boundary exact budget allocation (100% allocation, not overspent)", () => {
+    const project = {
+      budget_amount: 10000,
+      currency: "KZ" as const,
+    };
+
+    const expenses = [
+      { budget_amount: 6000, paid_amount: 6000 },
+      { budget_amount: 4000, paid_amount: 2000 },
+    ];
+
+    const summary = calculateProjectFinancialSummary(project, expenses);
+
+    assert.equal(summary.totalExpenseBudget, 10000);
+    assert.equal(summary.availableBudget, 0);
+    assert.equal(summary.allocatedPercent, 100);
+    assert.equal(summary.projectPaidPercent, 80);
+    assert.equal(summary.isOverspent, false);
   });
 
   it("evaluates willCauseProjectOverspending warning logic", () => {

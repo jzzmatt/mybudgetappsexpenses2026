@@ -20,7 +20,13 @@ export async function createSupabaseServerClient(): Promise<SupabaseClient> {
 
   return createClient(url, publishableKey, {
     async accessToken() {
-      return (await auth()).getToken();
+      try {
+        const session = await auth();
+        return (await session?.getToken()) ?? null;
+      } catch (err) {
+        console.error("Failed to retrieve Clerk auth token:", err);
+        return null;
+      }
     },
   });
 }

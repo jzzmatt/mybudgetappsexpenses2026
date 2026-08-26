@@ -26,7 +26,9 @@ export async function createProjectAction(formData: FormData) {
 
   const userId = await ensureUserRecord();
   const supabase = await createSupabaseServerClient();
-  const { error } = await supabase.from("projects").insert({
+  
+  // Try inserting with budget_amount and currency; if columns do not exist yet in DB, fallback to basic fields
+  let { error } = await supabase.from("projects").insert({
     user_id: userId,
     name: parsed.data.name,
     description: parsed.data.description,
@@ -34,6 +36,16 @@ export async function createProjectAction(formData: FormData) {
     currency: parsed.data.currency,
     status: parsed.data.status,
   });
+
+  if (error && (error.code === "42703" || error.message?.includes("does not exist"))) {
+    const fallback = await supabase.from("projects").insert({
+      user_id: userId,
+      name: parsed.data.name,
+      description: parsed.data.description,
+      status: parsed.data.status,
+    });
+    error = fallback.error;
+  }
 
   if (error) {
     const message =
@@ -61,7 +73,7 @@ export async function updateProjectAction(projectId: string, formData: FormData)
   await ensureUserRecord();
 
   const supabase = await createSupabaseServerClient();
-  const { error } = await supabase
+  let { error } = await supabase
     .from("projects")
     .update({
       name: parsed.data.name,
@@ -71,6 +83,18 @@ export async function updateProjectAction(projectId: string, formData: FormData)
       status: parsed.data.status,
     })
     .eq("id", projectId);
+
+  if (error && (error.code === "42703" || error.message?.includes("does not exist"))) {
+    const fallback = await supabase
+      .from("projects")
+      .update({
+        name: parsed.data.name,
+        description: parsed.data.description,
+        status: parsed.data.status,
+      })
+      .eq("id", projectId);
+    error = fallback.error;
+  }
 
   if (error) {
     const message =

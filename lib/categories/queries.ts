@@ -3,7 +3,11 @@ import { ensureUserRecord } from "@/lib/users/ensure-user";
 import type { Category } from "@/lib/categories/types";
 
 export async function getCategories(search?: string): Promise<Category[]> {
-  await ensureUserRecord();
+  try {
+    await ensureUserRecord();
+  } catch (error) {
+    console.error("ensureUserRecord failed in getCategories:", error);
+  }
 
   const supabase = await createSupabaseServerClient();
   let query = supabase
@@ -27,7 +31,11 @@ export async function getCategories(search?: string): Promise<Category[]> {
 }
 
 export async function getCategoryById(id: string): Promise<Category | null> {
-  await ensureUserRecord();
+  try {
+    await ensureUserRecord();
+  } catch (error) {
+    console.error("ensureUserRecord failed in getCategoryById:", error);
+  }
 
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase

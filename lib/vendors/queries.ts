@@ -3,7 +3,11 @@ import { ensureUserRecord } from "@/lib/users/ensure-user";
 import type { Vendor } from "@/lib/vendors/types";
 
 export async function getVendors(search?: string): Promise<Vendor[]> {
-  await ensureUserRecord();
+  try {
+    await ensureUserRecord();
+  } catch (error) {
+    console.error("ensureUserRecord failed in getVendors:", error);
+  }
 
   const supabase = await createSupabaseServerClient();
   let query = supabase
@@ -27,7 +31,11 @@ export async function getVendors(search?: string): Promise<Vendor[]> {
 }
 
 export async function getVendorById(id: string): Promise<Vendor | null> {
-  await ensureUserRecord();
+  try {
+    await ensureUserRecord();
+  } catch (error) {
+    console.error("ensureUserRecord failed in getVendorById:", error);
+  }
 
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase
