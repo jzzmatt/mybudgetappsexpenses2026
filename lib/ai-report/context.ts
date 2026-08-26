@@ -1,48 +1,50 @@
-import { getBudgets } from "@/lib/budgets/queries";
-import { getDashboardData } from "@/lib/dashboard/queries";
-import type { AiReportContext, AiReportFilters } from "@/lib/ai-report/types";
-import { getAiReportPeriodLabel } from "@/lib/ai-report/params";
+import { getProjectReportData } from "@/lib/projects/queries";
+import type { ProjectAiReportContext } from "@/lib/ai-report/types";
 
-export async function buildAiReportContext(filters: AiReportFilters): Promise<AiReportContext> {
-  const dashboard = await getDashboardData({
-    year: filters.year,
-    month: filters.month,
-    currency: filters.currency,
-  });
+export async function buildProjectAiReportContext(projectId: string): Promise<ProjectAiReportContext | null> {
+  const reportData = await getProjectReportData(projectId);
+  if (!reportData) {
+    return null;
+  }
 
-  const budgets = await getBudgets({
-    year: filters.year,
-    month: filters.month ?? undefined,
-    currency: filters.currency,
-  });
+  const { project, financials, categoryAnalysis, vendorAnalysis, expenses } = reportData;
+
+  // Largest expenses sorted by budget_amount descending
+  const sortedExpenses = [...expenses].sort((a, b) => Number(b.budget_amount) - Number(a.budget_amount));
+  const largestExpenses = sortedExpenses.slice(0, 5).map((exp) => ({
+    description: exp.description,
+    budget_amount: Number(exp.budget_amount),
+    paid_amount: Number(exp.paid_amount),
+    category: exp.category?.name || "Uncategorized",
+    status: exp.status,
+    priority: exp.priority,
+  }));
+
+  // Pending or partial expenses
+  const pendingOrPartialExpenses = expenses
+    .filter((exp) => exp.status === "pending" || exp.status === "partial")
+    .map((exp) => ({
+      description: exp.description,
+      budget_amount: Number(exp.budget_amount),
+      paid_amount: Number(exp.paid_amount),
+      remaining: Number(exp.budget_amount) - Number(exp.paid_amount),
+      status: exp.status,
+      priority: exp.priority,
+    }))
+    .slice(0, 5);
 
   return {
-    period_label: getAiReportPeriodLabel(filters),
-    currency: filters.currency,
-    kpis: {
-      total_budget: dashboard.kpis.totalBudget,
-      total_paid: dashboard.kpis.totalPaid,
-      remaining_budget: dashboard.kpis.remainingBudget,
-      pending_expenses: dashboard.kpis.pendingExpenses,
+    project: {
+      id: project.id,
+      name: project.name,
+      budget_amount: project.budget_amount,
+      currency: project.currency,
+      status: project.status,
     },
-    category_breakdown: dashboard.categoryData.map((item) => ({
-      category: item.category,
-      budget: item.budget,
-      paid: item.paid,
-    })),
-    monthly_trend: dashboard.monthlyData.map((item) => ({
-      month: item.month,
-      budget: item.budget,
-      paid: item.paid,
-    })),
-    budgets: budgets.map((budget) => ({
-      name: budget.name,
-      category: budget.category?.name ?? null,
-      project: budget.project?.name ?? null,
-      amount: budget.amount,
-      paid: budget.paid_amount,
-      remaining: budget.remaining,
-      progress_percent: budget.progress_percent,
-    })),
+    financials,
+    categories: categoryAnalysis,
+    vendors: vendorAnalysis,
+    largestExpenses,
+    pendingOrPartialExpenses,
   };
 }

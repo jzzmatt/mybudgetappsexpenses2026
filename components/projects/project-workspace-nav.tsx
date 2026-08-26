@@ -58,7 +58,7 @@ export function ProjectWorkspaceNav({
       <Link
         aria-current={isAiReport ? "page" : undefined}
         className={`project-workspace-tab${isAiReport ? " project-workspace-tab-active" : ""}`}
-        href={`/ai-report`}
+        href={`/projects/${projectId}/ai-report`}
       >
         AI Report
       </Link>

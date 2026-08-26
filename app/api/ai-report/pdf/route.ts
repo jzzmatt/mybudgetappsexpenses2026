@@ -6,12 +6,16 @@ import { EXPENSE_CURRENCIES } from "@/lib/currency/types";
 
 const aiReportSchema = z.object({
   title: z.string(),
-  period_label: z.string(),
+  project_id: z.string().optional(),
+  project_name: z.string().optional(),
   currency: z.enum(EXPENSE_CURRENCIES),
   executive_summary: z.string(),
+  spending_analysis: z.string().default(""),
   key_findings: z.array(z.string()),
+  largest_items: z.array(z.string()).default([]),
+  pending_items: z.array(z.string()).default([]),
   recommendations: z.array(z.string()),
-  risk_alerts: z.array(z.string()),
+  risk_alerts: z.array(z.string()).default([]),
   generated_at: z.string(),
 });
 
