@@ -28,7 +28,8 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
   return (
     <AppShell
       actions={<PageActionButton href="/projects/new">Add project</PageActionButton>}
-      title="Projects"
+      description="Select a project financial workspace or create a new one."
+      title="My Projects"
     >
       {loadError ? (
         <p className="form-error page-error" role="alert">
