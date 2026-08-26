@@ -8,8 +8,8 @@
 | 04 Projects Home & Creation | Completed | Yes |
 | 05 Project Workspace & Overview | Completed | Yes |
 | 06 Project-Scoped Expenses | Completed | Yes |
-| 07 Shared Categories & Vendors | Completed | |
-| 08 Project Dashboard & Analytics | Pending | |
+| 07 Shared Categories & Vendors | Completed | Yes |
+| 08 Project Dashboard & Analytics | Completed | |
 | 09 Project Reports | Pending | |
 | 10 AI Project Reporting | Pending | |
 | 11 UI Simplification & Final UX | Pending | |
