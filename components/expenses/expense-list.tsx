@@ -119,7 +119,7 @@ export function ExpenseList({
                 <dd>{expense.category?.name ?? "—"}</dd>
               </div>
               <div>
-                <dt>Budget</dt>
+                <dt>Expense Budget</dt>
                 <dd className="list-mobile-card-amount">
                   {formatCurrency(Number(expense.budget_amount), expense.currency)}
                 </dd>
@@ -196,7 +196,7 @@ export function ExpenseList({
                   basePath={basePath}
                   field="budget_amount"
                   filters={filters}
-                  label="Budget"
+                  label="Expense Budget"
                   omitProjectId={omitProjectId}
                 />
                 <SortableHeader

@@ -30,7 +30,7 @@ export default async function ProjectOverviewPage({ params }: ProjectOverviewPag
       actions={
         <div className="project-workspace-header-actions">
           <PageActionButton href={`/projects/${project.id}/edit`}>Edit Project</PageActionButton>
-          <PageActionButton href={`/expenses/new`}>Add Expense</PageActionButton>
+          <PageActionButton href={`/expenses/new?project=${project.id}`}>Add Expense</PageActionButton>
         </div>
       }
       description={`Financial workspace · Budget: ${project.currency} ${project.budget_amount.toLocaleString("en-US", { minimumFractionDigits: 2 })}`}

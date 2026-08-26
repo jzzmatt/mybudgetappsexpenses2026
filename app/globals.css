@@ -1089,6 +1089,30 @@ select {
   color: var(--muted-foreground);
 }
 
+.expense-overspend-warning {
+  grid-column: 1 / -1;
+  border: 1px solid color-mix(in srgb, #d97706 30%, var(--border));
+  border-radius: var(--radius-md);
+  background: #fffbeb;
+  padding: 10px 14px;
+  color: #b45309;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.expense-currency-display {
+  display: flex;
+  align-items: center;
+  min-height: 42px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: #f9fafb;
+  padding: 10px 14px;
+  color: var(--foreground);
+  font-size: 14px;
+}
+
 .budget-section-header {
   margin-bottom: 12px;
 }

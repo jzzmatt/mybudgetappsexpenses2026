@@ -5,11 +5,11 @@ import { getProjects } from "@/lib/projects/queries";
 import { getVendors } from "@/lib/vendors/queries";
 
 type NewExpensePageProps = {
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; project?: string }>;
 };
 
 export default async function NewExpensePage({ searchParams }: NewExpensePageProps) {
-  const { error } = await searchParams;
+  const { error, project: preselectedProjectId } = await searchParams;
   const [categories, projects, vendors] = await Promise.all([
     getCategories(),
     getProjects(),
@@ -23,7 +23,12 @@ export default async function NewExpensePage({ searchParams }: NewExpensePagePro
           {error}
         </p>
       ) : null}
-      <ExpenseCreateForm categories={categories} projects={projects} vendors={vendors} />
+      <ExpenseCreateForm
+        categories={categories}
+        preselectedProjectId={preselectedProjectId}
+        projects={projects}
+        vendors={vendors}
+      />
     </AppShell>
   );
 }
