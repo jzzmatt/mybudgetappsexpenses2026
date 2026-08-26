@@ -38,6 +38,34 @@ export type ProjectFinancialSummary = {
   currency: ExpenseCurrency;
 };
 
+export type ProjectVendorAnalysis = {
+  vendor: string;
+  expenseCount: number;
+  budget: number;
+  paid: number;
+  remaining: number;
+};
+
+export type ProjectCategoryAnalysis = {
+  category: string;
+  expenseCount: number;
+  budget: number;
+  paid: number;
+  remaining: number;
+  percentOfBudget: number;
+};
+
+export type ProjectReportData = {
+  project: Project;
+  financials: ProjectFinancialSummary;
+  categoryAnalysis: ProjectCategoryAnalysis[];
+  vendorAnalysis: ProjectVendorAnalysis[];
+  categoryChartData: CategoryChartDatum[];
+  monthlyChartData: MonthlyChartDatum[];
+  expenses: ExpenseWithRelations[];
+  generatedAt: string;
+};
+
 export type ProjectOverviewData = {
   project: Project;
   financials: ProjectFinancialSummary;
