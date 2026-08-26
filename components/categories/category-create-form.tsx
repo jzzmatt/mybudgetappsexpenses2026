@@ -7,7 +7,7 @@ import { createCategoryAction } from "@/lib/categories/actions";
 export function CategoryCreateForm() {
   return (
     <ResourceFormLayout
-      description="Add a category to organize expenses and budgets."
+      description="Create a shared category to organize and classify expenses across all your projects."
       title="Category details"
     >
       <form action={createCategoryAction} className="resource-form">

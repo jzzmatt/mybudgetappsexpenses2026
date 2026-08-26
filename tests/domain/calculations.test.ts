@@ -8,6 +8,8 @@ import {
 } from "@/lib/projects/calculations";
 import { projectSchema } from "@/lib/projects/schema";
 import { projectScopedExpenseSchema } from "@/lib/expenses/schema";
+import { categorySchema } from "@/lib/categories/schema";
+import { vendorSchema } from "@/lib/vendors/schema";
 
 describe("Project Domain Calculations & Financial Formulas", () => {
   it("calculates individual expense derived metrics correctly", () => {
@@ -172,5 +174,25 @@ describe("Project & Expense Domain Schemas", () => {
         budget_amount: 100,
       });
     });
+  });
+
+  it("validates shared category schema correctly", () => {
+    const valid = categorySchema.parse({
+      name: "Cloud Hosting",
+      description: "Hosting and cloud servers across projects",
+    });
+
+    assert.equal(valid.name, "Cloud Hosting");
+    assert.equal(valid.description, "Hosting and cloud servers across projects");
+  });
+
+  it("validates shared vendor schema correctly", () => {
+    const valid = vendorSchema.parse({
+      name: "AWS",
+      contact_info: "billing@aws.amazon.com",
+    });
+
+    assert.equal(valid.name, "AWS");
+    assert.equal(valid.contact_info, "billing@aws.amazon.com");
   });
 });

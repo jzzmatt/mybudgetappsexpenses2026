@@ -28,6 +28,7 @@ export default async function VendorsPage({ searchParams }: VendorsPageProps) {
   return (
     <AppShell
       actions={<PageActionButton href="/vendors/new">Add vendor</PageActionButton>}
+      description="Manage shared vendors and suppliers reusable across all your project workspaces."
       title="Vendors"
     >
       {loadError ? (

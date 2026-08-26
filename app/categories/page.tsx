@@ -28,6 +28,7 @@ export default async function CategoriesPage({ searchParams }: CategoriesPagePro
   return (
     <AppShell
       actions={<PageActionButton href="/categories/new">Add category</PageActionButton>}
+      description="Manage shared expense categories available across all your financial project workspaces."
       title="Categories"
     >
       {loadError ? (

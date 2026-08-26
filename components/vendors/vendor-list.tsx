@@ -16,7 +16,7 @@ export function VendorList({ vendors, search }: VendorListProps) {
         <p>
           {search
             ? `No vendors match "${search}". Try a different search or create a new vendor.`
-            : "Create your first vendor to track who you pay."}
+            : "Create your first vendor to track suppliers and payees across all projects."}
         </p>
         <Link className="button button-small" href="/vendors/new">
           Create vendor
