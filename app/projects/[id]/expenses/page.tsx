@@ -57,7 +57,7 @@ export default async function ProjectExpensesPage({ params, searchParams }: Proj
 
   return (
     <AppShell
-      actions={<PageActionButton href="/expenses/new">Add expense</PageActionButton>}
+      actions={<PageActionButton href={`/expenses/new?project=${project.id}`}>Add expense</PageActionButton>}
       description={`All expenses linked to ${project.name}.`}
       title={`${project.name} Expenses`}
     >

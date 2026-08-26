@@ -6,8 +6,8 @@
 | 02 Project Domain Model | Completed | Yes |
 | 03 Project Data Migration | Completed | Yes |
 | 04 Projects Home & Creation | Completed | Yes |
-| 05 Project Workspace & Overview | Completed | |
-| 06 Project-Scoped Expenses | Pending | |
+| 05 Project Workspace & Overview | Completed | Yes |
+| 06 Project-Scoped Expenses | Completed | |
 | 07 Shared Categories & Vendors | Pending | |
 | 08 Project Dashboard & Analytics | Pending | |
 | 09 Project Reports | Pending | |

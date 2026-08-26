@@ -86,18 +86,31 @@ export async function createExpenseAction(formData: FormData) {
   const parsed = parseExpenseFormData(formData);
 
   if (!parsed.success) {
-    redirect(`/expenses/new?error=${encodeURIComponent(formatZodError(parsed.error))}`);
-  }
-
-  if (parsed.data.paid_amount > parsed.data.budget_amount) {
-    redirect(
-      `/expenses/new?error=${encodeURIComponent("Paid amount cannot exceed budget amount.")}`,
-    );
+    const projectId = formData.get("project_id");
+    const redirectUrl = projectId
+      ? `/projects/${projectId}/expenses?error=${encodeURIComponent(formatZodError(parsed.error))}`
+      : `/expenses/new?error=${encodeURIComponent(formatZodError(parsed.error))}`;
+    redirect(redirectUrl);
   }
 
   const { month, year } = getMonthYearFromDate(parsed.data.date);
   const userId = await ensureUserRecord();
   const supabase = await createSupabaseServerClient();
+
+  // If project_id is provided, inherit the project's currency
+  let expenseCurrency = parsed.data.currency;
+  if (parsed.data.project_id) {
+    const { data: project } = await supabase
+      .from("projects")
+      .select("currency")
+      .eq("id", parsed.data.project_id)
+      .maybeSingle();
+
+    if (project?.currency) {
+      expenseCurrency = project.currency;
+    }
+  }
+
   const { error } = await supabase.from("expenses").insert({
     user_id: userId,
     date: parsed.data.date,
@@ -109,7 +122,7 @@ export async function createExpenseAction(formData: FormData) {
     description: parsed.data.description,
     budget_amount: parsed.data.budget_amount,
     paid_amount: parsed.data.paid_amount,
-    currency: parsed.data.currency,
+    currency: expenseCurrency,
     payment_method: parsed.data.payment_method,
     priority: parsed.data.priority,
     status: parsed.data.status,
@@ -117,11 +130,20 @@ export async function createExpenseAction(formData: FormData) {
   });
 
   if (error) {
-    redirect(`/expenses/new?error=${encodeURIComponent(error.message)}`);
+    const projectId = parsed.data.project_id;
+    const redirectUrl = projectId
+      ? `/projects/${projectId}/expenses?error=${encodeURIComponent(error.message)}`
+      : `/expenses/new?error=${encodeURIComponent(error.message)}`;
+    redirect(redirectUrl);
   }
 
   revalidatePath("/expenses");
   revalidatePath("/dashboard");
+  if (parsed.data.project_id) {
+    revalidatePath(`/projects/${parsed.data.project_id}`);
+    revalidatePath(`/projects/${parsed.data.project_id}/expenses`);
+    redirect(`/projects/${parsed.data.project_id}/expenses`);
+  }
   redirect("/expenses");
 }
 
@@ -132,16 +154,25 @@ export async function updateExpenseAction(expenseId: string, formData: FormData)
     redirect(`/expenses/${expenseId}/edit?error=${encodeURIComponent(formatZodError(parsed.error))}`);
   }
 
-  if (parsed.data.paid_amount > parsed.data.budget_amount) {
-    redirect(
-      `/expenses/${expenseId}/edit?error=${encodeURIComponent("Paid amount cannot exceed budget amount.")}`,
-    );
-  }
-
   const { month, year } = getMonthYearFromDate(parsed.data.date);
   await ensureUserRecord();
 
   const supabase = await createSupabaseServerClient();
+
+  // If project_id is provided, inherit the project's currency
+  let expenseCurrency = parsed.data.currency;
+  if (parsed.data.project_id) {
+    const { data: project } = await supabase
+      .from("projects")
+      .select("currency")
+      .eq("id", parsed.data.project_id)
+      .maybeSingle();
+
+    if (project?.currency) {
+      expenseCurrency = project.currency;
+    }
+  }
+
   const { error } = await supabase
     .from("expenses")
     .update({
@@ -154,7 +185,7 @@ export async function updateExpenseAction(expenseId: string, formData: FormData)
       description: parsed.data.description,
       budget_amount: parsed.data.budget_amount,
       paid_amount: parsed.data.paid_amount,
-      currency: parsed.data.currency,
+      currency: expenseCurrency,
       payment_method: parsed.data.payment_method,
       priority: parsed.data.priority,
       status: parsed.data.status,
@@ -168,6 +199,11 @@ export async function updateExpenseAction(expenseId: string, formData: FormData)
 
   revalidatePath("/expenses");
   revalidatePath("/dashboard");
+  if (parsed.data.project_id) {
+    revalidatePath(`/projects/${parsed.data.project_id}`);
+    revalidatePath(`/projects/${parsed.data.project_id}/expenses`);
+    redirect(`/projects/${parsed.data.project_id}/expenses`);
+  }
   redirect("/expenses");
 }
 
