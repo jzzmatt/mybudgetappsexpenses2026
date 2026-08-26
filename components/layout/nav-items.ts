@@ -9,9 +9,6 @@ export const primaryNavItems: NavItem[] = [
   { href: "/projects", label: "My Projects", icon: "projects", mobileLabel: "Projects" },
   { href: "/categories", label: "Categories", icon: "categories" },
   { href: "/vendors", label: "Vendors", icon: "vendors" },
-  { href: "/dashboard", label: "Dashboard", icon: "dashboard" },
-  { href: "/expenses", label: "Expenses", icon: "expenses" },
-  { href: "/budgets", label: "Budget", icon: "budget" },
   { href: "/reports", label: "Reports", icon: "reports" },
 ];
 
