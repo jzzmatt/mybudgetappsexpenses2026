@@ -78,7 +78,11 @@ function normalizeProject(row: Record<string, unknown>): Project {
 }
 
 export async function getProjects(search?: string): Promise<Project[]> {
-  await ensureUserRecord();
+  try {
+    await ensureUserRecord();
+  } catch (error) {
+    console.error("ensureUserRecord failed in getProjects:", error);
+  }
 
   const supabase = await createSupabaseServerClient();
   let query = supabase
@@ -97,6 +101,18 @@ export async function getProjects(search?: string): Promise<Project[]> {
   const { data, error } = await query;
 
   if (error) {
+    // If budget_amount or currency column doesn't exist yet on projects table before migration is run, fallback gracefully
+    if (error.code === "42703" || error.message?.includes("does not exist")) {
+      const fallbackQuery = await supabase
+        .from("projects")
+        .select("id, user_id, name, description, status, created_at, updated_at")
+        .order("name", { ascending: true });
+
+      if (fallbackQuery.error) {
+        throw new Error(fallbackQuery.error.message);
+      }
+      return (fallbackQuery.data ?? []).map((row) => normalizeProject(row as Record<string, unknown>));
+    }
     throw new Error(error.message);
   }
 
@@ -104,7 +120,11 @@ export async function getProjects(search?: string): Promise<Project[]> {
 }
 
 export async function getProjectById(id: string): Promise<Project | null> {
-  await ensureUserRecord();
+  try {
+    await ensureUserRecord();
+  } catch (error) {
+    console.error("ensureUserRecord failed in getProjectById:", error);
+  }
 
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase
@@ -114,6 +134,18 @@ export async function getProjectById(id: string): Promise<Project | null> {
     .maybeSingle();
 
   if (error) {
+    if (error.code === "42703" || error.message?.includes("does not exist")) {
+      const fallbackQuery = await supabase
+        .from("projects")
+        .select("id, user_id, name, description, status, created_at, updated_at")
+        .eq("id", id)
+        .maybeSingle();
+
+      if (fallbackQuery.error) {
+        throw new Error(fallbackQuery.error.message);
+      }
+      return fallbackQuery.data ? normalizeProject(fallbackQuery.data as Record<string, unknown>) : null;
+    }
     throw new Error(error.message);
   }
 
@@ -121,7 +153,11 @@ export async function getProjectById(id: string): Promise<Project | null> {
 }
 
 export async function getProjectOverview(projectId: string): Promise<ProjectOverviewData | null> {
-  await ensureUserRecord();
+  try {
+    await ensureUserRecord();
+  } catch (error) {
+    console.error("ensureUserRecord failed in getProjectOverview:", error);
+  }
 
   const project = await getProjectById(projectId);
   if (!project) {
@@ -187,7 +223,11 @@ export async function getProjectOverview(projectId: string): Promise<ProjectOver
 }
 
 export async function getProjectReportData(projectId: string): Promise<ProjectReportData | null> {
-  await ensureUserRecord();
+  try {
+    await ensureUserRecord();
+  } catch (error) {
+    console.error("ensureUserRecord failed in getProjectReportData:", error);
+  }
 
   const project = await getProjectById(projectId);
   if (!project) {

@@ -112,7 +112,11 @@ async function getExpenseUsageRows(): Promise<ExpenseUsageRow[]> {
 }
 
 export async function getBudgets(filters: BudgetFilters = {}): Promise<BudgetWithUsage[]> {
-  await ensureUserRecord();
+  try {
+    await ensureUserRecord();
+  } catch (error) {
+    console.error("ensureUserRecord failed in getBudgets:", error);
+  }
 
   const supabase = await createSupabaseServerClient();
   let query = supabase
@@ -160,7 +164,11 @@ export async function getBudgets(filters: BudgetFilters = {}): Promise<BudgetWit
 }
 
 export async function getBudgetById(id: string): Promise<BudgetWithUsage | null> {
-  await ensureUserRecord();
+  try {
+    await ensureUserRecord();
+  } catch (error) {
+    console.error("ensureUserRecord failed in getBudgetById:", error);
+  }
 
   const supabase = await createSupabaseServerClient();
   const [{ data, error }, expenses] = await Promise.all([
@@ -176,7 +184,11 @@ export async function getBudgetById(id: string): Promise<BudgetWithUsage | null>
 }
 
 export async function getUserPreferredCurrency(): Promise<ExpenseCurrency> {
-  await ensureUserRecord();
+  try {
+    await ensureUserRecord();
+  } catch (error) {
+    console.error("ensureUserRecord failed in getUserPreferredCurrency:", error);
+  }
 
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase

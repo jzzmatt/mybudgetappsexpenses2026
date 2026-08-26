@@ -183,7 +183,11 @@ async function getTotalBudgetByCurrency(filters: ExpenseFilters): Promise<Expens
 }
 
 export async function getExpenses(filters: ExpenseFilters = {}): Promise<ExpenseListResult> {
-  await ensureUserRecord();
+  try {
+    await ensureUserRecord();
+  } catch (error) {
+    console.error("ensureUserRecord failed in getExpenses:", error);
+  }
 
   const supabase = await createSupabaseServerClient();
   const page = Math.max(1, filters.page ?? 1);
@@ -263,7 +267,11 @@ export async function getExpenses(filters: ExpenseFilters = {}): Promise<Expense
 }
 
 export async function getExpenseById(id: string): Promise<ExpenseWithRelations | null> {
-  await ensureUserRecord();
+  try {
+    await ensureUserRecord();
+  } catch (error) {
+    console.error("ensureUserRecord failed in getExpenseById:", error);
+  }
 
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase

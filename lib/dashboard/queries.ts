@@ -230,7 +230,11 @@ async function fetchExpenses(period: DashboardPeriod) {
 }
 
 export async function getDashboardData(period: DashboardPeriod): Promise<DashboardData> {
-  await ensureUserRecord();
+  try {
+    await ensureUserRecord();
+  } catch (error) {
+    console.error("ensureUserRecord failed in getDashboardData:", error);
+  }
 
   const supabase = await createSupabaseServerClient();
   const previousPeriod = getPreviousPeriod(period);
