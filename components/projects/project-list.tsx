@@ -49,7 +49,7 @@ export function ProjectList({ projects, search }: ProjectListProps) {
             </div>
             <p className="list-mobile-card-meta">{project.description || "No description"}</p>
             <div className="list-mobile-card-actions">
-              <Link className="button button-small" href={`/projects/${project.id}/expenses`}>
+              <Link className="button button-small" href={`/projects/${project.id}`}>
                 Open Project
               </Link>
               <Link className="auth-link" href={`/projects/${project.id}/edit`}>
@@ -79,7 +79,7 @@ export function ProjectList({ projects, search }: ProjectListProps) {
                 <tr key={project.id}>
                   <td>
                     <strong>
-                      <Link className="auth-link" href={`/projects/${project.id}/expenses`}>
+                      <Link className="auth-link" href={`/projects/${project.id}`}>
                         {project.name}
                       </Link>
                     </strong>
@@ -93,7 +93,7 @@ export function ProjectList({ projects, search }: ProjectListProps) {
                     </span>
                   </td>
                   <td className="category-table-actions">
-                    <Link className="button button-small" href={`/projects/${project.id}/expenses`}>
+                    <Link className="button button-small" href={`/projects/${project.id}`}>
                       Open Project
                     </Link>
                     <Link className="auth-link" href={`/projects/${project.id}/edit`}>

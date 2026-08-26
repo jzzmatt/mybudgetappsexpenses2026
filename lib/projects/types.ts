@@ -1,4 +1,6 @@
 import type { ExpenseCurrency } from "@/lib/currency/types";
+import type { CategoryChartDatum, MonthlyChartDatum } from "@/lib/dashboard/types";
+import type { ExpenseWithRelations } from "@/lib/expenses/types";
 
 export const PROJECT_STATUSES = ["active", "paused", "completed"] as const;
 export type ProjectStatus = (typeof PROJECT_STATUSES)[number];
@@ -34,6 +36,14 @@ export type ProjectFinancialSummary = {
   isOverspent: boolean;
   expenseCount: number;
   currency: ExpenseCurrency;
+};
+
+export type ProjectOverviewData = {
+  project: Project;
+  financials: ProjectFinancialSummary;
+  categoryData: CategoryChartDatum[];
+  monthlyData: MonthlyChartDatum[];
+  recentExpenses: ExpenseWithRelations[];
 };
 
 export type ProjectExpenseCurrencyTotals = {

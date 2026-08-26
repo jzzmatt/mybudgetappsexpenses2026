@@ -1,7 +1,58 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { DEFAULT_EXPENSE_CURRENCY, isExpenseCurrency, type ExpenseCurrency } from "@/lib/currency/types";
 import { ensureUserRecord } from "@/lib/users/ensure-user";
-import type { Project, ProjectExpenseTotals } from "@/lib/projects/types";
+import { calculateProjectFinancialSummary } from "@/lib/projects/calculations";
+import type { CategoryChartDatum, MonthlyChartDatum } from "@/lib/dashboard/types";
+import type { Expense, ExpenseRelation, ExpenseWithRelations } from "@/lib/expenses/types";
+import type { Project, ProjectExpenseTotals, ProjectOverviewData } from "@/lib/projects/types";
+
+const MONTH_LABELS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+const expenseSelect = `
+  id,
+  user_id,
+  date,
+  month,
+  year,
+  category_id,
+  project_id,
+  vendor_id,
+  description,
+  budget_amount,
+  paid_amount,
+  balance,
+  currency,
+  payment_method,
+  priority,
+  status,
+  notes,
+  created_at,
+  updated_at,
+  category:categories(id, name),
+  project:projects(id, name),
+  vendor:vendors(id, name)
+`;
+
+function normalizeRelation(
+  value: ExpenseRelation | ExpenseRelation[] | null | undefined,
+): ExpenseRelation | null {
+  if (!value) {
+    return null;
+  }
+
+  return Array.isArray(value) ? (value[0] ?? null) : value;
+}
+
+function normalizeExpense(row: Record<string, unknown>): ExpenseWithRelations {
+  const { category, project, vendor, ...expense } = row;
+
+  return {
+    ...(expense as Expense),
+    category: normalizeRelation(category as ExpenseRelation | ExpenseRelation[] | null),
+    project: normalizeRelation(project as ExpenseRelation | ExpenseRelation[] | null),
+    vendor: normalizeRelation(vendor as ExpenseRelation | ExpenseRelation[] | null),
+  };
+}
 
 function normalizeProject(row: Record<string, unknown>): Project {
   return {
@@ -60,6 +111,72 @@ export async function getProjectById(id: string): Promise<Project | null> {
   }
 
   return data ? normalizeProject(data as Record<string, unknown>) : null;
+}
+
+export async function getProjectOverview(projectId: string): Promise<ProjectOverviewData | null> {
+  await ensureUserRecord();
+
+  const project = await getProjectById(projectId);
+  if (!project) {
+    return null;
+  }
+
+  const supabase = await createSupabaseServerClient();
+
+  const { data: rawExpenses, error } = await supabase
+    .from("expenses")
+    .select(expenseSelect)
+    .eq("project_id", projectId)
+    .order("date", { ascending: false });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  const expenses = (rawExpenses ?? []).map((row) => normalizeExpense(row as Record<string, unknown>));
+  const financials = calculateProjectFinancialSummary(project, expenses);
+
+  // Group by category for charts
+  const categoryMap = new Map<string, CategoryChartDatum>();
+  for (const exp of expenses) {
+    const catName = exp.category?.name || "Uncategorized";
+    const existing = categoryMap.get(catName) ?? { category: catName, budget: 0, paid: 0 };
+    existing.budget += Number(exp.budget_amount) || 0;
+    existing.paid += Number(exp.paid_amount) || 0;
+    categoryMap.set(catName, existing);
+  }
+  const categoryData = Array.from(categoryMap.values()).sort((a, b) => b.budget - a.budget);
+
+  // Group by month for current year
+  const currentYear = new Date().getFullYear();
+  const monthlyMap = new Map<number, MonthlyChartDatum>();
+  for (let m = 1; m <= 12; m += 1) {
+    monthlyMap.set(m, {
+      month: MONTH_LABELS[m - 1],
+      monthNumber: m,
+      budget: 0,
+      paid: 0,
+    });
+  }
+  for (const exp of expenses) {
+    if (exp.year === currentYear) {
+      const existing = monthlyMap.get(exp.month);
+      if (existing) {
+        existing.budget += Number(exp.budget_amount) || 0;
+        existing.paid += Number(exp.paid_amount) || 0;
+      }
+    }
+  }
+  const monthlyData = Array.from(monthlyMap.values());
+  const recentExpenses = expenses.slice(0, 5);
+
+  return {
+    project,
+    financials,
+    categoryData,
+    monthlyData,
+    recentExpenses,
+  };
 }
 
 export async function getProjectExpenseTotals(projectId: string): Promise<ProjectExpenseTotals> {

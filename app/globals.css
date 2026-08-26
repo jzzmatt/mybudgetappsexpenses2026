@@ -949,6 +949,146 @@ select {
   color: #92400e;
 }
 
+.project-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.project-kpi-card {
+  padding: 20px;
+}
+
+.project-kpi-label {
+  margin: 0 0 8px;
+  color: var(--muted-foreground);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.project-kpi-value {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.project-kpi-subtext {
+  margin: 8px 0 0;
+  color: var(--muted-foreground);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.project-kpi-card-danger {
+  background: #fef2f2;
+  border-color: color-mix(in srgb, #dc2626 20%, var(--border));
+}
+
+.project-kpi-card-danger .project-kpi-label,
+.project-kpi-card-danger .project-kpi-value,
+.project-kpi-card-danger .project-kpi-subtext {
+  color: #dc2626;
+}
+
+.project-workspace-topbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.project-workspace-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 4px;
+}
+
+.project-workspace-tab {
+  padding: 8px 16px;
+  border-radius: var(--radius-md);
+  color: var(--muted-foreground);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+
+.project-workspace-tab:hover {
+  background: #f3f4f6;
+  color: var(--foreground);
+}
+
+.project-workspace-tab-active {
+  background: color-mix(in srgb, var(--primary) 12%, transparent);
+  color: var(--primary);
+}
+
+.project-workspace-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.project-usage-card {
+  padding: 24px;
+}
+
+.project-usage-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.project-usage-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.project-overspent-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #fee2e2;
+  color: #dc2626;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.project-usage-bars {
+  display: grid;
+  gap: 16px;
+}
+
+.project-usage-bar-item {
+  display: grid;
+  gap: 8px;
+}
+
+.project-usage-bar-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.project-usage-bar-meta span:first-child {
+  color: var(--foreground);
+}
+
+.project-usage-bar-meta span:last-child {
+  color: var(--muted-foreground);
+}
+
 .budget-section-header {
   margin-bottom: 12px;
 }
@@ -2083,6 +2223,27 @@ select {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .project-kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .project-workspace-nav {
+    width: 100%;
+    justify-content: center;
+    overflow-x: auto;
+  }
+
+  .project-workspace-tab {
+    padding: 6px 12px;
+    font-size: 13px;
+  }
+
+  .project-workspace-topbar {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
   .reports-summary-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -2106,6 +2267,10 @@ select {
 
 @media (max-width: 560px) {
   .dashboard-kpi-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .project-kpi-grid {
     grid-template-columns: 1fr;
   }
 
