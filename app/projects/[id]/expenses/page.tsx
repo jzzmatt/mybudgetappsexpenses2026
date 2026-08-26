@@ -6,6 +6,7 @@ import { AppShell } from "@/components/layout/app-shell";
 import { ListPageContent } from "@/components/layout/list-page-content";
 import { PageActionButton } from "@/components/layout/page-action-button";
 import { ProjectExpensesSummary } from "@/components/projects/project-expenses-summary";
+import { ProjectWorkspaceNav } from "@/components/projects/project-workspace-nav";
 import { parseExpenseSearchParams } from "@/lib/expenses/params";
 import { getExpenses } from "@/lib/expenses/queries";
 import type { ExpenseListResult } from "@/lib/expenses/types";
@@ -58,7 +59,7 @@ export default async function ProjectExpensesPage({ params, searchParams }: Proj
     <AppShell
       actions={<PageActionButton href="/expenses/new">Add expense</PageActionButton>}
       description={`All expenses linked to ${project.name}.`}
-      title={`${project.name} expenses`}
+      title={`${project.name} Expenses`}
     >
       {loadError ? (
         <p className="form-error page-error" role="alert">
@@ -66,11 +67,12 @@ export default async function ProjectExpensesPage({ params, searchParams }: Proj
         </p>
       ) : null}
       <ListPageContent>
-        <p className="category-footer-link">
+        <div className="project-workspace-topbar">
           <Link className="auth-link" href="/projects">
-            Back to projects
+            ← Back to My Projects
           </Link>
-        </p>
+          <ProjectWorkspaceNav activeTab="expenses" projectId={project.id} projectName={project.name} />
+        </div>
         <ProjectExpensesSummary project={project} totals={totals} />
         <ExpenseList
           basePath={basePath}
