@@ -5,19 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { ensureUserRecord } from "@/lib/users/ensure-user";
-
-const projectSchema = z.object({
-  name: z.string().trim().min(1, "Name is required.").max(100, "Name must be 100 characters or fewer."),
-  description: z
-    .string()
-    .trim()
-    .max(500, "Description must be 500 characters or fewer.")
-    .optional()
-    .transform((value) => value || null),
-  status: z.enum(["active", "paused", "completed"], {
-    error: "Select a valid status.",
-  }),
-});
+import { projectSchema } from "@/lib/projects/schema";
 
 function formatZodError(error: z.ZodError) {
   return error.issues[0]?.message ?? "Invalid project data.";
@@ -27,7 +15,9 @@ export async function createProjectAction(formData: FormData) {
   const parsed = projectSchema.safeParse({
     name: formData.get("name"),
     description: formData.get("description") ?? undefined,
-    status: formData.get("status"),
+    budget_amount: formData.get("budget_amount") ?? "0",
+    currency: formData.get("currency") ?? "KZ",
+    status: formData.get("status") ?? "active",
   });
 
   if (!parsed.success) {
@@ -40,6 +30,8 @@ export async function createProjectAction(formData: FormData) {
     user_id: userId,
     name: parsed.data.name,
     description: parsed.data.description,
+    budget_amount: parsed.data.budget_amount,
+    currency: parsed.data.currency,
     status: parsed.data.status,
   });
 
@@ -57,7 +49,9 @@ export async function updateProjectAction(projectId: string, formData: FormData)
   const parsed = projectSchema.safeParse({
     name: formData.get("name"),
     description: formData.get("description") ?? undefined,
-    status: formData.get("status"),
+    budget_amount: formData.get("budget_amount") ?? "0",
+    currency: formData.get("currency") ?? "KZ",
+    status: formData.get("status") ?? "active",
   });
 
   if (!parsed.success) {
@@ -72,6 +66,8 @@ export async function updateProjectAction(projectId: string, formData: FormData)
     .update({
       name: parsed.data.name,
       description: parsed.data.description,
+      budget_amount: parsed.data.budget_amount,
+      currency: parsed.data.currency,
       status: parsed.data.status,
     })
     .eq("id", projectId);

@@ -41,13 +41,15 @@ begin
   select id into hr_id from public.categories where user_id = seed_user_id and name = 'HR';
   select id into technology_id from public.categories where user_id = seed_user_id and name = 'Technology';
 
-  insert into public.projects (user_id, name, description, status)
+  insert into public.projects (user_id, name, description, budget_amount, currency, status)
   values
-    (seed_user_id, 'Alpha Platform', 'Core platform delivery', 'active'),
-    (seed_user_id, 'Beta Launch', 'Go-to-market launch', 'active'),
-    (seed_user_id, 'Gamma System', 'Internal systems modernization', 'active'),
-    (seed_user_id, 'Delta Portal', 'Customer portal rollout', 'active')
-  on conflict (user_id, name) do nothing;
+    (seed_user_id, 'Alpha Platform', 'Core platform delivery', 250000::numeric, 'KZ', 'active'),
+    (seed_user_id, 'Beta Launch', 'Go-to-market launch', 150000::numeric, 'KZ', 'active'),
+    (seed_user_id, 'Gamma System', 'Internal systems modernization', 320000::numeric, 'KZ', 'active'),
+    (seed_user_id, 'Delta Portal', 'Customer portal rollout', 180000::numeric, 'KZ', 'active')
+  on conflict (user_id, name) do update
+  set budget_amount = excluded.budget_amount,
+      currency = excluded.currency;
 
   select id into alpha_id from public.projects where user_id = seed_user_id and name = 'Alpha Platform';
   select id into beta_id from public.projects where user_id = seed_user_id and name = 'Beta Launch';
