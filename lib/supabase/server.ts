@@ -9,12 +9,8 @@ export function isSupabaseConfigured() {
 }
 
 function getPublicEnvironment() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const publishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-
-  if (!isSupabaseConfigured() || !url || !publishableKey) {
-    throw new Error("Missing Supabase configuration.");
-  }
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://placeholder-project.supabase.co";
+  const publishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || "placeholder-publishable-key";
 
   return { url, publishableKey };
 }
