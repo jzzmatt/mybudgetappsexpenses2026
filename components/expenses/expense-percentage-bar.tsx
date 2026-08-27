@@ -2,15 +2,22 @@ import { formatExpensePercentage } from "@/lib/expenses/format";
 
 type ExpensePercentageBarProps = {
   percent: number;
+  labelSuffix?: string;
+  ariaLabel?: string;
 };
 
-export function ExpensePercentageBar({ percent }: ExpensePercentageBarProps) {
+export function ExpensePercentageBar({ percent, labelSuffix = "", ariaLabel }: ExpensePercentageBarProps) {
   const clamped = Math.min(100, Math.max(0, percent));
   const isHigh = percent > 50;
+  const formatted = formatExpensePercentage(percent);
+  const displayLabel = labelSuffix ? `${formatted}${labelSuffix}` : formatted;
+  const defaultAriaLabel = labelSuffix
+    ? `${formatted}${labelSuffix.trim()}`
+    : `${formatted} of total budget`;
 
   return (
     <div
-      aria-label={`${formatExpensePercentage(percent)} of total budget`}
+      aria-label={ariaLabel ?? defaultAriaLabel}
       aria-valuemax={100}
       aria-valuemin={0}
       aria-valuenow={clamped}
@@ -23,7 +30,7 @@ export function ExpensePercentageBar({ percent }: ExpensePercentageBarProps) {
           style={{ width: `${clamped}%` }}
         />
       </div>
-      <span className="expense-percentage-label">{formatExpensePercentage(percent)}</span>
+      <span className="expense-percentage-label">{displayLabel}</span>
     </div>
   );
 }

@@ -2,6 +2,8 @@ import {
   EXPENSE_PAGE_SIZE,
   EXPENSE_SORT_FIELDS,
   EXPENSE_STATUSES,
+  PROJECT_EXPENSE_DEFAULT_ORDER,
+  PROJECT_EXPENSE_DEFAULT_SORT,
   type ExpenseFilters,
   type ExpenseSortField,
   type ExpenseStatus,
@@ -120,4 +122,87 @@ export function buildExpenseQueryString(
 
 export function getExpensePageSize() {
   return EXPENSE_PAGE_SIZE;
+}
+
+export function getProjectExpenseFilters(
+  projectId: string,
+  params: RawSearchParams,
+): ExpenseFilters {
+  const parsed = parseExpenseSearchParams(params);
+
+  return {
+    ...parsed,
+    projectId,
+    sort: parsed.sort ?? PROJECT_EXPENSE_DEFAULT_SORT,
+    order: parsed.order ?? PROJECT_EXPENSE_DEFAULT_ORDER,
+  };
+}
+
+export function countProjectExpenseActiveFilters(filters: ExpenseFilters): number {
+  let count = 0;
+
+  if (filters.categoryId) {
+    count += 1;
+  }
+
+  if (filters.vendorId) {
+    count += 1;
+  }
+
+  if (
+    filters.sort !== PROJECT_EXPENSE_DEFAULT_SORT ||
+    filters.order !== PROJECT_EXPENSE_DEFAULT_ORDER
+  ) {
+    count += 1;
+  }
+
+  return count;
+}
+
+export function hasProjectNonDefaultSort(filters: ExpenseFilters): boolean {
+  return (
+    filters.sort !== PROJECT_EXPENSE_DEFAULT_SORT ||
+    filters.order !== PROJECT_EXPENSE_DEFAULT_ORDER
+  );
+}
+
+export type ProjectExpenseSortPreset = "recent" | "budget_high" | "budget_low";
+
+export function getProjectExpenseSortPreset(filters: ExpenseFilters): ProjectExpenseSortPreset {
+  if (filters.sort === "budget_amount" && filters.order === "asc") {
+    return "budget_low";
+  }
+
+  if (filters.sort === "budget_amount") {
+    return "budget_high";
+  }
+
+  return "recent";
+}
+
+export function getProjectExpenseSortLabel(filters: ExpenseFilters): string {
+  const preset = getProjectExpenseSortPreset(filters);
+
+  if (preset === "budget_high") {
+    return "Highest value";
+  }
+
+  if (preset === "budget_low") {
+    return "Lowest value";
+  }
+
+  return "Most recent";
+}
+
+export function projectExpenseSortPresetToFilters(
+  preset: ProjectExpenseSortPreset,
+): Pick<ExpenseFilters, "sort" | "order"> {
+  switch (preset) {
+    case "budget_high":
+      return { sort: "budget_amount", order: "desc" };
+    case "budget_low":
+      return { sort: "budget_amount", order: "asc" };
+    default:
+      return { sort: PROJECT_EXPENSE_DEFAULT_SORT, order: PROJECT_EXPENSE_DEFAULT_ORDER };
+  }
 }

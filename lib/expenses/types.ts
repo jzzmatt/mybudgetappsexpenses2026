@@ -6,6 +6,7 @@ export const EXPENSE_STATUSES = ["pending", "partial", "paid"] as const;
 export const EXPENSE_PRIORITIES = ["low", "medium", "high"] as const;
 export const EXPENSE_PAYMENT_METHODS = ["card", "bank_transfer", "cash", "check", "other"] as const;
 export const EXPENSE_SORT_FIELDS = [
+  "created_at",
   "date",
   "description",
   "budget_amount",
@@ -14,6 +15,9 @@ export const EXPENSE_SORT_FIELDS = [
   "percentage",
   "status",
 ] as const;
+
+export const PROJECT_EXPENSE_DEFAULT_SORT: ExpenseSortField = "created_at";
+export const PROJECT_EXPENSE_DEFAULT_ORDER = "desc" as const;
 
 export const EXPENSE_PAGE_SIZE = 10;
 

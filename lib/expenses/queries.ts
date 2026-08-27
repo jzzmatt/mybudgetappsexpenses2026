@@ -81,14 +81,50 @@ function resolveSortField(sort?: ExpenseSortField): ExpenseSortField {
   return "date";
 }
 
-function applyExpenseFilters(query: FilterableQuery, filters: ExpenseFilters) {
+async function buildExpenseSearchOrFilter(supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>, search: string) {
+  const trimmedSearch = search.trim();
+  const parts = [
+    `description.ilike.%${trimmedSearch}%`,
+    `notes.ilike.%${trimmedSearch}%`,
+    `payment_reference.ilike.%${trimmedSearch}%`,
+  ];
+
+  const [{ data: categories }, { data: vendors }] = await Promise.all([
+    supabase.from("categories").select("id").ilike("name", `%${trimmedSearch}%`),
+    supabase.from("vendors").select("id").ilike("name", `%${trimmedSearch}%`),
+  ]);
+
+  const categoryIds = (categories ?? []).map((row) => row.id);
+  const vendorIds = (vendors ?? []).map((row) => row.id);
+
+  if (categoryIds.length > 0) {
+    parts.push(`category_id.in.(${categoryIds.join(",")})`);
+  }
+
+  if (vendorIds.length > 0) {
+    parts.push(`vendor_id.in.(${vendorIds.join(",")})`);
+  }
+
+  return parts.join(",");
+}
+
+async function applyExpenseFilters(
+  query: FilterableQuery,
+  filters: ExpenseFilters,
+  supabase?: Awaited<ReturnType<typeof createSupabaseServerClient>>,
+) {
   const trimmedSearch = filters.search?.trim();
   let nextQuery = query;
 
   if (trimmedSearch) {
-    nextQuery = nextQuery.or(
-      `description.ilike.%${trimmedSearch}%,notes.ilike.%${trimmedSearch}%`,
-    );
+    if (supabase) {
+      const orFilter = await buildExpenseSearchOrFilter(supabase, trimmedSearch);
+      nextQuery = nextQuery.or(orFilter);
+    } else {
+      nextQuery = nextQuery.or(
+        `description.ilike.%${trimmedSearch}%,notes.ilike.%${trimmedSearch}%,payment_reference.ilike.%${trimmedSearch}%`,
+      );
+    }
   }
 
   if (filters.categoryId) {
@@ -175,7 +211,7 @@ function orderExpensesByIds(expenses: ExpenseWithRelations[], ids: string[]) {
 async function getTotalBudgetByCurrency(filters: ExpenseFilters): Promise<ExpenseBudgetTotals> {
   const supabase = await createSupabaseServerClient();
   let query = supabase.from("expenses").select("budget_amount, currency");
-  query = applyExpenseFilters(query, filters);
+  query = await applyExpenseFilters(query, filters, supabase);
 
   const { data, error } = await query;
 
@@ -204,7 +240,7 @@ export async function getExpenses(filters: ExpenseFilters = {}): Promise<Expense
 
   if (sortField === "percentage") {
     let sortQuery = supabase.from("expenses").select("id, budget_amount, currency", { count: "exact" });
-    sortQuery = applyExpenseFilters(sortQuery, filters);
+    sortQuery = await applyExpenseFilters(sortQuery, filters, supabase);
 
     const { data: sortRows, error: sortError, count } = await sortQuery;
 
@@ -248,7 +284,7 @@ export async function getExpenses(filters: ExpenseFilters = {}): Promise<Expense
   }
 
   let query = supabase.from("expenses").select(expenseSelect, { count: "exact" });
-  query = applyExpenseFilters(query, filters);
+  query = await applyExpenseFilters(query, filters, supabase);
   query = query.order(sortField, { ascending }).range(from, to);
 
   const { data, error, count } = await query;
@@ -301,4 +337,29 @@ export async function getExpenseById(id: string): Promise<ExpenseWithRelations |
   }
 
   return expense;
+}
+
+/**
+ * Returns the highest-budget expenses for a project (entire workspace, not paginated page).
+ */
+export async function getTopProjectExpenses(projectId: string, limit = 5): Promise<ExpenseWithRelations[]> {
+  try {
+    await ensureUserRecord();
+  } catch (error) {
+    console.error("ensureUserRecord failed in getTopProjectExpenses:", error);
+  }
+
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("expenses")
+    .select(expenseSelect)
+    .eq("project_id", projectId)
+    .order("budget_amount", { ascending: false })
+    .limit(limit);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return (data ?? []).map((row) => normalizeExpense(row as Record<string, unknown>));
 }

@@ -2497,3 +2497,421 @@ select {
     width: 100%;
   }
 }
+
+/* Project expenses page */
+.project-expenses-page {
+  display: grid;
+  gap: 16px;
+}
+
+.project-expenses-kpi-grid {
+  gap: 12px;
+}
+
+.project-expenses-kpi-card {
+  padding: 14px 16px;
+}
+
+.project-expenses-kpi-card .budget-summary-label {
+  margin-bottom: 4px;
+  font-size: 12px;
+}
+
+.project-expenses-kpi-card .budget-summary-value {
+  font-size: 20px;
+}
+
+.project-expenses-mobile-add {
+  display: none;
+  justify-content: center;
+  text-align: center;
+}
+
+.project-expense-toolbar {
+  display: grid;
+  gap: 12px;
+}
+
+.project-expense-search-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.project-expense-search-input {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+  font-size: 14px;
+}
+
+.project-expense-search-input:focus-visible {
+  border-color: var(--primary);
+  outline: 2px solid color-mix(in srgb, var(--primary) 20%, transparent);
+}
+
+.project-expense-filters-desktop {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.project-expense-filter-field select {
+  min-width: 150px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 8px 10px;
+  font-size: 14px;
+  background: var(--background);
+}
+
+.project-expense-filters-mobile-trigger {
+  display: none;
+  flex-shrink: 0;
+}
+
+.project-expense-active-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.project-expense-active-filter-chip {
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 4px 10px;
+  color: var(--muted-foreground);
+  background: color-mix(in srgb, var(--muted) 40%, transparent);
+}
+
+.project-expense-clear-filters {
+  font-size: 13px;
+}
+
+.project-expense-filter-sheet-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: color-mix(in srgb, var(--foreground) 35%, transparent);
+}
+
+.project-expense-filter-sheet {
+  width: min(100%, 480px);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  background: var(--background);
+  padding: 20px;
+  display: grid;
+  gap: 14px;
+}
+
+.project-expense-filter-sheet-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.project-expense-filter-sheet-header h3 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.project-expense-filter-sheet-close {
+  border: 0;
+  background: transparent;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.project-expense-filter-sheet-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.project-expense-filter-sheet-actions .button,
+.project-expense-filter-sheet-actions .button-outline {
+  flex: 1;
+}
+
+.top-expenses-section,
+.project-expense-list-section {
+  display: grid;
+  gap: 10px;
+}
+
+.top-expenses-heading,
+.project-expense-list-heading {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.top-expenses-empty {
+  padding: 16px;
+  color: var(--muted-foreground);
+}
+
+.top-expenses-mobile-cards {
+  display: none;
+  gap: 10px;
+}
+
+.top-expense-mobile-card {
+  padding: 14px;
+}
+
+.top-expense-mobile-card-header {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+
+.top-expense-mobile-card-header h3 {
+  margin: 0;
+  font-size: 15px;
+}
+
+.top-expense-rank {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.top-expense-mobile-category {
+  margin: 4px 0 0;
+  color: var(--muted-foreground);
+  font-size: 12px;
+}
+
+.top-expense-mobile-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+}
+
+.top-expense-mobile-metrics div {
+  display: grid;
+  gap: 2px;
+}
+
+.top-expense-mobile-metrics dt {
+  font-size: 11px;
+  color: var(--muted-foreground);
+  text-transform: uppercase;
+}
+
+.top-expense-mobile-metrics dd {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.top-expense-mobile-paid-label {
+  margin: 10px 0 0;
+  font-size: 12px;
+  color: var(--muted-foreground);
+}
+
+.top-expenses-desktop-table {
+  display: block;
+  padding: 0;
+}
+
+.top-expenses-table th,
+.top-expenses-table td {
+  white-space: nowrap;
+}
+
+.project-expense-mobile-list {
+  display: none;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  gap: 10px;
+}
+
+.project-expense-mobile-card {
+  padding: 14px;
+}
+
+.project-expense-mobile-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.project-expense-mobile-card-top h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.project-expense-mobile-date {
+  margin: 4px 0 0;
+  color: var(--muted-foreground);
+  font-size: 12px;
+}
+
+.project-expense-mobile-meta {
+  margin: 8px 0 10px;
+  color: var(--muted-foreground);
+  font-size: 13px;
+}
+
+.project-expense-mobile-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0 0 10px;
+}
+
+.project-expense-mobile-metrics div {
+  display: grid;
+  gap: 2px;
+}
+
+.project-expense-mobile-metrics dt {
+  font-size: 11px;
+  color: var(--muted-foreground);
+  text-transform: uppercase;
+}
+
+.project-expense-mobile-metrics dd {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.project-expense-mobile-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.project-expense-desktop-table {
+  display: block;
+}
+
+.project-expense-table th,
+.project-expense-table td {
+  white-space: nowrap;
+}
+
+.project-expense-table td:nth-child(2) {
+  white-space: normal;
+  min-width: 160px;
+}
+
+.project-expense-description-cell {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.expense-proof-indicator {
+  display: inline-flex;
+  align-items: center;
+  font-size: 12px;
+  color: var(--muted-foreground);
+}
+
+.expense-actions-menu {
+  position: relative;
+}
+
+.expense-actions-menu-trigger {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--background);
+  width: 32px;
+  height: 32px;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.expense-actions-menu-trigger:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--primary) 30%, transparent);
+}
+
+.expense-actions-menu-panel {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  z-index: 20;
+  min-width: 140px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--background);
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--foreground) 12%, transparent);
+  padding: 4px;
+}
+
+.expense-actions-menu-item {
+  display: block;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  padding: 8px 10px;
+  font-size: 14px;
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.expense-actions-menu-item:hover,
+.expense-actions-menu-item:focus-visible {
+  background: color-mix(in srgb, var(--muted) 50%, transparent);
+}
+
+.expense-actions-menu-item-danger {
+  color: var(--destructive, #b42318);
+}
+
+@media (max-width: 768px) {
+  .project-expenses-header-add {
+    display: none;
+  }
+
+  .project-expenses-mobile-add {
+    display: flex;
+    width: 100%;
+  }
+
+  .project-expense-filters-desktop {
+    display: none;
+  }
+
+  .project-expense-filters-mobile-trigger {
+    display: inline-flex;
+  }
+
+  .top-expenses-mobile-cards {
+    display: grid;
+  }
+
+  .top-expenses-desktop-table {
+    display: none;
+  }
+
+  .project-expense-mobile-list {
+    display: grid;
+  }
+
+  .project-expense-desktop-table {
+    display: none;
+  }
+}
