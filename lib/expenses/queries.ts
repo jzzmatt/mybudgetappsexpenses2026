@@ -81,21 +81,17 @@ function resolveSortField(sort?: ExpenseSortField): ExpenseSortField {
   return "date";
 }
 
-async function buildExpenseSearchOrFilter(supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>, search: string) {
+function buildExpenseSearchOrParts(
+  search: string,
+  categoryIds: string[] = [],
+  vendorIds: string[] = [],
+) {
   const trimmedSearch = search.trim();
   const parts = [
     `description.ilike.%${trimmedSearch}%`,
     `notes.ilike.%${trimmedSearch}%`,
     `payment_reference.ilike.%${trimmedSearch}%`,
   ];
-
-  const [{ data: categories }, { data: vendors }] = await Promise.all([
-    supabase.from("categories").select("id").ilike("name", `%${trimmedSearch}%`),
-    supabase.from("vendors").select("id").ilike("name", `%${trimmedSearch}%`),
-  ]);
-
-  const categoryIds = (categories ?? []).map((row) => row.id);
-  const vendorIds = (vendors ?? []).map((row) => row.id);
 
   if (categoryIds.length > 0) {
     parts.push(`category_id.in.(${categoryIds.join(",")})`);
@@ -108,23 +104,42 @@ async function buildExpenseSearchOrFilter(supabase: Awaited<ReturnType<typeof cr
   return parts.join(",");
 }
 
-async function applyExpenseFilters(
+async function resolveExpenseSearchRelationIds(
+  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
+  search: string,
+) {
+  const trimmedSearch = search.trim();
+
+  if (!trimmedSearch) {
+    return { categoryIds: [], vendorIds: [] };
+  }
+
+  const [{ data: categories }, { data: vendors }] = await Promise.all([
+    supabase.from("categories").select("id").ilike("name", `%${trimmedSearch}%`),
+    supabase.from("vendors").select("id").ilike("name", `%${trimmedSearch}%`),
+  ]);
+
+  return {
+    categoryIds: (categories ?? []).map((row) => row.id),
+    vendorIds: (vendors ?? []).map((row) => row.id),
+  };
+}
+
+function applyExpenseFilters(
   query: FilterableQuery,
   filters: ExpenseFilters,
-  supabase?: Awaited<ReturnType<typeof createSupabaseServerClient>>,
+  searchRelationIds?: { categoryIds: string[]; vendorIds: string[] },
 ) {
   const trimmedSearch = filters.search?.trim();
   let nextQuery = query;
 
   if (trimmedSearch) {
-    if (supabase) {
-      const orFilter = await buildExpenseSearchOrFilter(supabase, trimmedSearch);
-      nextQuery = nextQuery.or(orFilter);
-    } else {
-      nextQuery = nextQuery.or(
-        `description.ilike.%${trimmedSearch}%,notes.ilike.%${trimmedSearch}%,payment_reference.ilike.%${trimmedSearch}%`,
-      );
-    }
+    const orFilter = buildExpenseSearchOrParts(
+      trimmedSearch,
+      searchRelationIds?.categoryIds,
+      searchRelationIds?.vendorIds,
+    );
+    nextQuery = nextQuery.or(orFilter);
   }
 
   if (filters.categoryId) {
@@ -208,10 +223,13 @@ function orderExpensesByIds(expenses: ExpenseWithRelations[], ids: string[]) {
     .filter((expense): expense is ExpenseWithRelations => Boolean(expense));
 }
 
-async function getTotalBudgetByCurrency(filters: ExpenseFilters): Promise<ExpenseBudgetTotals> {
+async function getTotalBudgetByCurrency(
+  filters: ExpenseFilters,
+  searchRelationIds?: { categoryIds: string[]; vendorIds: string[] },
+): Promise<ExpenseBudgetTotals> {
   const supabase = await createSupabaseServerClient();
   let query = supabase.from("expenses").select("budget_amount, currency");
-  query = await applyExpenseFilters(query, filters, supabase);
+  query = applyExpenseFilters(query, filters, searchRelationIds);
 
   const { data, error } = await query;
 
@@ -236,11 +254,14 @@ export async function getExpenses(filters: ExpenseFilters = {}): Promise<Expense
   const to = from + pageSize - 1;
   const sortField = resolveSortField(filters.sort);
   const ascending = filters.order === "asc";
-  const totalBudgetByCurrency = await getTotalBudgetByCurrency(filters);
+  const searchRelationIds = filters.search?.trim()
+    ? await resolveExpenseSearchRelationIds(supabase, filters.search)
+    : undefined;
+  const totalBudgetByCurrency = await getTotalBudgetByCurrency(filters, searchRelationIds);
 
   if (sortField === "percentage") {
     let sortQuery = supabase.from("expenses").select("id, budget_amount, currency", { count: "exact" });
-    sortQuery = await applyExpenseFilters(sortQuery, filters, supabase);
+    sortQuery = applyExpenseFilters(sortQuery, filters, searchRelationIds);
 
     const { data: sortRows, error: sortError, count } = await sortQuery;
 
@@ -284,7 +305,7 @@ export async function getExpenses(filters: ExpenseFilters = {}): Promise<Expense
   }
 
   let query = supabase.from("expenses").select(expenseSelect, { count: "exact" });
-  query = await applyExpenseFilters(query, filters, supabase);
+  query = applyExpenseFilters(query, filters, searchRelationIds);
   query = query.order(sortField, { ascending }).range(from, to);
 
   const { data, error, count } = await query;
