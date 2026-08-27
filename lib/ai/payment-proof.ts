@@ -87,7 +87,7 @@ Return JSON matching this exact schema:
           },
           {
             type: "input_text",
-            text: `Please analyze this payment proof PDF for Project workspace: "${project.name}" (Project Currency: ${project.currency}, Project Budget: ${project.budget_amount}). Original filename: ${filename}`,
+            text: `Please analyze this payment proof PDF for Project workspace: "${project.name}" (Project Currency: ${project.currency}, Project Budget: ${project.budget_amount}). Original filename: ${filename}. Return your extraction as a valid JSON object matching the schema in the instructions.`,
           },
         ],
       },
