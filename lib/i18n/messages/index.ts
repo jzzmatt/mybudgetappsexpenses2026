@@ -1,4 +1,4 @@
-import type { Locale } from "@/lib/i18n/types";
+import type { Locale } from "@/lib/i18n/config";
 import { enMessages } from "@/lib/i18n/messages/en";
 import { frMessages } from "@/lib/i18n/messages/fr";
 import { ptMessages } from "@/lib/i18n/messages/pt";

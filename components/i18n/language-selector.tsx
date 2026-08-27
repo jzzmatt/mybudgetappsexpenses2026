@@ -5,7 +5,7 @@ import { useTransition } from "react";
 import { LOCALE_LABELS } from "@/lib/i18n/config";
 import { setLocaleAction } from "@/lib/i18n/actions";
 import { useI18n } from "@/lib/i18n/client";
-import type { Locale } from "@/lib/i18n/types";
+import type { Locale } from "@/lib/i18n/config";
 
 const localeOrder: Locale[] = ["pt", "en", "fr"];
 

@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { ptMessages } from "@/lib/i18n/messages/pt";
 import { createTranslator } from "@/lib/i18n/translator";
-import { isLocale } from "@/lib/i18n/server";
+import { isLocale } from "@/lib/i18n/config";
 
 describe("i18n translator", () => {
   it("resolves nested message keys", () => {

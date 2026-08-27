@@ -1,4 +1,4 @@
-import { auth } from "@clerk/nextjs/server";
+import { safeAuth } from "@/lib/clerk/server";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { buildAiReportPdf } from "@/lib/ai-report/export-pdf";
@@ -20,7 +20,8 @@ const aiReportSchema = z.object({
 });
 
 export async function POST(request: Request) {
-  const { userId } = await auth();
+  const authState = await safeAuth();
+  const userId = authState?.userId;
 
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

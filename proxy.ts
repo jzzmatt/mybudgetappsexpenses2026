@@ -1,5 +1,7 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
+import type { NextFetchEvent, NextRequest } from "next/server";
+import { isClerkConfigured } from "@/lib/clerk/config";
 
 const isPublicRoute = createRouteMatcher([
   "/login",
@@ -9,7 +11,7 @@ const isPublicRoute = createRouteMatcher([
   "/sso-callback",
 ]);
 
-export default clerkMiddleware(async (auth, request) => {
+const clerkHandler = clerkMiddleware(async (auth, request) => {
   if (isPublicRoute(request)) {
     return;
   }
@@ -22,6 +24,14 @@ export default clerkMiddleware(async (auth, request) => {
     return NextResponse.redirect(signInUrl);
   }
 });
+
+export default function proxy(request: NextRequest, event: NextFetchEvent) {
+  if (!isClerkConfigured()) {
+    return NextResponse.next();
+  }
+
+  return clerkHandler(request, event);
+}
 
 export const config = {
   matcher: [

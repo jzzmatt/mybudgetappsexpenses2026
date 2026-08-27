@@ -1,9 +1,9 @@
-import { currentUser } from "@clerk/nextjs/server";
+import { safeCurrentUser } from "@/lib/clerk/server";
 import { LogoutButton } from "@/components/layout/logout-button";
 import { getTranslations } from "@/lib/i18n/server";
 
 export async function AppSidebarUser() {
-  const user = await currentUser();
+  const user = await safeCurrentUser();
   const { t } = await getTranslations();
   const fullName =
     [user?.firstName, user?.lastName].filter(Boolean).join(" ").trim() || t("app.userFallback");

@@ -2,8 +2,7 @@
 
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
-import { LOCALE_COOKIE } from "@/lib/i18n/config";
-import { isLocale } from "@/lib/i18n/server";
+import { LOCALE_COOKIE, isLocale } from "@/lib/i18n/config";
 
 export async function setLocaleAction(locale: string) {
   if (!isLocale(locale)) {

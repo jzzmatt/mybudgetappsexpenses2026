@@ -1,4 +1,4 @@
-import { auth } from "@clerk/nextjs/server";
+import { safeAuth } from "@/lib/clerk/server";
 import { NextResponse } from "next/server";
 import { extractPaymentProofData } from "@/lib/ai/payment-proof";
 import { getProjectById } from "@/lib/projects/queries";
@@ -9,7 +9,8 @@ import {
 } from "@/lib/storage/payment-proofs";
 
 export async function POST(request: Request) {
-  const { userId } = await auth();
+  const authState = await safeAuth();
+  const userId = authState?.userId;
 
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

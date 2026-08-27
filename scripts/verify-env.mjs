@@ -30,27 +30,23 @@ function loadEnvFile(path) {
 loadEnvFile(".env.local");
 loadEnvFile(".env");
 
-const required = [
-  "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY",
-  "CLERK_SECRET_KEY",
-  "NEXT_PUBLIC_SUPABASE_URL",
-  "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
-];
+const placeholders = {
+  NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: "pk_test_placeholder_key_for_build_purposes",
+  CLERK_SECRET_KEY: "sk_test_placeholder_key_for_build_purposes",
+  NEXT_PUBLIC_SUPABASE_URL: "https://placeholder-project.supabase.co",
+  NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: "placeholder-publishable-key",
+};
 
-const missing = required.filter((key) => !process.env[key]);
+const required = Object.keys(placeholders);
 
 for (const key of required) {
-  console.log(`${key}: ${process.env[key] ? "set" : "MISSING"}`);
+  if (!process.env[key]) {
+    process.env[key] = placeholders[key];
+  }
 }
 
-if (missing.length > 0) {
-  if (process.env.VERCEL || process.env.CI) {
-    console.warn(
-      `\nWarning: Missing environment variables during CI build: ${missing.join(", ")}. Using fallback stubs for static optimization.`,
-    );
-  } else {
-    console.warn(
-      `\nWarning: Missing environment variables: ${missing.join(", ")}.`,
-    );
-  }
+for (const key of required) {
+  const value = process.env[key];
+  const isPlaceholder = value === placeholders[key];
+  console.log(`${key}: ${isPlaceholder ? "placeholder" : "set"}`);
 }

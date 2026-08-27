@@ -1,4 +1,4 @@
-import type { Locale } from "@/lib/i18n/types";
+import type { Locale } from "@/lib/i18n/config";
 
 export function getIntlLocale(locale: Locale): string {
   switch (locale) {

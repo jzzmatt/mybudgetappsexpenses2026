@@ -1,6 +1,6 @@
-import { LOCALES } from "@/lib/i18n/config";
+import type { Locale } from "@/lib/i18n/config";
 
-export type Locale = (typeof LOCALES)[number];
+export type { Locale };
 
 export type Messages = {
   app: {

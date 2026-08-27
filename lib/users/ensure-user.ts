@@ -1,8 +1,8 @@
-import { currentUser } from "@clerk/nextjs/server";
+import { safeCurrentUser } from "@/lib/clerk/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export async function ensureUserRecord() {
-  const user = await currentUser();
+  const user = await safeCurrentUser();
 
   if (!user) {
     throw new Error("Unauthorized");

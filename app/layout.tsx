@@ -1,12 +1,14 @@
 import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata } from "next";
 import { I18nProvider } from "@/lib/i18n/client";
+import { getClerkPublishableKey } from "@/lib/clerk/config";
+import { DEFAULT_LOCALE } from "@/lib/i18n/config";
 import { getMessages } from "@/lib/i18n/messages";
-import { getLocale, getTranslations } from "@/lib/i18n/server";
+import { getLocale, getStaticTranslations } from "@/lib/i18n/server";
 import "./globals.css";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const { t } = await getTranslations();
+  const { t } = getStaticTranslations(DEFAULT_LOCALE);
 
   return {
     title: t("app.name"),
@@ -25,7 +27,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const publishableKey =
-    process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || "pk_test_placeholder_key_for_build_purposes";
+    getClerkPublishableKey() || "pk_test_placeholder_key_for_build_purposes";
   const locale = await getLocale();
   const messages = getMessages(locale);
 

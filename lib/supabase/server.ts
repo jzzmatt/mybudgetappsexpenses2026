@@ -1,4 +1,4 @@
-import { auth } from "@clerk/nextjs/server";
+import { safeAuth } from "@/lib/clerk/server";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
 export function isSupabaseConfigured() {
@@ -21,8 +21,8 @@ export async function createSupabaseServerClient(): Promise<SupabaseClient> {
   return createClient(url, publishableKey, {
     async accessToken() {
       try {
-        const session = await auth();
-        return (await session?.getToken()) ?? null;
+        const session = await safeAuth();
+        return session ? ((await session.getToken()) ?? null) : null;
       } catch (err) {
         console.error("Failed to retrieve Clerk auth token:", err);
         return null;
