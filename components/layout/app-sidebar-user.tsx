@@ -1,9 +1,12 @@
 import { currentUser } from "@clerk/nextjs/server";
 import { LogoutButton } from "@/components/layout/logout-button";
+import { getTranslations } from "@/lib/i18n/server";
 
 export async function AppSidebarUser() {
   const user = await currentUser();
-  const fullName = [user?.firstName, user?.lastName].filter(Boolean).join(" ").trim() || "User";
+  const { t } = await getTranslations();
+  const fullName =
+    [user?.firstName, user?.lastName].filter(Boolean).join(" ").trim() || t("app.userFallback");
   const initials = fullName
     .split(" ")
     .map((part) => part.charAt(0))
@@ -23,7 +26,7 @@ export async function AppSidebarUser() {
       </span>
       <div className="app-sidebar-user-copy">
         <p className="app-sidebar-user-name">{fullName}</p>
-        <p className="app-sidebar-user-role">Administrator</p>
+        <p className="app-sidebar-user-role">{t("app.administrator")}</p>
       </div>
       <LogoutButton variant="sidebar" />
     </div>

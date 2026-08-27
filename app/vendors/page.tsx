@@ -3,6 +3,7 @@ import { ListPageContent } from "@/components/layout/list-page-content";
 import { PageActionButton } from "@/components/layout/page-action-button";
 import { VendorList } from "@/components/vendors/vendor-list";
 import { VendorToolbar } from "@/components/vendors/vendor-toolbar";
+import { getTranslations } from "@/lib/i18n/server";
 import { getVendors } from "@/lib/vendors/queries";
 import type { Vendor } from "@/lib/vendors/types";
 
@@ -12,6 +13,7 @@ type VendorsPageProps = {
 
 export default async function VendorsPage({ searchParams }: VendorsPageProps) {
   const { q } = await searchParams;
+  const { t } = await getTranslations();
 
   let vendors: Vendor[] = [];
   let loadError: string | undefined;
@@ -19,17 +21,14 @@ export default async function VendorsPage({ searchParams }: VendorsPageProps) {
   try {
     vendors = await getVendors(q);
   } catch (error) {
-    loadError =
-      error instanceof Error
-        ? error.message
-        : "Unable to load vendors. Check your Supabase and Clerk integration.";
+    loadError = error instanceof Error ? error.message : t("vendors.loadError");
   }
 
   return (
     <AppShell
-      actions={<PageActionButton href="/vendors/new">Add vendor</PageActionButton>}
-      description="Manage shared vendors and suppliers reusable across all your project workspaces."
-      title="Vendors"
+      actions={<PageActionButton href="/vendors/new">{t("vendors.add")}</PageActionButton>}
+      description={t("vendors.description")}
+      title={t("vendors.title")}
     >
       {loadError ? (
         <p className="form-error page-error" role="alert">

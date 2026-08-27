@@ -1,12 +1,14 @@
 import Link from "next/link";
 import { buildExpenseQueryString } from "@/lib/expenses/params";
+import { getTranslations } from "@/lib/i18n/server";
 import type { ExpenseFilters } from "@/lib/expenses/types";
 
 type ExpenseSearchFormProps = {
   filters: ExpenseFilters;
 };
 
-export function ExpenseSearchForm({ filters }: ExpenseSearchFormProps) {
+export async function ExpenseSearchForm({ filters }: ExpenseSearchFormProps) {
+  const { t } = await getTranslations();
   const clearHref = `/expenses${buildExpenseQueryString({
     ...filters,
     search: undefined,
@@ -25,21 +27,21 @@ export function ExpenseSearchForm({ filters }: ExpenseSearchFormProps) {
       {filters.sort ? <input name="sort" type="hidden" value={filters.sort} /> : null}
       {filters.order ? <input name="order" type="hidden" value={filters.order} /> : null}
       <label className="sr-only" htmlFor="expense-search">
-        Search expenses
+        {t("expenses.searchPlaceholder")}
       </label>
       <input
         defaultValue={filters.search}
         id="expense-search"
         name="q"
-        placeholder="Search description or notes…"
+        placeholder={t("expenses.searchPlaceholder")}
         type="search"
       />
       <button className="button button-outline button-small" type="submit">
-        Search
+        {t("common.search")}
       </button>
       {filters.search ? (
         <Link className="auth-link" href={clearHref}>
-          Clear
+          {t("common.clear")}
         </Link>
       ) : null}
     </form>

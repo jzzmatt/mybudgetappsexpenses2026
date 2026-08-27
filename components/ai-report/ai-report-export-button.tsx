@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { useTranslations } from "@/lib/i18n/client";
 import { buildAiReportPdf } from "@/lib/ai-report/export-pdf";
 import type { AiReportResult } from "@/lib/ai-report/types";
 
@@ -11,6 +12,7 @@ type AiReportExportButtonProps = {
 
 export function AiReportExportButton({ report }: AiReportExportButtonProps) {
   const [isExporting, setIsExporting] = useState(false);
+  const { t } = useTranslations();
 
   const onExport = () => {
     setIsExporting(true);
@@ -30,7 +32,7 @@ export function AiReportExportButton({ report }: AiReportExportButtonProps) {
       URL.revokeObjectURL(url);
     } catch (err) {
       console.error("Failed to export AI Report PDF:", err);
-      window.alert("Failed to export PDF. Please try again.");
+      window.alert(t("errors.generic"));
     } finally {
       setIsExporting(false);
     }
@@ -38,7 +40,7 @@ export function AiReportExportButton({ report }: AiReportExportButtonProps) {
 
   return (
     <Button className="button-small" disabled={isExporting} onClick={onExport} type="button">
-      {isExporting ? "Exporting PDF…" : "Export AI PDF Report"}
+      {isExporting ? t("aiReport.exporting") : t("aiReport.exportPdf")}
     </Button>
   );
 }

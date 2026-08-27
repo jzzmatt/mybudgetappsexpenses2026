@@ -7,9 +7,10 @@ import {
   calculateExpenseBudgetPercentage,
   formatCurrency,
   formatExpenseDate,
-  formatLabel,
 } from "@/lib/expenses/format";
 import { buildExpenseQueryString } from "@/lib/expenses/params";
+import { getTranslations } from "@/lib/i18n/server";
+import { translateEnum } from "@/lib/i18n/translator";
 import type {
   ExpenseBudgetTotals,
   ExpenseFilters,
@@ -73,7 +74,7 @@ function getExpensePercentage(
   );
 }
 
-export function ExpenseList({
+export async function ExpenseList({
   expenses,
   filters,
   hasActiveFilters,
@@ -82,18 +83,19 @@ export function ExpenseList({
   emptyMessage,
   hideProjectColumn = false,
 }: ExpenseListProps) {
+  const { t, locale } = await getTranslations();
   const omitProjectId = basePath.startsWith("/projects/") && basePath.endsWith("/expenses");
   const defaultEmptyMessage = hasActiveFilters
-    ? "No expenses match your current search or filters. Try adjusting them or create a new expense."
-    : "Create your first expense to start tracking spending.";
+    ? t("expenses.noExpensesFiltersHint")
+    : t("expenses.noExpensesDescription");
 
   if (expenses.length === 0) {
     return (
       <Card className="list-empty-card">
-        <h2>No expenses found</h2>
+        <h2>{t("expenses.noExpensesFound")}</h2>
         <p>{emptyMessage ?? defaultEmptyMessage}</p>
         <Link className="button button-small" href="/expenses/new">
-          Create expense
+          {t("common.createExpense")}
         </Link>
       </Card>
     );
@@ -107,37 +109,37 @@ export function ExpenseList({
             <div className="list-mobile-card-header">
               <div>
                 <h3>{expense.description}</h3>
-                <p className="list-mobile-card-date">{formatExpenseDate(expense.date)}</p>
+                <p className="list-mobile-card-date">{formatExpenseDate(expense.date, locale)}</p>
               </div>
               <span className={`status-badge status-${expense.status}`}>
-                {formatLabel(expense.status)}
+                {translateEnum(t, "status", expense.status)}
               </span>
             </div>
             <dl className="list-mobile-card-details">
               <div>
-                <dt>Category</dt>
-                <dd>{expense.category?.name ?? "—"}</dd>
+                <dt>{t("expenses.category")}</dt>
+                <dd>{expense.category?.name ?? t("common.dash")}</dd>
               </div>
               <div>
-                <dt>Expense Budget</dt>
+                <dt>{t("expenses.expenseBudget")}</dt>
                 <dd className="list-mobile-card-amount">
-                  {formatCurrency(Number(expense.budget_amount), expense.currency)}
+                  {formatCurrency(Number(expense.budget_amount), expense.currency, locale)}
                 </dd>
               </div>
               <div>
-                <dt>Paid</dt>
+                <dt>{t("expenses.paid")}</dt>
                 <dd className="list-mobile-card-amount">
-                  {formatCurrency(Number(expense.paid_amount), expense.currency)}
+                  {formatCurrency(Number(expense.paid_amount), expense.currency, locale)}
                 </dd>
               </div>
               <div>
-                <dt>Balance</dt>
+                <dt>{t("expenses.balance")}</dt>
                 <dd className="list-mobile-card-amount">
-                  {formatCurrency(Number(expense.balance), expense.currency)}
+                  {formatCurrency(Number(expense.balance), expense.currency, locale)}
                 </dd>
               </div>
               <div>
-                <dt>Percentage</dt>
+                <dt>{t("expenses.percentage")}</dt>
                 <dd>
                   <ExpensePercentageBar
                     percent={getExpensePercentage(expense, totalBudgetByCurrency)}
@@ -146,7 +148,7 @@ export function ExpenseList({
               </div>
               {expense.payment_reference || expense.payment_proof_path ? (
                 <div>
-                  <dt>Proof / Ref</dt>
+                  <dt>{t("expenses.refProof")}</dt>
                   <dd>
                     {expense.payment_reference ? `${expense.payment_reference} ` : ""}
                     {expense.payment_proof_path ? "📎 PDF" : ""}
@@ -155,18 +157,18 @@ export function ExpenseList({
               ) : null}
               {hideProjectColumn ? null : (
                 <div>
-                  <dt>Project</dt>
-                  <dd>{expense.project?.name ?? "—"}</dd>
+                  <dt>{t("expenses.project")}</dt>
+                  <dd>{expense.project?.name ?? t("common.dash")}</dd>
                 </div>
               )}
               <div>
-                <dt>Vendor</dt>
-                <dd>{expense.vendor?.name ?? "—"}</dd>
+                <dt>{t("expenses.vendor")}</dt>
+                <dd>{expense.vendor?.name ?? t("common.dash")}</dd>
               </div>
             </dl>
             <div className="list-mobile-card-actions">
               <Link className="auth-link" href={`/expenses/${expense.id}/edit`}>
-                Edit
+                {t("common.edit")}
               </Link>
               <CopyExpenseButton expense={expense} />
               <DeleteExpenseButton
@@ -180,74 +182,74 @@ export function ExpenseList({
       <Card className="category-table-card list-desktop-table">
         <div className="category-table-wrap">
           <table className="category-table list-table expense-table">
-            <caption className="sr-only">Expenses</caption>
+            <caption className="sr-only">{t("expenses.title")}</caption>
             <thead>
               <tr>
                 <SortableHeader
                   basePath={basePath}
                   field="date"
                   filters={filters}
-                  label="Date"
+                  label={t("expenses.date")}
                   omitProjectId={omitProjectId}
                 />
                 <SortableHeader
                   basePath={basePath}
                   field="description"
                   filters={filters}
-                  label="Description"
+                  label={t("expenses.description")}
                   omitProjectId={omitProjectId}
                 />
-                <th scope="col">Category</th>
-                {hideProjectColumn ? null : <th scope="col">Project</th>}
-                <th scope="col">Vendor</th>
-                <th scope="col">Ref / Proof</th>
-                <th scope="col">Currency</th>
+                <th scope="col">{t("expenses.category")}</th>
+                {hideProjectColumn ? null : <th scope="col">{t("expenses.project")}</th>}
+                <th scope="col">{t("expenses.vendor")}</th>
+                <th scope="col">{t("expenses.refProof")}</th>
+                <th scope="col">{t("projects.currency")}</th>
                 <SortableHeader
                   basePath={basePath}
                   field="budget_amount"
                   filters={filters}
-                  label="Expense Budget"
+                  label={t("expenses.expenseBudget")}
                   omitProjectId={omitProjectId}
                 />
                 <SortableHeader
                   basePath={basePath}
                   field="percentage"
                   filters={filters}
-                  label="Percentage"
+                  label={t("expenses.percentage")}
                   omitProjectId={omitProjectId}
                 />
                 <SortableHeader
                   basePath={basePath}
                   field="paid_amount"
                   filters={filters}
-                  label="Paid"
+                  label={t("expenses.paid")}
                   omitProjectId={omitProjectId}
                 />
                 <SortableHeader
                   basePath={basePath}
                   field="balance"
                   filters={filters}
-                  label="Balance"
+                  label={t("expenses.balance")}
                   omitProjectId={omitProjectId}
                 />
                 <SortableHeader
                   basePath={basePath}
                   field="status"
                   filters={filters}
-                  label="Status"
+                  label={t("expenses.status")}
                   omitProjectId={omitProjectId}
                 />
-                <th scope="col">Actions</th>
+                <th scope="col">{t("common.actions")}</th>
               </tr>
             </thead>
             <tbody>
               {expenses.map((expense) => (
                 <tr key={expense.id}>
-                  <td>{formatExpenseDate(expense.date)}</td>
+                  <td>{formatExpenseDate(expense.date, locale)}</td>
                   <td>{expense.description}</td>
-                  <td>{expense.category?.name ?? "—"}</td>
-                  {hideProjectColumn ? null : <td>{expense.project?.name ?? "—"}</td>}
-                  <td>{expense.vendor?.name ?? "—"}</td>
+                  <td>{expense.category?.name ?? t("common.dash")}</td>
+                  {hideProjectColumn ? null : <td>{expense.project?.name ?? t("common.dash")}</td>}
+                  <td>{expense.vendor?.name ?? t("common.dash")}</td>
                   <td>
                     {expense.payment_reference ? (
                       <span className="expense-ref-tag" title={`Ref: ${expense.payment_reference}`}>
@@ -255,29 +257,32 @@ export function ExpenseList({
                       </span>
                     ) : null}
                     {expense.payment_proof_path ? (
-                      <span className="expense-proof-icon" title={expense.payment_proof_filename || "Proof attached"}>
+                      <span
+                        className="expense-proof-icon"
+                        title={expense.payment_proof_filename || t("common.proofAttached")}
+                      >
                         📎 PDF
                       </span>
                     ) : null}
-                    {!expense.payment_reference && !expense.payment_proof_path ? "—" : null}
+                    {!expense.payment_reference && !expense.payment_proof_path ? t("common.dash") : null}
                   </td>
                   <td>{expense.currency}</td>
-                  <td>{formatCurrency(expense.budget_amount, expense.currency)}</td>
+                  <td>{formatCurrency(expense.budget_amount, expense.currency, locale)}</td>
                   <td className="expense-percentage-cell">
                     <ExpensePercentageBar
                       percent={getExpensePercentage(expense, totalBudgetByCurrency)}
                     />
                   </td>
-                  <td>{formatCurrency(expense.paid_amount, expense.currency)}</td>
-                  <td>{formatCurrency(expense.balance, expense.currency)}</td>
+                  <td>{formatCurrency(expense.paid_amount, expense.currency, locale)}</td>
+                  <td>{formatCurrency(expense.balance, expense.currency, locale)}</td>
                   <td>
                     <span className={`status-badge status-${expense.status}`}>
-                      {formatLabel(expense.status)}
+                      {translateEnum(t, "status", expense.status)}
                     </span>
                   </td>
                   <td className="category-table-actions">
                     <Link className="auth-link" href={`/expenses/${expense.id}/edit`}>
-                      Edit
+                      {t("common.edit")}
                     </Link>
                     <CopyExpenseButton expense={expense} />
                     <DeleteExpenseButton

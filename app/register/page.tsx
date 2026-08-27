@@ -1,12 +1,12 @@
 import { AuthPageShell } from "@/components/auth/auth-page-shell";
 import { RegisterForm } from "@/components/auth/register-form";
+import { getTranslations } from "@/lib/i18n/server";
 
-export default function RegisterPage() {
+export default async function RegisterPage() {
+  const { t } = await getTranslations();
+
   return (
-    <AuthPageShell
-      description="Create an account to begin managing your budget."
-      title="Create your account"
-    >
+    <AuthPageShell description={t("auth.signUpDescription")} title={t("auth.signUpTitle")}>
       <RegisterForm />
     </AuthPageShell>
   );

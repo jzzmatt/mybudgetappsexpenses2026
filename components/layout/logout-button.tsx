@@ -3,6 +3,7 @@
 import { useClerk } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { useTranslations } from "@/lib/i18n/client";
 
 type LogoutButtonProps = {
   variant?: "default" | "sidebar";
@@ -11,6 +12,7 @@ type LogoutButtonProps = {
 export function LogoutButton({ variant = "default" }: LogoutButtonProps) {
   const router = useRouter();
   const { signOut } = useClerk();
+  const { t } = useTranslations();
 
   const logout = async () => {
     await signOut();
@@ -21,10 +23,10 @@ export function LogoutButton({ variant = "default" }: LogoutButtonProps) {
   if (variant === "sidebar") {
     return (
       <button
-        aria-label="Sign out"
+        aria-label={t("auth.signOut")}
         className="app-sidebar-signout"
         onClick={logout}
-        title="Sign out"
+        title={t("auth.signOut")}
         type="button"
       >
         <svg aria-hidden="true" fill="none" height="18" viewBox="0 0 18 18" width="18">
@@ -42,7 +44,7 @@ export function LogoutButton({ variant = "default" }: LogoutButtonProps) {
 
   return (
     <Button className="button-outline button-small" onClick={logout} type="button">
-      Sign out
+      {t("auth.signOut")}
     </Button>
   );
 }

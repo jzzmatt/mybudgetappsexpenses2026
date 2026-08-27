@@ -1,12 +1,15 @@
 import { Card } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/currency/format";
+import { getTranslations } from "@/lib/i18n/server";
 import type { ProjectFinancialSummary } from "@/lib/projects/types";
 
 type ProjectUsageAllocationCardProps = {
   financials: ProjectFinancialSummary;
 };
 
-export function ProjectUsageAllocationCard({ financials }: ProjectUsageAllocationCardProps) {
+export async function ProjectUsageAllocationCard({ financials }: ProjectUsageAllocationCardProps) {
+  const { t, locale } = await getTranslations();
+
   const {
     projectBudget,
     totalExpenseBudget,
@@ -24,10 +27,10 @@ export function ProjectUsageAllocationCard({ financials }: ProjectUsageAllocatio
   return (
     <Card className="project-usage-card">
       <div className="project-usage-header">
-        <h3>Budget Allocation &amp; Consumption</h3>
+        <h3>{t("projects.budgetAllocation")}</h3>
         {isOverspent ? (
           <span className="project-overspent-badge" role="status">
-            Overspent by {formatCurrency(Math.abs(availableBudget), currency)}
+            {t("projects.overspent")} {formatCurrency(Math.abs(availableBudget), currency, locale)}
           </span>
         ) : null}
       </div>
@@ -35,9 +38,12 @@ export function ProjectUsageAllocationCard({ financials }: ProjectUsageAllocatio
       <div className="project-usage-bars">
         <div className="project-usage-bar-item">
           <div className="project-usage-bar-meta">
-            <span>Budget Allocated ({allocatedPercent.toFixed(1)}%)</span>
             <span>
-              {formatCurrency(totalExpenseBudget, currency)} of {formatCurrency(projectBudget, currency)}
+              {t("projects.allocated")} ({allocatedPercent.toFixed(1)}%)
+            </span>
+            <span>
+              {formatCurrency(totalExpenseBudget, currency, locale)} /{" "}
+              {formatCurrency(projectBudget, currency, locale)}
             </span>
           </div>
           <div className="budget-progress-track">
@@ -50,9 +56,12 @@ export function ProjectUsageAllocationCard({ financials }: ProjectUsageAllocatio
 
         <div className="project-usage-bar-item">
           <div className="project-usage-bar-meta">
-            <span>Actual Paid Out ({projectPaidPercent.toFixed(1)}%)</span>
             <span>
-              {formatCurrency(totalPaid, currency)} of {formatCurrency(projectBudget, currency)}
+              {t("projects.budgetVsPaid")} ({projectPaidPercent.toFixed(1)}%)
+            </span>
+            <span>
+              {formatCurrency(totalPaid, currency, locale)} /{" "}
+              {formatCurrency(projectBudget, currency, locale)}
             </span>
           </div>
           <div className="budget-progress-track">

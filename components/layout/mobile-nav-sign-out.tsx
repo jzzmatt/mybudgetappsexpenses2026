@@ -2,10 +2,12 @@
 
 import { useClerk } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "@/lib/i18n/client";
 
 export function MobileNavSignOut() {
   const router = useRouter();
   const { signOut } = useClerk();
+  const { t } = useTranslations();
 
   const logout = async () => {
     await signOut();
@@ -15,7 +17,7 @@ export function MobileNavSignOut() {
 
   return (
     <button className="app-bottom-nav-signout" onClick={logout} type="button">
-      Sign out
+      {t("auth.signOut")}
     </button>
   );
 }

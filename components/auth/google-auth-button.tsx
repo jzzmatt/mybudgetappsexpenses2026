@@ -4,11 +4,13 @@ import { useSignIn, useSignUp } from "@clerk/nextjs/legacy";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { useTranslations } from "@/lib/i18n/client";
 
 export function GoogleAuthButton() {
   const pathname = usePathname();
   const { isLoaded: isSignInLoaded, signIn } = useSignIn();
   const { isLoaded: isSignUpLoaded, signUp } = useSignUp();
+  const { t } = useTranslations();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>();
 
@@ -41,8 +43,7 @@ export function GoogleAuthButton() {
         });
       }
     } catch (err) {
-      const message =
-        err instanceof Error ? err.message : "Unable to continue with Google.";
+      const message = err instanceof Error ? err.message : t("errors.generic");
       setError(message);
       setIsLoading(false);
     }
@@ -79,7 +80,7 @@ export function GoogleAuthButton() {
             fill="#EA4335"
           />
         </svg>
-        {isLoading ? "Redirecting…" : "Continue with Google"}
+        {isLoading ? t("common.loading") : t("auth.googleSignIn")}
       </Button>
     </div>
   );

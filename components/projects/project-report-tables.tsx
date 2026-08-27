@@ -1,6 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/currency/format";
 import type { ExpenseCurrency } from "@/lib/currency/types";
+import { getTranslations } from "@/lib/i18n/server";
 import type { ProjectCategoryAnalysis, ProjectVendorAnalysis } from "@/lib/projects/types";
 
 type ProjectReportTablesProps = {
@@ -9,37 +10,39 @@ type ProjectReportTablesProps = {
   currency: ExpenseCurrency;
 };
 
-export function ProjectReportTables({
+export async function ProjectReportTables({
   categoryAnalysis,
   vendorAnalysis,
   currency,
 }: ProjectReportTablesProps) {
+  const { t, locale } = await getTranslations();
+
   return (
     <div className="dashboard-tables-row">
       <Card className="dashboard-table-card">
         <div className="dashboard-table-header">
-          <h2>Category Breakdown</h2>
+          <h2>{t("projects.categorySpending")}</h2>
         </div>
         {categoryAnalysis.length === 0 ? (
-          <p className="dashboard-table-empty">No category expenses recorded.</p>
+          <p className="dashboard-table-empty">{t("common.noResults")}</p>
         ) : (
           <div className="category-table-wrap">
             <table className="category-table dashboard-table">
-              <caption className="sr-only">Category Breakdown</caption>
+              <caption className="sr-only">{t("projects.categorySpending")}</caption>
               <thead>
                 <tr>
-                  <th scope="col">Category</th>
-                  <th scope="col">Budget</th>
-                  <th scope="col">Paid</th>
-                  <th scope="col">% of Total</th>
+                  <th scope="col">{t("expenses.category")}</th>
+                  <th scope="col">{t("projects.projectBudget")}</th>
+                  <th scope="col">{t("expenses.paid")}</th>
+                  <th scope="col">{t("expenses.percentage")}</th>
                 </tr>
               </thead>
               <tbody>
                 {categoryAnalysis.map((item) => (
                   <tr key={item.category}>
                     <td><strong>{item.category}</strong></td>
-                    <td>{formatCurrency(item.budget, currency)}</td>
-                    <td>{formatCurrency(item.paid, currency)}</td>
+                    <td>{formatCurrency(item.budget, currency, locale)}</td>
+                    <td>{formatCurrency(item.paid, currency, locale)}</td>
                     <td>{item.percentOfBudget.toFixed(1)}%</td>
                   </tr>
                 ))}
@@ -51,20 +54,20 @@ export function ProjectReportTables({
 
       <Card className="dashboard-table-card">
         <div className="dashboard-table-header">
-          <h2>Vendor Breakdown</h2>
+          <h2>{t("projects.vendorSpending")}</h2>
         </div>
         {vendorAnalysis.length === 0 ? (
-          <p className="dashboard-table-empty">No vendor expenses recorded.</p>
+          <p className="dashboard-table-empty">{t("common.noResults")}</p>
         ) : (
           <div className="category-table-wrap">
             <table className="category-table dashboard-table">
-              <caption className="sr-only">Vendor Breakdown</caption>
+              <caption className="sr-only">{t("projects.vendorSpending")}</caption>
               <thead>
                 <tr>
-                  <th scope="col">Vendor</th>
-                  <th scope="col">Expenses</th>
-                  <th scope="col">Budget</th>
-                  <th scope="col">Paid</th>
+                  <th scope="col">{t("expenses.vendor")}</th>
+                  <th scope="col">{t("projects.numberOfExpenses")}</th>
+                  <th scope="col">{t("projects.projectBudget")}</th>
+                  <th scope="col">{t("expenses.paid")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -72,8 +75,8 @@ export function ProjectReportTables({
                   <tr key={item.vendor}>
                     <td><strong>{item.vendor}</strong></td>
                     <td>{item.expenseCount}</td>
-                    <td>{formatCurrency(item.budget, currency)}</td>
-                    <td>{formatCurrency(item.paid, currency)}</td>
+                    <td>{formatCurrency(item.budget, currency, locale)}</td>
+                    <td>{formatCurrency(item.paid, currency, locale)}</td>
                   </tr>
                 ))}
               </tbody>

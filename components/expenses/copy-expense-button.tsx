@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { Button } from "@/components/ui/button";
+import { useTranslations } from "@/lib/i18n/client";
 import { duplicateExpenseAction } from "@/lib/expenses/actions";
 import type { ExpenseWithRelations } from "@/lib/expenses/types";
 
@@ -13,6 +14,7 @@ type CopyExpenseButtonProps = {
 export function CopyExpenseButton({ expense }: CopyExpenseButtonProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  const { t } = useTranslations();
 
   const onCopy = () => {
     startTransition(async () => {
@@ -29,13 +31,13 @@ export function CopyExpenseButton({ expense }: CopyExpenseButtonProps) {
 
   return (
     <Button
-      aria-label={`Duplicate ${expense.description}`}
+      aria-label={`${t("common.copy")} ${expense.description}`}
       className="button-outline button-small"
       disabled={isPending}
       onClick={onCopy}
       type="button"
     >
-      {isPending ? "Copying…" : "Copy"}
+      {isPending ? t("expenses.copying") : t("common.copy")}
     </Button>
   );
 }

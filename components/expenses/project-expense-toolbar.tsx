@@ -6,12 +6,12 @@ import { useEffect, useMemo, useState } from "react";
 import {
   buildExpenseQueryString,
   countProjectExpenseActiveFilters,
-  getProjectExpenseSortLabel,
   getProjectExpenseSortPreset,
   hasProjectNonDefaultSort,
   projectExpenseSortPresetToFilters,
   type ProjectExpenseSortPreset,
 } from "@/lib/expenses/params";
+import { useTranslations } from "@/lib/i18n/client";
 import type { ExpenseFilters } from "@/lib/expenses/types";
 import type { Category } from "@/lib/categories/types";
 import type { Vendor } from "@/lib/vendors/types";
@@ -35,6 +35,17 @@ function navigateToFilters(
   router.push(href);
 }
 
+function getSortLabel(t: ReturnType<typeof useTranslations>["t"], preset: ProjectExpenseSortPreset) {
+  switch (preset) {
+    case "budget_high":
+      return t("expenses.sortHighestValue");
+    case "budget_low":
+      return t("expenses.sortLowestValue");
+    default:
+      return t("expenses.sortMostRecent");
+  }
+}
+
 export function ProjectExpenseToolbar({
   basePath,
   filters,
@@ -42,6 +53,7 @@ export function ProjectExpenseToolbar({
   vendors,
 }: ProjectExpenseToolbarProps) {
   const router = useRouter();
+  const { t } = useTranslations();
   const [searchValue, setSearchValue] = useState(filters.search ?? "");
   const [isFilterSheetOpen, setIsFilterSheetOpen] = useState(false);
   const [sheetCategory, setSheetCategory] = useState(filters.categoryId ?? "");
@@ -52,7 +64,7 @@ export function ProjectExpenseToolbar({
 
   const activeFilterCount = countProjectExpenseActiveFilters(filters);
   const sortPreset = getProjectExpenseSortPreset(filters);
-  const sortLabel = getProjectExpenseSortLabel(filters);
+  const sortLabel = getSortLabel(t, sortPreset);
 
   const categoryLabel = useMemo(
     () => categories.find((category) => category.id === filters.categoryId)?.name,
@@ -143,16 +155,16 @@ export function ProjectExpenseToolbar({
   };
 
   return (
-    <section aria-label="Expense search and filters" className="project-expense-toolbar">
+    <section aria-label={t("expenses.filters")} className="project-expense-toolbar">
       <div className="project-expense-search-row">
         <label className="sr-only" htmlFor="project-expense-search">
-          Search expenses
+          {t("expenses.searchPlaceholder")}
         </label>
         <input
           className="project-expense-search-input"
           id="project-expense-search"
           onChange={(event) => setSearchValue(event.target.value)}
-          placeholder="Search expenses..."
+          placeholder={t("expenses.searchPlaceholder")}
           type="search"
           value={searchValue}
         />
@@ -161,19 +173,19 @@ export function ProjectExpenseToolbar({
           onClick={openFilterSheet}
           type="button"
         >
-          Filters{activeFilterCount > 0 ? ` (${activeFilterCount})` : ""}
+          {t("expenses.filters")}{activeFilterCount > 0 ? ` (${activeFilterCount})` : ""}
         </button>
       </div>
 
       <div className="project-expense-filters-desktop">
         <label className="project-expense-filter-field">
-          <span className="sr-only">Category</span>
+          <span className="sr-only">{t("expenses.category")}</span>
           <select
-            aria-label="Filter by category"
+            aria-label={t("expenses.category")}
             onChange={(event) => onDesktopCategoryChange(event.target.value)}
             value={filters.categoryId ?? ""}
           >
-            <option value="">All Categories</option>
+            <option value="">{t("expenses.allCategories")}</option>
             {categories.map((category) => (
               <option key={category.id} value={category.id}>
                 {category.name}
@@ -183,13 +195,13 @@ export function ProjectExpenseToolbar({
         </label>
 
         <label className="project-expense-filter-field">
-          <span className="sr-only">Vendor</span>
+          <span className="sr-only">{t("expenses.vendor")}</span>
           <select
-            aria-label="Filter by vendor"
+            aria-label={t("expenses.vendor")}
             onChange={(event) => onDesktopVendorChange(event.target.value)}
             value={filters.vendorId ?? ""}
           >
-            <option value="">All Vendors</option>
+            <option value="">{t("expenses.allVendors")}</option>
             {vendors.map((vendor) => (
               <option key={vendor.id} value={vendor.id}>
                 {vendor.name}
@@ -199,17 +211,17 @@ export function ProjectExpenseToolbar({
         </label>
 
         <label className="project-expense-filter-field">
-          <span className="sr-only">Sort expenses</span>
+          <span className="sr-only">{t("expenses.filters")}</span>
           <select
-            aria-label="Sort expenses"
+            aria-label={t("expenses.filters")}
             onChange={(event) =>
               onDesktopSortChange(event.target.value as ProjectExpenseSortPreset)
             }
             value={sortPreset}
           >
-            <option value="recent">Most Recent</option>
-            <option value="budget_high">Highest value</option>
-            <option value="budget_low">Lowest value</option>
+            <option value="recent">{t("expenses.sortMostRecent")}</option>
+            <option value="budget_high">{t("expenses.sortHighestValue")}</option>
+            <option value="budget_low">{t("expenses.sortLowestValue")}</option>
           </select>
         </label>
       </div>
@@ -217,19 +229,27 @@ export function ProjectExpenseToolbar({
       {hasRemovableFilters ? (
         <div className="project-expense-active-filters">
           {categoryLabel ? (
-            <span className="project-expense-active-filter-chip">Category: {categoryLabel}</span>
+            <span className="project-expense-active-filter-chip">
+              {t("expenses.activeCategory", { name: categoryLabel })}
+            </span>
           ) : null}
           {vendorLabel ? (
-            <span className="project-expense-active-filter-chip">Vendor: {vendorLabel}</span>
+            <span className="project-expense-active-filter-chip">
+              {t("expenses.activeVendor", { name: vendorLabel })}
+            </span>
           ) : null}
           {hasProjectNonDefaultSort(filters) ? (
-            <span className="project-expense-active-filter-chip">Sort: {sortLabel}</span>
+            <span className="project-expense-active-filter-chip">
+              {t("expenses.activeSort", { name: sortLabel })}
+            </span>
           ) : null}
           {filters.search ? (
-            <span className="project-expense-active-filter-chip">Search: {filters.search}</span>
+            <span className="project-expense-active-filter-chip">
+              {t("expenses.activeSearch", { query: filters.search })}
+            </span>
           ) : null}
           <Link className="project-expense-clear-filters" href={clearHref}>
-            Clear filters
+            {t("expenses.clearFilters")}
           </Link>
         </div>
       ) : null}
@@ -237,15 +257,15 @@ export function ProjectExpenseToolbar({
       {isFilterSheetOpen ? (
         <div className="project-expense-filter-sheet-overlay" role="presentation">
           <div
-            aria-label="Expense filters"
+            aria-label={t("expenses.filters")}
             aria-modal="true"
             className="project-expense-filter-sheet"
             role="dialog"
           >
             <div className="project-expense-filter-sheet-header">
-              <h3>Filters</h3>
+              <h3>{t("expenses.filters")}</h3>
               <button
-                aria-label="Close filters"
+                aria-label={t("common.close")}
                 className="project-expense-filter-sheet-close"
                 onClick={() => setIsFilterSheetOpen(false)}
                 type="button"
@@ -255,13 +275,13 @@ export function ProjectExpenseToolbar({
             </div>
 
             <label className="auth-field" htmlFor="project-expense-sheet-category">
-              <span>Category</span>
+              <span>{t("expenses.category")}</span>
               <select
                 id="project-expense-sheet-category"
                 onChange={(event) => setSheetCategory(event.target.value)}
                 value={sheetCategory}
               >
-                <option value="">All Categories</option>
+                <option value="">{t("expenses.allCategories")}</option>
                 {categories.map((category) => (
                   <option key={category.id} value={category.id}>
                     {category.name}
@@ -271,13 +291,13 @@ export function ProjectExpenseToolbar({
             </label>
 
             <label className="auth-field" htmlFor="project-expense-sheet-vendor">
-              <span>Vendor</span>
+              <span>{t("expenses.vendor")}</span>
               <select
                 id="project-expense-sheet-vendor"
                 onChange={(event) => setSheetVendor(event.target.value)}
                 value={sheetVendor}
               >
-                <option value="">All Vendors</option>
+                <option value="">{t("expenses.allVendors")}</option>
                 {vendors.map((vendor) => (
                   <option key={vendor.id} value={vendor.id}>
                     {vendor.name}
@@ -287,7 +307,7 @@ export function ProjectExpenseToolbar({
             </label>
 
             <label className="auth-field" htmlFor="project-expense-sheet-sort">
-              <span>Sort</span>
+              <span>{t("expenses.filters")}</span>
               <select
                 id="project-expense-sheet-sort"
                 onChange={(event) =>
@@ -295,9 +315,9 @@ export function ProjectExpenseToolbar({
                 }
                 value={sheetSort}
               >
-                <option value="recent">Most Recent</option>
-                <option value="budget_high">Highest value</option>
-                <option value="budget_low">Lowest value</option>
+                <option value="recent">{t("expenses.sortMostRecent")}</option>
+                <option value="budget_high">{t("expenses.sortHighestValue")}</option>
+                <option value="budget_low">{t("expenses.sortLowestValue")}</option>
               </select>
             </label>
 
@@ -307,10 +327,10 @@ export function ProjectExpenseToolbar({
                 onClick={clearSheetFilters}
                 type="button"
               >
-                Clear
+                {t("common.clear")}
               </button>
               <button className="button" onClick={applySheetFilters} type="button">
-                Apply Filters
+                {t("common.applyFilters")}
               </button>
             </div>
           </div>

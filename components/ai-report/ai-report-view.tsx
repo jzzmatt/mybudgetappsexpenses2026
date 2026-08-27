@@ -1,4 +1,6 @@
 import { Card } from "@/components/ui/card";
+import { getIntlLocale } from "@/lib/i18n/locale-format";
+import { getTranslations } from "@/lib/i18n/server";
 import type { AiReportResult } from "@/lib/ai-report/types";
 
 type AiReportViewProps = {
@@ -22,29 +24,33 @@ function BulletList({ items, title }: { items?: string[]; title: string }) {
   );
 }
 
-export function AiReportView({ report }: AiReportViewProps) {
+export async function AiReportView({ report }: AiReportViewProps) {
+  const { t, locale } = await getTranslations();
+  const intlLocale = getIntlLocale(locale);
+
   return (
     <div className="ai-report-content">
       <Card className="ai-report-section-card">
-        <h2>Executive Summary</h2>
+        <h2>{t("aiReport.executiveSummary")}</h2>
         <p>{report.executive_summary}</p>
         <p className="ai-report-meta">
-          Generated {new Date(report.generated_at).toLocaleString("en-US")} · Currency: {report.currency}
+          {new Date(report.generated_at).toLocaleString(intlLocale)} · {t("projects.currency")}:{" "}
+          {report.currency}
         </p>
       </Card>
 
       {report.spending_analysis ? (
         <Card className="ai-report-section-card">
-          <h2>Spending &amp; Allocation Analysis</h2>
+          <h2>{t("aiReport.spendingAnalysis")}</h2>
           <p>{report.spending_analysis}</p>
         </Card>
       ) : null}
 
-      <BulletList items={report.key_findings} title="Key Findings" />
-      <BulletList items={report.largest_items} title="Largest Budget Commitments" />
-      <BulletList items={report.pending_items} title="Pending &amp; Partial Items" />
-      <BulletList items={report.recommendations} title="Strategic Recommendations" />
-      <BulletList items={report.risk_alerts} title="Risk Alerts" />
+      <BulletList items={report.key_findings} title={t("aiReport.keyFindings")} />
+      <BulletList items={report.largest_items} title={t("aiReport.largestItems")} />
+      <BulletList items={report.pending_items} title={t("aiReport.pendingItems")} />
+      <BulletList items={report.recommendations} title={t("aiReport.recommendations")} />
+      <BulletList items={report.risk_alerts} title={t("aiReport.riskAlerts")} />
     </div>
   );
 }

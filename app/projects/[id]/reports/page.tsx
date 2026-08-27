@@ -8,6 +8,7 @@ import { ProjectReportTables } from "@/components/projects/project-report-tables
 import { ProjectUsageAllocationCard } from "@/components/projects/project-usage-allocation-card";
 import { ProjectWorkspaceNav } from "@/components/projects/project-workspace-nav";
 import { DashboardChartsSection } from "@/components/dashboard/dashboard-charts-section";
+import { getTranslations } from "@/lib/i18n/server";
 import { getProjectReportData } from "@/lib/projects/queries";
 
 type ProjectReportsPageProps = {
@@ -16,6 +17,7 @@ type ProjectReportsPageProps = {
 
 export default async function ProjectReportsPage({ params }: ProjectReportsPageProps) {
   const { id } = await params;
+  const { t } = await getTranslations();
   const reportData = await getProjectReportData(id);
 
   if (!reportData) {
@@ -29,13 +31,13 @@ export default async function ProjectReportsPage({ params }: ProjectReportsPageP
   return (
     <AppShell
       actions={<ProjectReportExportButton reportData={reportData} />}
-      description={`Comprehensive financial statement and breakdowns for ${project.name}.`}
-      title={`${project.name} Reports`}
+      description={t("reports.description")}
+      title={`${project.name} ${t("projects.reportsTitle")}`}
     >
       <ListPageContent>
         <div className="project-workspace-topbar">
           <Link className="auth-link" href="/projects">
-            ← Back to My Projects
+            {t("nav.backToProjects")}
           </Link>
           <ProjectWorkspaceNav activeTab="reports" projectId={project.id} projectName={project.name} />
         </div>
@@ -58,9 +60,8 @@ export default async function ProjectReportsPage({ params }: ProjectReportsPageP
         />
 
         <p className="reports-ai-link">
-          Looking for AI-driven insights?{" "}
           <Link className="auth-link" href={`/projects/${project.id}/ai-report`}>
-            Generate AI Report
+            {t("aiReport.generate")}
           </Link>
         </p>
       </ListPageContent>

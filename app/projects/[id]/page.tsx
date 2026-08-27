@@ -8,6 +8,8 @@ import { ProjectRecentExpensesCard } from "@/components/projects/project-recent-
 import { ProjectUsageAllocationCard } from "@/components/projects/project-usage-allocation-card";
 import { ProjectWorkspaceNav } from "@/components/projects/project-workspace-nav";
 import { DashboardChartsSection } from "@/components/dashboard/dashboard-charts-section";
+import { formatCurrency } from "@/lib/currency/format";
+import { getTranslations } from "@/lib/i18n/server";
 import { getProjectOverview } from "@/lib/projects/queries";
 
 type ProjectOverviewPageProps = {
@@ -16,6 +18,7 @@ type ProjectOverviewPageProps = {
 
 export default async function ProjectOverviewPage({ params }: ProjectOverviewPageProps) {
   const { id } = await params;
+  const { t, locale } = await getTranslations();
   const data = await getProjectOverview(id);
 
   if (!data) {
@@ -29,17 +32,25 @@ export default async function ProjectOverviewPage({ params }: ProjectOverviewPag
     <AppShell
       actions={
         <div className="project-workspace-header-actions">
-          <PageActionButton href={`/projects/${project.id}/edit`}>Edit Project</PageActionButton>
-          <PageActionButton href={`/expenses/new?project=${project.id}`}>Add Expense</PageActionButton>
+          <PageActionButton href={`/projects/${project.id}/edit`}>
+            {t("projects.editProject")}
+          </PageActionButton>
+          <PageActionButton href={`/expenses/new?project=${project.id}`}>
+            {t("common.addExpense")}
+          </PageActionButton>
         </div>
       }
-      description={`Financial workspace · Budget: ${project.currency} ${project.budget_amount.toLocaleString("en-US", { minimumFractionDigits: 2 })}`}
+      description={`${t("projects.projectBudget")}: ${formatCurrency(
+        project.budget_amount,
+        project.currency,
+        locale,
+      )}`}
       title={project.name}
     >
       <ListPageContent>
         <div className="project-workspace-topbar">
           <Link className="auth-link" href="/projects">
-            ← Back to My Projects
+            {t("nav.backToProjects")}
           </Link>
           <ProjectWorkspaceNav activeTab="overview" projectId={project.id} projectName={project.name} />
         </div>

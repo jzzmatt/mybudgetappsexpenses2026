@@ -2,19 +2,19 @@ import Link from "next/link";
 import { AuthField } from "@/components/auth/auth-field";
 import { ResourceFormLayout } from "@/components/layout/resource-form-layout";
 import { Button } from "@/components/ui/button";
+import { getTranslations } from "@/lib/i18n/server";
 import { createVendorAction } from "@/lib/vendors/actions";
 
-export function VendorCreateForm() {
+export async function VendorCreateForm() {
+  const { t } = await getTranslations();
+
   return (
-    <ResourceFormLayout
-      description="Add a vendor or supplier reusable across all your project workspaces."
-      title="Vendor details"
-    >
+    <ResourceFormLayout description={t("vendors.description")} title={t("vendors.createTitle")}>
       <form action={createVendorAction} className="resource-form">
         <AuthField
           autoComplete="off"
           id="vendor-name"
-          label="Name"
+          label={t("vendors.name")}
           name="name"
           placeholder="e.g. Cloud Provider"
           required
@@ -22,14 +22,14 @@ export function VendorCreateForm() {
         <AuthField
           autoComplete="off"
           id="vendor-contact"
-          label="Contact info"
+          label={t("vendors.contactInfo")}
           name="contact_info"
           placeholder="e.g. billing@cloud.example"
         />
         <div className="resource-form-actions">
-          <Button type="submit">Create vendor</Button>
+          <Button type="submit">{t("vendors.add")}</Button>
           <Link className="auth-link" href="/vendors">
-            Cancel
+            {t("common.cancel")}
           </Link>
         </div>
       </form>

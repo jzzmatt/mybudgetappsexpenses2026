@@ -1,6 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/currency/format";
 import { isExpenseCurrency, type ExpenseCurrency } from "@/lib/currency/types";
+import { getTranslations } from "@/lib/i18n/server";
 import type { Project, ProjectExpenseTotals } from "@/lib/projects/types";
 
 type ProjectExpensesSummaryProps = {
@@ -8,7 +9,9 @@ type ProjectExpensesSummaryProps = {
   totals: ProjectExpenseTotals;
 };
 
-export function ProjectExpensesSummary({ project, totals }: ProjectExpensesSummaryProps) {
+export async function ProjectExpensesSummary({ project, totals }: ProjectExpensesSummaryProps) {
+  const { t, locale } = await getTranslations();
+
   const budgetItems = totals.currencies.flatMap((currencyCode) => {
     if (!isExpenseCurrency(currencyCode)) {
       return [];
@@ -26,20 +29,24 @@ export function ProjectExpensesSummary({ project, totals }: ProjectExpensesSumma
     return [
       {
         key: `budget-${currency}`,
-        label: multiCurrency ? `Total Budget (${currency})` : "Total Budget",
-        value: formatCurrency(totalsForCurrency.totalBudget, currency),
+        label: multiCurrency
+          ? `${t("projects.totalBudget")} (${currency})`
+          : t("projects.totalBudget"),
+        value: formatCurrency(totalsForCurrency.totalBudget, currency, locale),
         variant: "default" as const,
       },
       {
         key: `paid-${currency}`,
-        label: multiCurrency ? `Total Paid (${currency})` : "Total Paid",
-        value: formatCurrency(totalsForCurrency.totalPaid, currency),
+        label: multiCurrency ? `${t("projects.totalPaid")} (${currency})` : t("projects.totalPaid"),
+        value: formatCurrency(totalsForCurrency.totalPaid, currency, locale),
         variant: "paid" as const,
       },
       {
         key: `remaining-${currency}`,
-        label: multiCurrency ? `Total Remaining (${currency})` : "Total Remaining",
-        value: formatCurrency(totalsForCurrency.totalBalance, currency),
+        label: multiCurrency
+          ? `${t("projects.totalRemaining")} (${currency})`
+          : t("projects.totalRemaining"),
+        value: formatCurrency(totalsForCurrency.totalBalance, currency, locale),
         variant: "remaining" as const,
       },
     ];
@@ -49,7 +56,7 @@ export function ProjectExpensesSummary({ project, totals }: ProjectExpensesSumma
     ...budgetItems,
     {
       key: "expense-count",
-      label: "Number of Expenses",
+      label: t("projects.numberOfExpenses"),
       value: String(totals.expenseCount),
       variant: "default" as const,
     },
@@ -59,20 +66,20 @@ export function ProjectExpensesSummary({ project, totals }: ProjectExpensesSumma
     items.unshift(
       {
         key: "budget-empty",
-        label: "Total Budget",
-        value: formatCurrency(0, project.currency),
+        label: t("projects.totalBudget"),
+        value: formatCurrency(0, project.currency, locale),
         variant: "default" as const,
       },
       {
         key: "paid-empty",
-        label: "Total Paid",
-        value: formatCurrency(0, project.currency),
+        label: t("projects.totalPaid"),
+        value: formatCurrency(0, project.currency, locale),
         variant: "paid" as const,
       },
       {
         key: "remaining-empty",
-        label: "Total Remaining",
-        value: formatCurrency(0, project.currency),
+        label: t("projects.totalRemaining"),
+        value: formatCurrency(0, project.currency, locale),
         variant: "remaining" as const,
       },
     );

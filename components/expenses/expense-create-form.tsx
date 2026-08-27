@@ -6,15 +6,17 @@ import { AuthField } from "@/components/auth/auth-field";
 import { ImportPaymentProofModal } from "@/components/expenses/import-payment-proof-modal";
 import { ResourceFormLayout } from "@/components/layout/resource-form-layout";
 import { Button } from "@/components/ui/button";
+import { CURRENCY_LABELS, DEFAULT_EXPENSE_CURRENCY } from "@/lib/currency/types";
 import { createExpenseAction } from "@/lib/expenses/actions";
+import { formatCurrency } from "@/lib/expenses/format";
 import {
   EXPENSE_PAYMENT_METHODS,
   EXPENSE_PRIORITIES,
   EXPENSE_STATUSES,
   type ExpenseDraftFromProof,
 } from "@/lib/expenses/types";
-import { CURRENCY_LABELS, DEFAULT_EXPENSE_CURRENCY } from "@/lib/currency/types";
-import { formatCurrency, formatLabel } from "@/lib/expenses/format";
+import { useTranslations } from "@/lib/i18n/client";
+import { translateEnum } from "@/lib/i18n/translator";
 import { willCauseProjectOverspending } from "@/lib/projects/calculations";
 import type { Category } from "@/lib/categories/types";
 import type { Project } from "@/lib/projects/types";
@@ -33,6 +35,7 @@ export function ExpenseCreateForm({
   vendors,
   preselectedProjectId,
 }: ExpenseCreateFormProps) {
+  const { t, locale } = useTranslations();
   const today = new Date().toISOString().slice(0, 10);
   const initialProjectId = preselectedProjectId || projects[0]?.id || "";
 
@@ -53,7 +56,6 @@ export function ExpenseCreateForm({
   const inheritedCurrency = selectedProject?.currency || DEFAULT_EXPENSE_CURRENCY;
   const projectBudget = selectedProject?.budget_amount || 0;
 
-  // When an AI draft is extracted from a payment proof PDF, prefill the state
   const handleDraftLoaded = (extractedDraft: ExpenseDraftFromProof) => {
     setDraft(extractedDraft);
     if (extractedDraft.date) {
@@ -79,10 +81,10 @@ export function ExpenseCreateForm({
       setNotesValue(extractedDraft.notes);
     }
 
-    // Try matching vendor by name if extracted
     if (extractedDraft.vendor_person) {
       const match = vendors.find(
-        (v) => v.name.toLowerCase().includes(extractedDraft.vendor_person!.toLowerCase()) ||
+        (v) =>
+          v.name.toLowerCase().includes(extractedDraft.vendor_person!.toLowerCase()) ||
           extractedDraft.vendor_person!.toLowerCase().includes(v.name.toLowerCase()),
       );
       if (match) {
@@ -97,19 +99,13 @@ export function ExpenseCreateForm({
       : null;
 
   return (
-    <ResourceFormLayout
-      description="Record an expense manually or import from a PDF payment proof with AI assistance."
-      title="New Expense Details"
-    >
+    <ResourceFormLayout description={t("expenses.newDescription")} title={t("expenses.newTitle")}>
       {selectedProject ? (
         <div className="expense-import-toolbar">
-          <ImportPaymentProofModal
-            onDraftLoaded={handleDraftLoaded}
-            project={selectedProject}
-          />
+          <ImportPaymentProofModal onDraftLoaded={handleDraftLoaded} project={selectedProject} />
           {draft?.payment_proof_path ? (
             <span className="expense-proof-attached-badge">
-              📎 Proof Attached: {draft.payment_proof_filename}
+              {t("common.proofAttached")}: {draft.payment_proof_filename}
               {draft.proof_signed_url ? (
                 <a
                   className="expense-proof-preview-link"
@@ -117,7 +113,7 @@ export function ExpenseCreateForm({
                   rel="noopener noreferrer"
                   target="_blank"
                 >
-                  (View PDF)
+                  ({t("common.viewPdf")})
                 </a>
               ) : null}
             </span>
@@ -127,7 +123,7 @@ export function ExpenseCreateForm({
 
       {draft?.extraction_warnings && draft.extraction_warnings.length > 0 ? (
         <div className="expense-ai-warning-box" role="alert">
-          <strong>AI Extraction Notes:</strong>
+          <strong>{t("expenses.extractionWarnings")}:</strong>
           <ul>
             {draft.extraction_warnings.map((w, idx) => (
               <li key={idx}>{w}</li>
@@ -137,15 +133,14 @@ export function ExpenseCreateForm({
       ) : null}
 
       <form action={createExpenseAction} className="resource-form resource-form-grid">
-        {/* Hidden inputs to retain uploaded PDF proof */}
         <input name="payment_proof_path" type="hidden" value={draft?.payment_proof_path ?? ""} />
         <input name="payment_proof_filename" type="hidden" value={draft?.payment_proof_filename ?? ""} />
 
         <section className="resource-form-section">
-          <h3>Basic information</h3>
+          <h3>{t("expenses.description")}</h3>
 
           <label className="auth-field" htmlFor="expense-project">
-            <span>Project Workspace</span>
+            <span>{t("expenses.project")}</span>
             <select
               id="expense-project"
               name="project_id"
@@ -154,7 +149,7 @@ export function ExpenseCreateForm({
               value={selectedProjectId}
             >
               {projects.length === 0 ? (
-                <option value="">No projects available (Create a project first)</option>
+                <option value="">{t("projects.noProjects")}</option>
               ) : null}
               {projects.map((project) => (
                 <option key={project.id} value={project.id}>
@@ -166,7 +161,7 @@ export function ExpenseCreateForm({
 
           <AuthField
             id="expense-date"
-            label="Date"
+            label={t("expenses.date")}
             name="date"
             onChange={(e) => setDateValue(e.target.value)}
             required
@@ -177,7 +172,7 @@ export function ExpenseCreateForm({
           <AuthField
             autoComplete="off"
             id="expense-description"
-            label="Description"
+            label={t("expenses.description")}
             name="description"
             onChange={(e) => setDescriptionValue(e.target.value)}
             placeholder="e.g. Cloud infrastructure"
@@ -186,9 +181,9 @@ export function ExpenseCreateForm({
           />
 
           <label className="auth-field" htmlFor="expense-category">
-            <span>Category</span>
+            <span>{t("expenses.category")}</span>
             <select defaultValue="" id="expense-category" name="category_id">
-              <option value="">No category</option>
+              <option value="">{t("common.uncategorized")}</option>
               {categories.map((category) => (
                 <option key={category.id} value={category.id}>
                   {category.name}
@@ -198,14 +193,14 @@ export function ExpenseCreateForm({
           </label>
 
           <label className="auth-field" htmlFor="expense-vendor">
-            <span>Vendor / Supplier</span>
+            <span>{t("expenses.vendor")}</span>
             <select
               id="expense-vendor"
               name="vendor_id"
               onChange={(e) => setVendorIdValue(e.target.value)}
               value={vendorIdValue}
             >
-              <option value="">No vendor</option>
+              <option value="">{t("expenses.allVendors")}</option>
               {vendors.map((vendor) => (
                 <option key={vendor.id} value={vendor.id}>
                   {vendor.name}
@@ -217,7 +212,7 @@ export function ExpenseCreateForm({
           <AuthField
             autoComplete="off"
             id="expense-payment-ref"
-            label="Payment Reference / Transaction ID"
+            label={t("expenses.paymentReference")}
             name="payment_reference"
             onChange={(e) => setPaymentReferenceValue(e.target.value)}
             placeholder="e.g. TRX-938218 / 32305151"
@@ -226,10 +221,10 @@ export function ExpenseCreateForm({
         </section>
 
         <section className="resource-form-section">
-          <h3>Budget &amp; Status</h3>
+          <h3>{t("expenses.expenseBudget")}</h3>
 
           <div className="auth-field">
-            <span>Workspace Currency (Inherited)</span>
+            <span>{t("expenses.currencyInherited", { currency: inheritedCurrency })}</span>
             <div className="expense-currency-display">
               <strong>{CURRENCY_LABELS[inheritedCurrency]}</strong>
               <input name="currency" type="hidden" value={inheritedCurrency} />
@@ -239,7 +234,7 @@ export function ExpenseCreateForm({
           <AuthField
             id="expense-budget"
             inputMode="decimal"
-            label="Expense Budget"
+            label={t("expenses.expenseBudget")}
             min="0"
             name="budget_amount"
             onChange={(e) => setBudgetAmount(Number(e.target.value) || 0)}
@@ -252,14 +247,17 @@ export function ExpenseCreateForm({
 
           {overspendWarning?.isOverspent ? (
             <div className="expense-overspend-warning" role="alert">
-              ⚠️ Warning: This expense ({formatCurrency(budgetAmount, inheritedCurrency)}) exceeds the Project Budget ({formatCurrency(projectBudget, inheritedCurrency)}). You can still proceed if intended.
+              {t("expenses.overspendWarningTitle")}:{" "}
+              {t("expenses.overspendWarning", {
+                amount: formatCurrency(budgetAmount, inheritedCurrency, locale),
+              })}
             </div>
           ) : null}
 
           <AuthField
             id="expense-paid"
             inputMode="decimal"
-            label="Paid Amount"
+            label={t("expenses.paid")}
             min="0"
             name="paid_amount"
             onChange={(e) => setPaidAmount(Number(e.target.value) || 0)}
@@ -271,36 +269,36 @@ export function ExpenseCreateForm({
           />
 
           <label className="auth-field" htmlFor="expense-payment-method">
-            <span>Payment method</span>
+            <span>{t("expenses.paymentMethod")}</span>
             <select
               id="expense-payment-method"
               name="payment_method"
               onChange={(e) => setPaymentMethodValue(e.target.value)}
               value={paymentMethodValue}
             >
-              <option value="">Not specified</option>
+              <option value="">{t("common.optional")}</option>
               {EXPENSE_PAYMENT_METHODS.map((method) => (
                 <option key={method} value={method}>
-                  {formatLabel(method)}
+                  {translateEnum(t, "paymentMethod", method)}
                 </option>
               ))}
             </select>
           </label>
 
           <label className="auth-field" htmlFor="expense-priority">
-            <span>Priority</span>
+            <span>{t("expenses.priority")}</span>
             <select defaultValue="" id="expense-priority" name="priority">
-              <option value="">Not specified</option>
+              <option value="">{t("common.optional")}</option>
               {EXPENSE_PRIORITIES.map((priority) => (
                 <option key={priority} value={priority}>
-                  {formatLabel(priority)}
+                  {translateEnum(t, "priority", priority)}
                 </option>
               ))}
             </select>
           </label>
 
           <label className="auth-field" htmlFor="expense-status">
-            <span>Status</span>
+            <span>{t("expenses.status")}</span>
             <select
               id="expense-status"
               name="status"
@@ -310,19 +308,19 @@ export function ExpenseCreateForm({
             >
               {EXPENSE_STATUSES.map((status) => (
                 <option key={status} value={status}>
-                  {formatLabel(status)}
+                  {translateEnum(t, "status", status)}
                 </option>
               ))}
             </select>
           </label>
 
           <label className="auth-field resource-form-span-2" htmlFor="expense-notes">
-            <span>Notes</span>
+            <span>{t("expenses.notes")}</span>
             <textarea
               id="expense-notes"
               name="notes"
               onChange={(e) => setNotesValue(e.target.value)}
-              placeholder="Optional notes"
+              placeholder={t("common.optional")}
               rows={4}
               value={notesValue}
             />
@@ -330,12 +328,12 @@ export function ExpenseCreateForm({
         </section>
 
         <div className="resource-form-actions resource-form-span-2">
-          <Button type="submit">Create expense</Button>
+          <Button type="submit">{t("common.createExpense")}</Button>
           <Link
             className="auth-link"
             href={selectedProjectId ? `/projects/${selectedProjectId}/expenses` : "/expenses"}
           >
-            Cancel
+            {t("common.cancel")}
           </Link>
         </div>
       </form>

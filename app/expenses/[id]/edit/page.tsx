@@ -4,6 +4,7 @@ import { ExpenseEditForm } from "@/components/expenses/expense-edit-form";
 import { AppShell } from "@/components/layout/app-shell";
 import { getCategories } from "@/lib/categories/queries";
 import { getExpenseById } from "@/lib/expenses/queries";
+import { getTranslations } from "@/lib/i18n/server";
 import { getProjects } from "@/lib/projects/queries";
 import { getVendors } from "@/lib/vendors/queries";
 
@@ -15,6 +16,7 @@ type EditExpensePageProps = {
 export default async function EditExpensePage({ params, searchParams }: EditExpensePageProps) {
   const { id } = await params;
   const { error } = await searchParams;
+  const { t } = await getTranslations();
   const [expense, categories, projects, vendors] = await Promise.all([
     getExpenseById(id),
     getCategories(),
@@ -27,7 +29,7 @@ export default async function EditExpensePage({ params, searchParams }: EditExpe
   }
 
   return (
-    <AppShell description={`Update details for ${expense.description}.`} title="Edit expense">
+    <AppShell description={t("expenses.editTitle")} title={t("expenses.editTitle")}>
       {error ? (
         <p className="form-error page-error" role="alert">
           {error}
@@ -41,7 +43,7 @@ export default async function EditExpensePage({ params, searchParams }: EditExpe
       />
       <p className="category-footer-link">
         <Link className="auth-link" href="/expenses">
-          Back to expenses
+          {t("expenses.title")}
         </Link>
       </p>
     </AppShell>

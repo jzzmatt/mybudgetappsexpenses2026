@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { buildExpenseQueryString } from "@/lib/expenses/params";
+import { getTranslations } from "@/lib/i18n/server";
 import type { ExpenseFilters } from "@/lib/expenses/types";
 
 type ExpensePaginationProps = {
@@ -10,13 +11,14 @@ type ExpensePaginationProps = {
   basePath?: string;
 };
 
-export function ExpensePagination({
+export async function ExpensePagination({
   filters,
   page,
   totalPages,
   totalCount,
   basePath = "/expenses",
 }: ExpensePaginationProps) {
+  const { t } = await getTranslations();
   const omitProjectId = basePath.startsWith("/projects/") && basePath.endsWith("/expenses");
   const queryOptions = { omitProjectId };
 
@@ -34,33 +36,33 @@ export function ExpensePagination({
       : undefined;
 
   return (
-    <nav aria-label="Expense pagination" className="expense-pagination">
+    <nav aria-label={t("pagination.label")} className="expense-pagination">
       <p className="expense-pagination-summary">
-        Page {page} of {totalPages} ({totalCount} total)
+        {t("pagination.summary", { page, totalPages, totalCount })}
       </p>
       <div className="expense-pagination-actions">
         {previousHref ? (
           <Link className="button button-outline button-small" href={previousHref}>
-            Previous
+            {t("common.previous")}
           </Link>
         ) : (
           <span
             aria-disabled="true"
             className="button button-outline button-small expense-pagination-disabled"
           >
-            Previous
+            {t("common.previous")}
           </span>
         )}
         {nextHref ? (
           <Link className="button button-outline button-small" href={nextHref}>
-            Next
+            {t("common.next")}
           </Link>
         ) : (
           <span
             aria-disabled="true"
             className="button button-outline button-small expense-pagination-disabled"
           >
-            Next
+            {t("common.next")}
           </span>
         )}
       </div>

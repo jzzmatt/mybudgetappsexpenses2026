@@ -1,28 +1,31 @@
 import Link from "next/link";
+import { getTranslations } from "@/lib/i18n/server";
 
 type CategorySearchFormProps = {
   defaultValue?: string;
 };
 
-export function CategorySearchForm({ defaultValue }: CategorySearchFormProps) {
+export async function CategorySearchForm({ defaultValue }: CategorySearchFormProps) {
+  const { t } = await getTranslations();
+
   return (
     <form action="/categories" className="list-search-form" method="get" role="search">
       <label className="sr-only" htmlFor="category-search">
-        Search categories
+        {t("categories.searchPlaceholder")}
       </label>
       <input
         defaultValue={defaultValue}
         id="category-search"
         name="q"
-        placeholder="Search categories…"
+        placeholder={t("categories.searchPlaceholder")}
         type="search"
       />
       <button className="button button-outline button-small" type="submit">
-        Search
+        {t("common.search")}
       </button>
       {defaultValue ? (
         <Link className="auth-link" href="/categories">
-          Clear
+          {t("common.clear")}
         </Link>
       ) : null}
     </form>

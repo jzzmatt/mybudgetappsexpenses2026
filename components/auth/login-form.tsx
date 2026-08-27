@@ -5,25 +5,35 @@ import { useSignIn } from "@clerk/nextjs/legacy";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useState } from "react";
+import { Suspense, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { AuthField } from "@/components/auth/auth-field";
 import { GoogleAuthButton } from "@/components/auth/google-auth-button";
 import { Button } from "@/components/ui/button";
+import { useTranslations } from "@/lib/i18n/client";
 
-const schema = z.object({
-  email: z.email("Enter a valid email address."),
-  password: z.string().min(1, "Enter your password."),
-});
-
-type FormValues = z.infer<typeof schema>;
+type FormValues = {
+  email: string;
+  password: string;
+};
 
 function LoginFormFields() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { isLoaded, signIn, setActive } = useSignIn();
+  const { t } = useTranslations();
   const [serverError, setServerError] = useState<string>();
+
+  const schema = useMemo(
+    () =>
+      z.object({
+        email: z.email(t("validation.emailInvalid")),
+        password: z.string().min(1, t("validation.passwordRequired")),
+      }),
+    [t],
+  );
+
   const {
     register,
     handleSubmit,
@@ -52,14 +62,14 @@ function LoginFormFields() {
         return;
       }
 
-      setServerError("Additional verification is required before signing in.");
+      setServerError(t("auth.verificationRequired"));
     } catch (error) {
       if (isClerkAPIResponseError(error)) {
         setServerError(error.errors[0]?.longMessage ?? error.errors[0]?.message);
         return;
       }
 
-      setServerError("Unable to sign in. Please try again.");
+      setServerError(t("auth.signInError"));
     }
   };
 
@@ -74,8 +84,8 @@ function LoginFormFields() {
         autoComplete="email"
         error={errors.email?.message}
         id="login-email"
-        label="Email"
-        placeholder="Enter your email"
+        label={t("auth.email")}
+        placeholder={t("auth.emailPlaceholder")}
         type="email"
         {...register("email")}
       />
@@ -83,31 +93,31 @@ function LoginFormFields() {
         autoComplete="current-password"
         error={errors.password?.message}
         id="login-password"
-        label="Password"
-        placeholder="••••••••"
+        label={t("auth.password")}
+        placeholder={t("auth.passwordPlaceholder")}
         type="password"
         {...register("password")}
       />
       <div className="auth-row">
         <label className="auth-remember">
           <input name="remember" type="checkbox" />
-          <span>Remember me</span>
+          <span>{t("auth.rememberMe")}</span>
         </label>
         <Link className="auth-link" href="/forgot-password">
-          Forgot password?
+          {t("auth.forgotPassword")}
         </Link>
       </div>
       <Button disabled={!isLoaded || isSubmitting} type="submit">
-        {isSubmitting ? "Signing in…" : "Sign in"}
+        {isSubmitting ? t("auth.signingIn") : t("auth.signIn")}
       </Button>
       <p className="auth-divider">
-        <span>or</span>
+        <span>{t("common.or")}</span>
       </p>
       <GoogleAuthButton />
       <p className="auth-footer">
-        Don&apos;t have an account?{" "}
+        {t("auth.noAccount")}{" "}
         <Link className="auth-link" href="/register">
-          Sign up
+          {t("auth.signUp")}
         </Link>
       </p>
     </form>
@@ -115,8 +125,10 @@ function LoginFormFields() {
 }
 
 export function LoginForm() {
+  const { t } = useTranslations();
+
   return (
-    <Suspense fallback={<p className="auth-description">Loading sign in…</p>}>
+    <Suspense fallback={<p className="auth-description">{t("auth.loadingSignIn")}</p>}>
       <LoginFormFields />
     </Suspense>
   );

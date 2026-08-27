@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { useTranslations } from "@/lib/i18n/client";
 import { generateProjectReportPdf } from "@/lib/projects/export-pdf";
 import type { ProjectReportData } from "@/lib/projects/types";
 
@@ -11,6 +12,7 @@ type ProjectReportExportButtonProps = {
 
 export function ProjectReportExportButton({ reportData }: ProjectReportExportButtonProps) {
   const [isExporting, setIsExporting] = useState(false);
+  const { t } = useTranslations();
 
   const handleExport = () => {
     setIsExporting(true);
@@ -28,7 +30,7 @@ export function ProjectReportExportButton({ reportData }: ProjectReportExportBut
       URL.revokeObjectURL(url);
     } catch (err) {
       console.error("Failed to generate PDF report:", err);
-      window.alert("Failed to export PDF report. Please try again.");
+      window.alert(t("errors.generic"));
     } finally {
       setIsExporting(false);
     }
@@ -41,7 +43,7 @@ export function ProjectReportExportButton({ reportData }: ProjectReportExportBut
       onClick={handleExport}
       type="button"
     >
-      {isExporting ? "Exporting PDF…" : "Export PDF Report"}
+      {isExporting ? t("projects.exporting") : t("projects.exportReport")}
     </Button>
   );
 }

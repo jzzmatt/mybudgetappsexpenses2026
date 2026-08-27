@@ -1,15 +1,15 @@
 export type NavItem = {
   href: string;
-  label: string;
+  labelKey: string;
   icon: "dashboard" | "expenses" | "budget" | "categories" | "projects" | "vendors" | "reports";
-  mobileLabel?: string;
+  mobileLabelKey?: string;
 };
 
 export const primaryNavItems: NavItem[] = [
-  { href: "/projects", label: "My Projects", icon: "projects", mobileLabel: "Projects" },
-  { href: "/categories", label: "Categories", icon: "categories" },
-  { href: "/vendors", label: "Vendors", icon: "vendors" },
-  { href: "/reports", label: "Reports", icon: "reports" },
+  { href: "/projects", labelKey: "nav.myProjects", icon: "projects", mobileLabelKey: "nav.projects" },
+  { href: "/categories", labelKey: "nav.categories", icon: "categories" },
+  { href: "/vendors", labelKey: "nav.vendors", icon: "vendors" },
+  { href: "/reports", labelKey: "nav.reports", icon: "reports" },
 ];
 
 export const mobileNavItems: NavItem[] = [

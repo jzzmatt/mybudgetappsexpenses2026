@@ -2881,6 +2881,40 @@ select {
   color: var(--destructive, #b42318);
 }
 
+.language-selector {
+  display: flex;
+  gap: 4px;
+}
+
+.language-selector-button {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--muted-foreground);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1;
+  padding: 6px 8px;
+  cursor: pointer;
+}
+
+.language-selector-button:hover,
+.language-selector-button:focus-visible {
+  color: var(--foreground);
+  border-color: color-mix(in srgb, var(--primary) 35%, var(--border));
+}
+
+.language-selector-button-active {
+  background: color-mix(in srgb, var(--primary) 10%, var(--surface));
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.app-sidebar-locale {
+  padding: 12px 16px;
+  margin: 0 8px 8px;
+}
+
 @media (max-width: 768px) {
   .project-expenses-header-add {
     display: none;

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ProjectEditForm } from "@/components/projects/project-edit-form";
 import { AppShell } from "@/components/layout/app-shell";
+import { getTranslations } from "@/lib/i18n/server";
 import { getProjectById } from "@/lib/projects/queries";
 
 type EditProjectPageProps = {
@@ -12,6 +13,7 @@ type EditProjectPageProps = {
 export default async function EditProjectPage({ params, searchParams }: EditProjectPageProps) {
   const { id } = await params;
   const { error } = await searchParams;
+  const { t } = await getTranslations();
   const project = await getProjectById(id);
 
   if (!project) {
@@ -19,7 +21,7 @@ export default async function EditProjectPage({ params, searchParams }: EditProj
   }
 
   return (
-    <AppShell description={`Update details for ${project.name}.`} title="Edit project">
+    <AppShell description={t("projects.editTitle")} title={t("projects.editTitle")}>
       {error ? (
         <p className="form-error page-error" role="alert">
           {error}
@@ -28,7 +30,7 @@ export default async function EditProjectPage({ params, searchParams }: EditProj
       <ProjectEditForm project={project} />
       <p className="category-footer-link">
         <Link className="auth-link" href="/projects">
-          Back to projects
+          {t("projects.backToProjects")}
         </Link>
       </p>
     </AppShell>

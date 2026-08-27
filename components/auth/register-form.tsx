@@ -5,25 +5,35 @@ import { useSignUp } from "@clerk/nextjs/legacy";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { AuthField } from "@/components/auth/auth-field";
 import { GoogleAuthButton } from "@/components/auth/google-auth-button";
 import { Button } from "@/components/ui/button";
+import { useTranslations } from "@/lib/i18n/client";
 
-const schema = z.object({
-  email: z.email("Enter a valid email address."),
-  password: z.string().min(8, "Use at least 8 characters."),
-});
-
-type FormValues = z.infer<typeof schema>;
+type FormValues = {
+  email: string;
+  password: string;
+};
 
 export function RegisterForm() {
   const router = useRouter();
   const { isLoaded, signUp, setActive } = useSignUp();
+  const { t } = useTranslations();
   const [message, setMessage] = useState<string>();
   const [serverError, setServerError] = useState<string>();
+
+  const schema = useMemo(
+    () =>
+      z.object({
+        email: z.email(t("validation.emailInvalid")),
+        password: z.string().min(8, t("validation.passwordRequired")),
+      }),
+    [t],
+  );
+
   const {
     register,
     handleSubmit,
@@ -58,20 +68,18 @@ export function RegisterForm() {
         await signUp.prepareEmailAddressVerification({
           strategy: "email_code",
         });
-        setMessage(
-          "Check your email for a verification code, then sign in once verified.",
-        );
+        setMessage(t("auth.verificationRequired"));
         return;
       }
 
-      setMessage("Account created. You can now sign in.");
+      setMessage(t("auth.signUp"));
     } catch (error) {
       if (isClerkAPIResponseError(error)) {
         setServerError(error.errors[0]?.longMessage ?? error.errors[0]?.message);
         return;
       }
 
-      setServerError("Unable to create your account. Please try again.");
+      setServerError(t("errors.generic"));
     }
   };
 
@@ -91,8 +99,8 @@ export function RegisterForm() {
         autoComplete="email"
         error={errors.email?.message}
         id="register-email"
-        label="Email"
-        placeholder="Enter your email"
+        label={t("auth.email")}
+        placeholder={t("auth.emailPlaceholder")}
         type="email"
         {...register("email")}
       />
@@ -100,22 +108,22 @@ export function RegisterForm() {
         autoComplete="new-password"
         error={errors.password?.message}
         id="register-password"
-        label="Password"
-        placeholder="••••••••"
+        label={t("auth.password")}
+        placeholder={t("auth.passwordPlaceholder")}
         type="password"
         {...register("password")}
       />
       <Button disabled={!isLoaded || isSubmitting} type="submit">
-        {isSubmitting ? "Creating account…" : "Create account"}
+        {isSubmitting ? t("auth.signingUp") : t("auth.signUp")}
       </Button>
       <p className="auth-divider">
-        <span>or</span>
+        <span>{t("common.or")}</span>
       </p>
       <GoogleAuthButton />
       <p className="auth-footer">
-        Already have an account?{" "}
+        {t("auth.hasAccount")}{" "}
         <Link className="auth-link" href="/login">
-          Sign in
+          {t("auth.signIn")}
         </Link>
       </p>
     </form>

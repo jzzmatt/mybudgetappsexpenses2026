@@ -3,6 +3,8 @@ import { DeleteProjectButton } from "@/components/projects/delete-project-button
 import { Card } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/currency/format";
 import type { ExpenseCurrency } from "@/lib/currency/types";
+import { getTranslations } from "@/lib/i18n/server";
+import { translateEnum } from "@/lib/i18n/translator";
 import type { Project } from "@/lib/projects/types";
 
 type ProjectListProps = {
@@ -10,22 +12,18 @@ type ProjectListProps = {
   search?: string;
 };
 
-function formatStatus(status: string) {
-  return status.charAt(0).toUpperCase() + status.slice(1);
-}
+export async function ProjectList({ projects, search }: ProjectListProps) {
+  const { t, locale } = await getTranslations();
 
-export function ProjectList({ projects, search }: ProjectListProps) {
   if (projects.length === 0) {
     return (
       <Card className="list-empty-card">
-        <h2>No projects found</h2>
+        <h2>{t("common.noResults")}</h2>
         <p>
-          {search
-            ? `No projects match "${search}". Try a different search or create a new project.`
-            : "Create your first financial project workspace to track budgets and expenses."}
+          {search ? t("projects.noProjectsSearch") : t("projects.noProjects")}
         </p>
         <Link className="button button-small" href="/projects/new">
-          Create project
+          {t("common.createProject")}
         </Link>
       </Card>
     );
@@ -40,20 +38,23 @@ export function ProjectList({ projects, search }: ProjectListProps) {
               <div>
                 <h3>{project.name}</h3>
                 <p className="list-mobile-card-date">
-                  Budget: {formatCurrency(project.budget_amount, project.currency as ExpenseCurrency)}
+                  {t("projects.projectBudget")}:{" "}
+                  {formatCurrency(project.budget_amount, project.currency as ExpenseCurrency, locale)}
                 </p>
               </div>
               <span className={`status-badge status-${project.status}`}>
-                {formatStatus(project.status)}
+                {translateEnum(t, "status", project.status)}
               </span>
             </div>
-            <p className="list-mobile-card-meta">{project.description || "No description"}</p>
+            <p className="list-mobile-card-meta">
+              {project.description || t("common.optional")}
+            </p>
             <div className="list-mobile-card-actions">
               <Link className="button button-small" href={`/projects/${project.id}`}>
-                Open Project
+                {t("common.openProject")}
               </Link>
               <Link className="auth-link" href={`/projects/${project.id}/edit`}>
-                Edit
+                {t("common.edit")}
               </Link>
               <DeleteProjectButton projectId={project.id} projectName={project.name} />
             </div>
@@ -63,15 +64,15 @@ export function ProjectList({ projects, search }: ProjectListProps) {
       <Card className="category-table-card list-desktop-table">
         <div className="category-table-wrap">
           <table className="category-table list-table">
-            <caption className="sr-only">Projects</caption>
+            <caption className="sr-only">{t("nav.projects")}</caption>
             <thead>
               <tr>
-                <th scope="col">Name</th>
-                <th scope="col">Budget</th>
-                <th scope="col">Currency</th>
-                <th scope="col">Description</th>
-                <th scope="col">Status</th>
-                <th scope="col">Actions</th>
+                <th scope="col">{t("projects.name")}</th>
+                <th scope="col">{t("projects.projectBudget")}</th>
+                <th scope="col">{t("projects.currency")}</th>
+                <th scope="col">{t("projects.descriptionLabel")}</th>
+                <th scope="col">{t("projects.statusLabel")}</th>
+                <th scope="col">{t("common.actions")}</th>
               </tr>
             </thead>
             <tbody>
@@ -84,20 +85,22 @@ export function ProjectList({ projects, search }: ProjectListProps) {
                       </Link>
                     </strong>
                   </td>
-                  <td>{formatCurrency(project.budget_amount, project.currency as ExpenseCurrency)}</td>
+                  <td>
+                    {formatCurrency(project.budget_amount, project.currency as ExpenseCurrency, locale)}
+                  </td>
                   <td>{project.currency}</td>
-                  <td>{project.description || "—"}</td>
+                  <td>{project.description || t("common.dash")}</td>
                   <td>
                     <span className={`status-badge status-${project.status}`}>
-                      {formatStatus(project.status)}
+                      {translateEnum(t, "status", project.status)}
                     </span>
                   </td>
                   <td className="category-table-actions">
                     <Link className="button button-small" href={`/projects/${project.id}`}>
-                      Open Project
+                      {t("common.openProject")}
                     </Link>
                     <Link className="auth-link" href={`/projects/${project.id}/edit`}>
-                      Edit
+                      {t("common.edit")}
                     </Link>
                     <DeleteProjectButton projectId={project.id} projectName={project.name} />
                   </td>

@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { Button } from "@/components/ui/button";
+import { useTranslations } from "@/lib/i18n/client";
 import { deleteProjectAction } from "@/lib/projects/actions";
 
 type DeleteProjectButtonProps = {
@@ -13,9 +14,10 @@ type DeleteProjectButtonProps = {
 export function DeleteProjectButton({ projectId, projectName }: DeleteProjectButtonProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  const { t } = useTranslations();
 
   const onDelete = () => {
-    const confirmed = window.confirm(`Delete "${projectName}"? This action cannot be undone.`);
+    const confirmed = window.confirm(t("projects.deleteConfirm", { name: projectName }));
 
     if (!confirmed) {
       return;
@@ -35,13 +37,13 @@ export function DeleteProjectButton({ projectId, projectName }: DeleteProjectBut
 
   return (
     <Button
-      aria-label={`Delete ${projectName}`}
+      aria-label={`${t("common.delete")} ${projectName}`}
       className="button-danger button-small"
       disabled={isPending}
       onClick={onDelete}
       type="button"
     >
-      {isPending ? "Deleting…" : "Delete"}
+      {isPending ? t("expenses.deleting") : t("common.delete")}
     </Button>
   );
 }

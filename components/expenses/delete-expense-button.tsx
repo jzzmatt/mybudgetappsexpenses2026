@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { Button } from "@/components/ui/button";
+import { useTranslations } from "@/lib/i18n/client";
 import { deleteExpenseAction } from "@/lib/expenses/actions";
 
 type DeleteExpenseButtonProps = {
@@ -13,10 +14,11 @@ type DeleteExpenseButtonProps = {
 export function DeleteExpenseButton({ expenseId, expenseDescription }: DeleteExpenseButtonProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  const { t } = useTranslations();
 
   const onDelete = () => {
     const confirmed = window.confirm(
-      `Delete "${expenseDescription}"? This action cannot be undone.`,
+      t("expenses.deleteConfirm", { name: expenseDescription }),
     );
 
     if (!confirmed) {
@@ -37,13 +39,13 @@ export function DeleteExpenseButton({ expenseId, expenseDescription }: DeleteExp
 
   return (
     <Button
-      aria-label={`Delete ${expenseDescription}`}
+      aria-label={`${t("common.delete")} ${expenseDescription}`}
       className="button-danger button-small"
       disabled={isPending}
       onClick={onDelete}
       type="button"
     >
-      {isPending ? "Deleting…" : "Delete"}
+      {isPending ? t("expenses.deleting") : t("common.delete")}
     </Button>
   );
 }

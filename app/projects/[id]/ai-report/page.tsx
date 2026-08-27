@@ -7,6 +7,7 @@ import { AiReportView } from "@/components/ai-report/ai-report-view";
 import { ProjectWorkspaceNav } from "@/components/projects/project-workspace-nav";
 import { buildProjectAiReportContext } from "@/lib/ai-report/context";
 import { generateProjectAiReport } from "@/lib/ai-report/generate";
+import { getTranslations } from "@/lib/i18n/server";
 import { getProjectById } from "@/lib/projects/queries";
 import type { AiReportResult } from "@/lib/ai-report/types";
 
@@ -19,6 +20,7 @@ export default async function ProjectAiReportPage({ params, searchParams }: Proj
   const { id } = await params;
   const { generate } = await searchParams;
   const shouldGenerate = generate === "true";
+  const { t } = await getTranslations();
 
   const project = await getProjectById(id);
   if (!project) {
@@ -32,14 +34,11 @@ export default async function ProjectAiReportPage({ params, searchParams }: Proj
     try {
       const context = await buildProjectAiReportContext(id);
       if (!context) {
-        throw new Error("Unable to load project workspace context for AI reporting.");
+        throw new Error(t("aiReport.loadError"));
       }
       report = await generateProjectAiReport(context);
     } catch (error) {
-      loadError =
-        error instanceof Error
-          ? error.message
-          : "Unable to generate AI report. Check your OpenAI API configuration.";
+      loadError = error instanceof Error ? error.message : t("aiReport.loadError");
     }
   }
 
@@ -50,17 +49,17 @@ export default async function ProjectAiReportPage({ params, searchParams }: Proj
           <AiReportExportButton report={report} />
         ) : (
           <Link className="button button-small" href={`/projects/${project.id}/ai-report?generate=true`}>
-            Generate AI Report
+            {t("aiReport.generate")}
           </Link>
         )
       }
-      description={`Executive AI CFO insights, spending analysis, and strategic recommendations for ${project.name}.`}
-      title={`${project.name} AI Report`}
+      description={t("aiReport.description")}
+      title={`${project.name} ${t("aiReport.title")}`}
     >
       <ListPageContent>
         <div className="project-workspace-topbar">
           <Link className="auth-link" href="/projects">
-            ← Back to My Projects
+            {t("nav.backToProjects")}
           </Link>
           <ProjectWorkspaceNav activeTab="ai-report" projectId={project.id} projectName={project.name} />
         </div>
@@ -73,11 +72,7 @@ export default async function ProjectAiReportPage({ params, searchParams }: Proj
 
         {!shouldGenerate && !loadError ? (
           <div className="ai-report-placeholder">
-            <p>
-              Click <strong>Generate AI Report</strong> above to generate an executive CFO analysis,
-              utilization evaluation, largest commitment review, and actionable financial recommendations for{" "}
-              <strong>{project.name}</strong>.
-            </p>
+            <p>{t("aiReport.emptyState")}</p>
           </div>
         ) : null}
 

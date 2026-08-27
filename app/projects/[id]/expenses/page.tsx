@@ -13,6 +13,7 @@ import { getCategories } from "@/lib/categories/queries";
 import { getProjectExpenseFilters, buildExpenseQueryString } from "@/lib/expenses/params";
 import { getExpenses, getTopProjectExpenses } from "@/lib/expenses/queries";
 import type { ExpenseListResult } from "@/lib/expenses/types";
+import { getTranslations } from "@/lib/i18n/server";
 import { getProjectById, getProjectExpenseTotals } from "@/lib/projects/queries";
 import type { ProjectExpenseTotals } from "@/lib/projects/types";
 import { getVendors } from "@/lib/vendors/queries";
@@ -25,6 +26,7 @@ type ProjectExpensesPageProps = {
 export default async function ProjectExpensesPage({ params, searchParams }: ProjectExpensesPageProps) {
   const { id } = await params;
   const queryParams = await searchParams;
+  const { t } = await getTranslations();
   const project = await getProjectById(id);
 
   if (!project) {
@@ -58,10 +60,7 @@ export default async function ProjectExpensesPage({ params, searchParams }: Proj
       getVendors(),
     ]);
   } catch (error) {
-    loadError =
-      error instanceof Error
-        ? error.message
-        : "Unable to load expenses. Check your Supabase and Clerk integration.";
+    loadError = error instanceof Error ? error.message : t("expenses.loadError");
   }
 
   const hasSearch = Boolean(filters.search);
@@ -71,10 +70,12 @@ export default async function ProjectExpensesPage({ params, searchParams }: Proj
     <AppShell
       actions={
         <PageActionButton className="project-expenses-header-add" href={addExpenseHref}>
-          + Add Expense
+          {t("common.addExpense")}
         </PageActionButton>
       }
-      description={project.description ?? `All expenses linked to ${project.name}.`}
+      description={
+        project.description ?? t("projects.expensesDescription", { name: project.name })
+      }
       title={project.name}
     >
       {loadError ? (
@@ -85,7 +86,7 @@ export default async function ProjectExpensesPage({ params, searchParams }: Proj
       <ListPageContent className="project-expenses-page">
         <div className="project-workspace-topbar">
           <Link className="auth-link" href="/projects">
-            ← Back to My Projects
+            {t("nav.backToProjects")}
           </Link>
           <ProjectWorkspaceNav activeTab="expenses" projectId={project.id} projectName={project.name} />
         </div>
@@ -93,7 +94,7 @@ export default async function ProjectExpensesPage({ params, searchParams }: Proj
         <ProjectExpensesSummary project={project} totals={totals} />
 
         <Link className="button project-expenses-mobile-add" href={addExpenseHref}>
-          + Add Expense
+          {t("common.addExpense")}
         </Link>
 
         <ProjectExpenseToolbar

@@ -1,0 +1,23 @@
+"use server";
+
+import { cookies } from "next/headers";
+import { revalidatePath } from "next/cache";
+import { LOCALE_COOKIE } from "@/lib/i18n/config";
+import { isLocale } from "@/lib/i18n/server";
+
+export async function setLocaleAction(locale: string) {
+  if (!isLocale(locale)) {
+    return { error: "Invalid locale" };
+  }
+
+  const cookieStore = await cookies();
+  cookieStore.set(LOCALE_COOKIE, locale, {
+    path: "/",
+    maxAge: 60 * 60 * 24 * 365,
+    sameSite: "lax",
+  });
+
+  revalidatePath("/", "layout");
+
+  return { success: true };
+}

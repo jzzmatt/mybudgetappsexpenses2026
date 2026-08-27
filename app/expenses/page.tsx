@@ -9,6 +9,7 @@ import type { Category } from "@/lib/categories/types";
 import { parseExpenseSearchParams } from "@/lib/expenses/params";
 import { getExpenses } from "@/lib/expenses/queries";
 import type { ExpenseListResult } from "@/lib/expenses/types";
+import { getTranslations } from "@/lib/i18n/server";
 import { getProjects } from "@/lib/projects/queries";
 import type { Project } from "@/lib/projects/types";
 import { getVendors } from "@/lib/vendors/queries";
@@ -21,6 +22,7 @@ type ExpensesPageProps = {
 export default async function ExpensesPage({ searchParams }: ExpensesPageProps) {
   const params = await searchParams;
   const filters = parseExpenseSearchParams(params);
+  const { t } = await getTranslations();
 
   let result: ExpenseListResult = {
     expenses: [],
@@ -44,10 +46,7 @@ export default async function ExpensesPage({ searchParams }: ExpensesPageProps) 
       getVendors(),
     ]);
   } catch (error) {
-    loadError =
-      error instanceof Error
-        ? error.message
-        : "Unable to load expenses. Check your Supabase and Clerk integration.";
+    loadError = error instanceof Error ? error.message : t("expenses.loadError");
   }
 
   const hasActiveFilters = Boolean(
@@ -63,8 +62,8 @@ export default async function ExpensesPage({ searchParams }: ExpensesPageProps) 
 
   return (
     <AppShell
-      actions={<PageActionButton href="/expenses/new">Add expense</PageActionButton>}
-      title="Expenses"
+      actions={<PageActionButton href="/expenses/new">{t("common.add")}</PageActionButton>}
+      title={t("expenses.title")}
     >
       {loadError ? (
         <p className="form-error page-error" role="alert">

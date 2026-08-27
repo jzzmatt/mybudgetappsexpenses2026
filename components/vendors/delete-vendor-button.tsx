@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { Button } from "@/components/ui/button";
+import { useTranslations } from "@/lib/i18n/client";
 import { deleteVendorAction } from "@/lib/vendors/actions";
 
 type DeleteVendorButtonProps = {
@@ -13,9 +14,10 @@ type DeleteVendorButtonProps = {
 export function DeleteVendorButton({ vendorId, vendorName }: DeleteVendorButtonProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  const { t } = useTranslations();
 
   const onDelete = () => {
-    const confirmed = window.confirm(`Delete "${vendorName}"? This action cannot be undone.`);
+    const confirmed = window.confirm(t("vendors.deleteConfirm", { name: vendorName }));
 
     if (!confirmed) {
       return;
@@ -35,13 +37,13 @@ export function DeleteVendorButton({ vendorId, vendorName }: DeleteVendorButtonP
 
   return (
     <Button
-      aria-label={`Delete ${vendorName}`}
+      aria-label={`${t("common.delete")} ${vendorName}`}
       className="button-danger button-small"
       disabled={isPending}
       onClick={onDelete}
       type="button"
     >
-      {isPending ? "Deleting…" : "Delete"}
+      {isPending ? t("expenses.deleting") : t("common.delete")}
     </Button>
   );
 }

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
+import { useTranslations } from "@/lib/i18n/client";
 import { duplicateExpenseAction, deleteExpenseAction } from "@/lib/expenses/actions";
 import type { ExpenseWithRelations } from "@/lib/expenses/types";
 
@@ -12,6 +13,7 @@ type ExpenseActionsMenuProps = {
 
 export function ExpenseActionsMenu({ expense }: ExpenseActionsMenuProps) {
   const router = useRouter();
+  const { t } = useTranslations();
   const [isOpen, setIsOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const menuRef = useRef<HTMLDivElement>(null);
@@ -59,7 +61,7 @@ export function ExpenseActionsMenu({ expense }: ExpenseActionsMenuProps) {
   const onDelete = () => {
     setIsOpen(false);
     const confirmed = window.confirm(
-      `Delete "${expense.description}"? This action cannot be undone.`,
+      t("expenses.deleteConfirm", { name: expense.description }),
     );
 
     if (!confirmed) {
@@ -83,7 +85,7 @@ export function ExpenseActionsMenu({ expense }: ExpenseActionsMenuProps) {
       <button
         aria-expanded={isOpen}
         aria-haspopup="menu"
-        aria-label={`Actions for ${expense.description}`}
+        aria-label={`${t("common.actions")} ${expense.description}`}
         className="expense-actions-menu-trigger"
         disabled={isPending}
         onClick={() => setIsOpen((current) => !current)}
@@ -99,7 +101,7 @@ export function ExpenseActionsMenu({ expense }: ExpenseActionsMenuProps) {
             onClick={() => setIsOpen(false)}
             role="menuitem"
           >
-            Edit
+            {t("common.edit")}
           </Link>
           <button
             className="expense-actions-menu-item"
@@ -108,7 +110,7 @@ export function ExpenseActionsMenu({ expense }: ExpenseActionsMenuProps) {
             role="menuitem"
             type="button"
           >
-            Copy
+            {t("common.copy")}
           </button>
           <button
             className="expense-actions-menu-item expense-actions-menu-item-danger"
@@ -117,7 +119,7 @@ export function ExpenseActionsMenu({ expense }: ExpenseActionsMenuProps) {
             role="menuitem"
             type="button"
           >
-            Delete
+            {t("common.delete")}
           </button>
         </div>
       ) : null}

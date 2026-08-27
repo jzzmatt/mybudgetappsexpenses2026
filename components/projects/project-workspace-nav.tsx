@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useTranslations } from "@/lib/i18n/client";
 
 type ProjectWorkspaceNavProps = {
   projectId: string;
@@ -14,6 +15,7 @@ export function ProjectWorkspaceNav({
   activeTab,
 }: ProjectWorkspaceNavProps) {
   const pathname = usePathname();
+  const { t } = useTranslations();
 
   const isOverview =
     activeTab === "overview" ||
@@ -33,34 +35,34 @@ export function ProjectWorkspaceNav({
     pathname.startsWith(`/projects/${projectId}/ai-report`);
 
   return (
-    <nav aria-label="Project Workspace Navigation" className="project-workspace-nav">
+    <nav aria-label={t("nav.projectWorkspace")} className="project-workspace-nav">
       <Link
         aria-current={isOverview ? "page" : undefined}
         className={`project-workspace-tab${isOverview ? " project-workspace-tab-active" : ""}`}
         href={`/projects/${projectId}`}
       >
-        Overview
+        {t("nav.overview")}
       </Link>
       <Link
         aria-current={isExpenses ? "page" : undefined}
         className={`project-workspace-tab${isExpenses ? " project-workspace-tab-active" : ""}`}
         href={`/projects/${projectId}/expenses`}
       >
-        Expenses
+        {t("nav.expenses")}
       </Link>
       <Link
         aria-current={isReports ? "page" : undefined}
         className={`project-workspace-tab${isReports ? " project-workspace-tab-active" : ""}`}
         href={`/projects/${projectId}/reports`}
       >
-        Reports
+        {t("nav.reports")}
       </Link>
       <Link
         aria-current={isAiReport ? "page" : undefined}
         className={`project-workspace-tab${isAiReport ? " project-workspace-tab-active" : ""}`}
         href={`/projects/${projectId}/ai-report`}
       >
-        AI Report
+        {t("nav.aiReport")}
       </Link>
     </nav>
   );

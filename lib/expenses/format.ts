@@ -1,8 +1,14 @@
 export { formatCurrency } from "@/lib/currency/format";
+import { getIntlLocale } from "@/lib/i18n/locale-format";
+import type { Locale } from "@/lib/i18n/types";
 
-export function formatExpenseDate(date: string) {
+export function formatExpenseDate(date: string, locale?: Locale | string) {
+  const intlLocale =
+    typeof locale === "string" && locale.includes("-")
+      ? locale
+      : getIntlLocale((locale as Locale) ?? "pt");
   const [year, month, day] = date.split("-").map(Number);
-  return new Date(year, month - 1, day).toLocaleDateString("en-US", {
+  return new Date(year, month - 1, day).toLocaleDateString(intlLocale, {
     year: "numeric",
     month: "short",
     day: "numeric",

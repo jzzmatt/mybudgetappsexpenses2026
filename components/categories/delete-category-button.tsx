@@ -3,6 +3,7 @@
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { useTranslations } from "@/lib/i18n/client";
 import { deleteCategoryAction } from "@/lib/categories/actions";
 
 type DeleteCategoryButtonProps = {
@@ -13,9 +14,10 @@ type DeleteCategoryButtonProps = {
 export function DeleteCategoryButton({ categoryId, categoryName }: DeleteCategoryButtonProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  const { t } = useTranslations();
 
   const onDelete = () => {
-    const confirmed = window.confirm(`Delete "${categoryName}"? This action cannot be undone.`);
+    const confirmed = window.confirm(t("categories.deleteConfirm", { name: categoryName }));
 
     if (!confirmed) {
       return;
@@ -35,13 +37,13 @@ export function DeleteCategoryButton({ categoryId, categoryName }: DeleteCategor
 
   return (
     <Button
-      aria-label={`Delete ${categoryName}`}
+      aria-label={`${t("common.delete")} ${categoryName}`}
       className="button-danger button-small"
       disabled={isPending}
       onClick={onDelete}
       type="button"
     >
-      {isPending ? "Deleting…" : "Delete"}
+      {isPending ? t("expenses.deleting") : t("common.delete")}
     </Button>
   );
 }

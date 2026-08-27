@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { VendorEditForm } from "@/components/vendors/vendor-edit-form";
 import { AppShell } from "@/components/layout/app-shell";
+import { getTranslations } from "@/lib/i18n/server";
 import { getVendorById } from "@/lib/vendors/queries";
 
 type EditVendorPageProps = {
@@ -12,6 +13,7 @@ type EditVendorPageProps = {
 export default async function EditVendorPage({ params, searchParams }: EditVendorPageProps) {
   const { id } = await params;
   const { error } = await searchParams;
+  const { t } = await getTranslations();
   const vendor = await getVendorById(id);
 
   if (!vendor) {
@@ -19,7 +21,7 @@ export default async function EditVendorPage({ params, searchParams }: EditVendo
   }
 
   return (
-    <AppShell description={`Update details for ${vendor.name}.`} title="Edit vendor">
+    <AppShell description={t("vendors.editTitle")} title={t("vendors.editTitle")}>
       {error ? (
         <p className="form-error page-error" role="alert">
           {error}
@@ -28,7 +30,7 @@ export default async function EditVendorPage({ params, searchParams }: EditVendo
       <VendorEditForm vendor={vendor} />
       <p className="category-footer-link">
         <Link className="auth-link" href="/vendors">
-          Back to vendors
+          {t("vendors.title")}
         </Link>
       </p>
     </AppShell>

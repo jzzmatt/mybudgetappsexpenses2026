@@ -1,12 +1,17 @@
 import { Card } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/currency/format";
+import { getIntlLocale } from "@/lib/i18n/locale-format";
+import { getTranslations } from "@/lib/i18n/server";
 import type { ProjectFinancialSummary } from "@/lib/projects/types";
 
 type ProjectOverviewKpisProps = {
   financials: ProjectFinancialSummary;
 };
 
-export function ProjectOverviewKpis({ financials }: ProjectOverviewKpisProps) {
+export async function ProjectOverviewKpis({ financials }: ProjectOverviewKpisProps) {
+  const { t, locale } = await getTranslations();
+  const intlLocale = getIntlLocale(locale);
+
   const {
     projectBudget,
     totalExpenseBudget,
@@ -22,39 +27,39 @@ export function ProjectOverviewKpis({ financials }: ProjectOverviewKpisProps) {
 
   const items = [
     {
-      label: "Project Budget",
-      value: formatCurrency(projectBudget, currency),
-      subtext: `${allocatedPercent.toFixed(1)}% allocated`,
+      label: t("projects.totalBudget"),
+      value: formatCurrency(projectBudget, currency, locale),
+      subtext: `${allocatedPercent.toFixed(1)}% ${t("projects.allocated").toLowerCase()}`,
       variant: "default",
     },
     {
-      label: "Total Expense Budget",
-      value: formatCurrency(totalExpenseBudget, currency),
-      subtext: isOverspent ? "Exceeds Project Budget" : "Sum of expense budgets",
+      label: t("projects.totalExpenseBudget"),
+      value: formatCurrency(totalExpenseBudget, currency, locale),
+      subtext: isOverspent ? t("projects.overspent") : t("projects.expenseBudgetAllocation"),
       variant: isOverspent ? "danger" : "default",
     },
     {
-      label: "Total Paid",
-      value: formatCurrency(totalPaid, currency),
-      subtext: `${projectPaidPercent.toFixed(1)}% of project budget`,
+      label: t("projects.totalPaid"),
+      value: formatCurrency(totalPaid, currency, locale),
+      subtext: `${projectPaidPercent.toFixed(1)}% ${t("projects.projectBudgetUsage").toLowerCase()}`,
       variant: "paid",
     },
     {
-      label: "Total Remaining",
-      value: formatCurrency(totalExpenseRemaining, currency),
-      subtext: "Unpaid balance",
+      label: t("projects.totalRemaining"),
+      value: formatCurrency(totalExpenseRemaining, currency, locale),
+      subtext: t("expenses.remaining"),
       variant: "remaining",
     },
     {
-      label: "Available Budget",
-      value: formatCurrency(availableBudget, currency),
-      subtext: availableBudget < 0 ? "Budget Deficit" : "Remaining unallocated",
+      label: t("projects.availableBudget"),
+      value: formatCurrency(availableBudget, currency, locale),
+      subtext: availableBudget < 0 ? t("projects.overspent") : t("projects.allocated"),
       variant: availableBudget < 0 ? "danger" : "default",
     },
     {
-      label: "Number of Expenses",
-      value: expenseCount.toLocaleString("en-US"),
-      subtext: "Recorded in workspace",
+      label: t("projects.numberOfExpenses"),
+      value: expenseCount.toLocaleString(intlLocale),
+      subtext: t("nav.projectWorkspace"),
       variant: "default",
     },
   ];
