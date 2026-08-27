@@ -1,4 +1,7 @@
+"use client";
+
 import { formatExpensePercentage } from "@/lib/expenses/format";
+import { useTranslations } from "@/lib/i18n/client";
 
 type ExpensePercentageBarProps = {
   percent: number;
@@ -7,13 +10,14 @@ type ExpensePercentageBarProps = {
 };
 
 export function ExpensePercentageBar({ percent, labelSuffix = "", ariaLabel }: ExpensePercentageBarProps) {
+  const { t } = useTranslations();
   const clamped = Math.min(100, Math.max(0, percent));
   const isHigh = percent > 50;
   const formatted = formatExpensePercentage(percent);
   const displayLabel = labelSuffix ? `${formatted}${labelSuffix}` : formatted;
   const defaultAriaLabel = labelSuffix
-    ? `${formatted}${labelSuffix.trim()}`
-    : `${formatted} of total budget`;
+    ? t("expenses.paidPercentAria", { percent: formatted })
+    : `${formatted} ${t("expenses.percentage")}`;
 
   return (
     <div
