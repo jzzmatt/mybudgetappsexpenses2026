@@ -200,6 +200,36 @@ export function ExpenseEditForm({ expense, categories, projects, vendors }: Expe
           />
         </label>
 
+        <AuthField
+          autoComplete="off"
+          defaultValue={expense.payment_reference ?? ""}
+          id="expense-payment-reference"
+          label="Payment Reference / Transaction ID"
+          name="payment_reference"
+          placeholder="e.g. TRX-938218 / 32305151"
+        />
+
+        {expense.payment_proof_path ? (
+          <div className="auth-field">
+            <span>Attached Payment Proof</span>
+            <div className="expense-proof-preview-box">
+              <span>📄 {expense.payment_proof_filename || "payment-proof.pdf"}</span>
+              {expense.proofSignedUrl ? (
+                <a
+                  className="button button-outline button-small"
+                  href={expense.proofSignedUrl}
+                  rel="noopener noreferrer"
+                  target="_blank"
+                >
+                  View / Download PDF
+                </a>
+              ) : null}
+            </div>
+            <input name="payment_proof_path" type="hidden" value={expense.payment_proof_path} />
+            <input name="payment_proof_filename" type="hidden" value={expense.payment_proof_filename ?? ""} />
+          </div>
+        ) : null}
+
         <div className="category-form-actions">
           <Button type="submit">Save changes</Button>
           <CopyExpenseButton expense={expense} />

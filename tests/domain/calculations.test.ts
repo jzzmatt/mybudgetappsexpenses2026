@@ -7,7 +7,7 @@ import {
   willCauseProjectOverspending,
 } from "@/lib/projects/calculations";
 import { projectSchema } from "@/lib/projects/schema";
-import { projectScopedExpenseSchema } from "@/lib/expenses/schema";
+import { paymentProofExtractionSchema, projectScopedExpenseSchema } from "@/lib/expenses/schema";
 import { categorySchema } from "@/lib/categories/schema";
 import { vendorSchema } from "@/lib/vendors/schema";
 import { generateProjectReportPdf } from "@/lib/projects/export-pdf";
@@ -59,6 +59,9 @@ describe("Project Domain Calculations & Financial Formulas", () => {
       paid_amount: 200,
       balance: 300,
       payment_method: null,
+      payment_reference: null,
+      payment_proof_path: null,
+      payment_proof_filename: null,
       priority: null,
       status: "partial",
       notes: null,
@@ -240,6 +243,48 @@ describe("Project & Expense Domain Schemas", () => {
     assert.equal(valid.contact_info, "billing@aws.amazon.com");
   });
 
+  it("validates payment proof extraction schema output correctly", () => {
+    const rawAiOutput = {
+      date: "2026-07-27",
+      description: "Payment to Adriano Eduardo",
+      vendor_person: "ADRIANO UTALE CAMUTALI EDUARDO",
+      paid_amount: 2083333,
+      currency_detected: "Kz",
+      payment_method: "bank_transfer",
+      payment_reference: "32305151",
+      suggested_expense_budget: 2083333,
+      suggested_status: "paid",
+      notes: "Extracted from bank transfer receipt",
+      extraction_warnings: [],
+    };
+
+    const validated = paymentProofExtractionSchema.parse(rawAiOutput);
+    assert.equal(validated.date, "2026-07-27");
+    assert.equal(validated.vendor_person, "ADRIANO UTALE CAMUTALI EDUARDO");
+    assert.equal(validated.paid_amount, 2083333);
+    assert.equal(validated.payment_reference, "32305151");
+    assert.equal(validated.payment_method, "bank_transfer");
+    assert.equal(validated.suggested_status, "paid");
+  });
+
+  it("validates expense schema with optional payment proof fields", () => {
+    const valid = projectScopedExpenseSchema.parse({
+      project_id: "550e8400-e29b-41d4-a716-446655440000",
+      date: "2026-08-27",
+      description: "Hardware server procurement",
+      budget_amount: 50000,
+      paid_amount: 50000,
+      payment_method: "bank_transfer",
+      payment_reference: "TRX-998822",
+      payment_proof_path: "user_1/proj_1/proof_123.pdf",
+      payment_proof_filename: "receipt_server.pdf",
+    });
+
+    assert.equal(valid.payment_reference, "TRX-998822");
+    assert.equal(valid.payment_proof_path, "user_1/proj_1/proof_123.pdf");
+    assert.equal(valid.payment_proof_filename, "receipt_server.pdf");
+  });
+
   it("generates a valid project PDF report buffer without throwing", () => {
     const mockReportData: ProjectReportData = {
       project: {
@@ -289,6 +334,9 @@ describe("Project & Expense Domain Schemas", () => {
           paid_amount: 15000,
           balance: 10000,
           payment_method: "bank_transfer",
+          payment_reference: "32305151",
+          payment_proof_path: "user-1/proj-1/proof.pdf",
+          payment_proof_filename: "receipt.pdf",
           priority: "high",
           status: "partial",
           notes: null,

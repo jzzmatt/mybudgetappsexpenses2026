@@ -24,6 +24,11 @@ const optionalEnum = <T extends readonly [string, ...string[]]>(values: T) =>
     z.enum(values).nullable(),
   );
 
+const optionalString = z.preprocess(
+  (value) => (typeof value === "string" && value.trim() ? value.trim() : null),
+  z.string().nullable().optional(),
+);
+
 const expenseSchema = z.object({
   date: z
     .string()
@@ -46,6 +51,9 @@ const expenseSchema = z.object({
     .min(0, "Paid amount cannot be negative."),
   currency: z.enum(EXPENSE_CURRENCIES, { error: "Select a valid currency." }),
   payment_method: optionalEnum(EXPENSE_PAYMENT_METHODS),
+  payment_reference: optionalString,
+  payment_proof_path: optionalString,
+  payment_proof_filename: optionalString,
   priority: optionalEnum(EXPENSE_PRIORITIES),
   status: z.enum(EXPENSE_STATUSES, { error: "Select a valid status." }),
   notes: z
@@ -76,6 +84,9 @@ function parseExpenseFormData(formData: FormData) {
     paid_amount: formData.get("paid_amount"),
     currency: formData.get("currency"),
     payment_method: formData.get("payment_method") ?? undefined,
+    payment_reference: formData.get("payment_reference") ?? undefined,
+    payment_proof_path: formData.get("payment_proof_path") ?? undefined,
+    payment_proof_filename: formData.get("payment_proof_filename") ?? undefined,
     priority: formData.get("priority") ?? undefined,
     status: formData.get("status"),
     notes: formData.get("notes") ?? undefined,
@@ -111,7 +122,7 @@ export async function createExpenseAction(formData: FormData) {
     }
   }
 
-  const { error } = await supabase.from("expenses").insert({
+  let { error } = await supabase.from("expenses").insert({
     user_id: userId,
     date: parsed.data.date,
     month,
@@ -124,10 +135,35 @@ export async function createExpenseAction(formData: FormData) {
     paid_amount: parsed.data.paid_amount,
     currency: expenseCurrency,
     payment_method: parsed.data.payment_method,
+    payment_reference: parsed.data.payment_reference,
+    payment_proof_path: parsed.data.payment_proof_path,
+    payment_proof_filename: parsed.data.payment_proof_filename,
     priority: parsed.data.priority,
     status: parsed.data.status,
     notes: parsed.data.notes,
   });
+
+  // If payment proof columns don't exist yet before migration, gracefully fallback
+  if (error && (error.code === "42703" || error.message?.includes("does not exist"))) {
+    const fallback = await supabase.from("expenses").insert({
+      user_id: userId,
+      date: parsed.data.date,
+      month,
+      year,
+      category_id: parsed.data.category_id,
+      project_id: parsed.data.project_id,
+      vendor_id: parsed.data.vendor_id,
+      description: parsed.data.description,
+      budget_amount: parsed.data.budget_amount,
+      paid_amount: parsed.data.paid_amount,
+      currency: expenseCurrency,
+      payment_method: parsed.data.payment_method,
+      priority: parsed.data.priority,
+      status: parsed.data.status,
+      notes: parsed.data.notes,
+    });
+    error = fallback.error;
+  }
 
   if (error) {
     const projectId = parsed.data.project_id;
@@ -173,7 +209,7 @@ export async function updateExpenseAction(expenseId: string, formData: FormData)
     }
   }
 
-  const { error } = await supabase
+  let { error } = await supabase
     .from("expenses")
     .update({
       date: parsed.data.date,
@@ -187,11 +223,37 @@ export async function updateExpenseAction(expenseId: string, formData: FormData)
       paid_amount: parsed.data.paid_amount,
       currency: expenseCurrency,
       payment_method: parsed.data.payment_method,
+      payment_reference: parsed.data.payment_reference,
+      payment_proof_path: parsed.data.payment_proof_path,
+      payment_proof_filename: parsed.data.payment_proof_filename,
       priority: parsed.data.priority,
       status: parsed.data.status,
       notes: parsed.data.notes,
     })
     .eq("id", expenseId);
+
+  if (error && (error.code === "42703" || error.message?.includes("does not exist"))) {
+    const fallback = await supabase
+      .from("expenses")
+      .update({
+        date: parsed.data.date,
+        month,
+        year,
+        category_id: parsed.data.category_id,
+        project_id: parsed.data.project_id,
+        vendor_id: parsed.data.vendor_id,
+        description: parsed.data.description,
+        budget_amount: parsed.data.budget_amount,
+        paid_amount: parsed.data.paid_amount,
+        currency: expenseCurrency,
+        payment_method: parsed.data.payment_method,
+        priority: parsed.data.priority,
+        status: parsed.data.status,
+        notes: parsed.data.notes,
+      })
+      .eq("id", expenseId);
+    error = fallback.error;
+  }
 
   if (error) {
     redirect(`/expenses/${expenseId}/edit?error=${encodeURIComponent(error.message)}`);

@@ -7,6 +7,11 @@ const optionalUuid = z.preprocess(
   z.string().uuid().nullable().optional(),
 );
 
+const optionalString = z.preprocess(
+  (value) => (typeof value === "string" && value.trim() ? value.trim() : null),
+  z.string().nullable().optional(),
+);
+
 const optionalEnum = <T extends readonly [string, ...string[]]>(values: T) =>
   z.preprocess(
     (value) => (typeof value === "string" && value.trim() ? value : null),
@@ -36,6 +41,9 @@ export const projectScopedExpenseSchema = z.object({
     .default(0),
   currency: z.enum(EXPENSE_CURRENCIES).default(DEFAULT_EXPENSE_CURRENCY),
   payment_method: optionalEnum(EXPENSE_PAYMENT_METHODS),
+  payment_reference: optionalString,
+  payment_proof_path: optionalString,
+  payment_proof_filename: optionalString,
   priority: optionalEnum(EXPENSE_PRIORITIES),
   status: z.enum(EXPENSE_STATUSES).default("pending"),
   notes: z
@@ -47,4 +55,24 @@ export const projectScopedExpenseSchema = z.object({
     .transform((val) => val || null),
 });
 
+export const paymentProofExtractionSchema = z.object({
+  date: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format")
+    .nullable()
+    .optional()
+    .default(null),
+  description: z.string().trim().min(1).default("Imported Payment"),
+  vendor_person: z.string().trim().nullable().optional().default(null),
+  paid_amount: z.coerce.number().min(0).default(0),
+  currency_detected: z.string().trim().nullable().optional().default(null),
+  payment_method: optionalEnum(EXPENSE_PAYMENT_METHODS),
+  payment_reference: z.string().trim().nullable().optional().default(null),
+  suggested_expense_budget: z.coerce.number().min(0).default(0),
+  suggested_status: z.enum(EXPENSE_STATUSES).default("paid"),
+  notes: z.string().trim().nullable().optional().default(null),
+  extraction_warnings: z.array(z.string()).default([]),
+});
+
 export type ProjectScopedExpenseSchemaInput = z.infer<typeof projectScopedExpenseSchema>;
+export type PaymentProofExtractionSchemaOutput = z.infer<typeof paymentProofExtractionSchema>;

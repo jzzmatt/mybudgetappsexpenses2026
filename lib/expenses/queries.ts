@@ -1,6 +1,7 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { isExpenseCurrency, type ExpenseCurrency } from "@/lib/currency/types";
 import { ensureUserRecord } from "@/lib/users/ensure-user";
+import { getPaymentProofSignedUrl } from "@/lib/storage/payment-proofs";
 import {
   EXPENSE_PAGE_SIZE,
   EXPENSE_SORT_FIELDS,
@@ -29,6 +30,9 @@ const expenseSelect = `
   balance,
   currency,
   payment_method,
+  payment_reference,
+  payment_proof_path,
+  payment_proof_filename,
   priority,
   status,
   notes,
@@ -284,5 +288,17 @@ export async function getExpenseById(id: string): Promise<ExpenseWithRelations |
     throw new Error(error.message);
   }
 
-  return data ? normalizeExpense(data as Record<string, unknown>) : null;
+  if (!data) {
+    return null;
+  }
+
+  const expense = normalizeExpense(data as Record<string, unknown>);
+
+  // If the expense has a payment proof path, generate a short-lived signed URL
+  if (expense.payment_proof_path) {
+    const signedUrl = await getPaymentProofSignedUrl(expense.payment_proof_path);
+    expense.proofSignedUrl = signedUrl;
+  }
+
+  return expense;
 }
