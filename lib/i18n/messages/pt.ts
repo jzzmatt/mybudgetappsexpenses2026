@@ -278,6 +278,9 @@ export const ptMessages: Messages = {
     resetPasswordTitle: "Redefinir senha",
     forgotPasswordTitle: "Recuperar senha",
     signOut: "Terminar sessão",
+    clerkUnavailable:
+      "Autenticação indisponível. Configure NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY e CLERK_SECRET_KEY no Vercel (Production e Preview) e adicione este domínio no painel Clerk.",
+    clerkLoading: "A carregar autenticação…",
   },
   validation: {
     emailInvalid: "Introduza um email válido.",

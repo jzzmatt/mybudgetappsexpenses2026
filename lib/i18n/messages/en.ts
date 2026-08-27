@@ -278,6 +278,9 @@ export const enMessages: Messages = {
     resetPasswordTitle: "Reset password",
     forgotPasswordTitle: "Forgot password",
     signOut: "Sign out",
+    clerkUnavailable:
+      "Authentication is unavailable. Set NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY and CLERK_SECRET_KEY in Vercel (Production and Preview) and add this domain in the Clerk dashboard.",
+    clerkLoading: "Loading authentication…",
   },
   validation: {
     emailInvalid: "Enter a valid email address.",

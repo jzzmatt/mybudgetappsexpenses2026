@@ -279,6 +279,8 @@ export type Messages = {
     resetPasswordTitle: string;
     forgotPasswordTitle: string;
     signOut: string;
+    clerkUnavailable: string;
+    clerkLoading: string;
   };
   validation: {
     emailInvalid: string;

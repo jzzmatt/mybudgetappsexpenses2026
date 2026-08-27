@@ -1,9 +1,11 @@
 import { safeCurrentUser } from "@/lib/clerk/server";
+import { isClerkConfigured } from "@/lib/clerk/config";
 import { LogoutButton } from "@/components/layout/logout-button";
 import { getTranslations } from "@/lib/i18n/server";
 
 export async function AppSidebarUser() {
   const user = await safeCurrentUser();
+  const clerkReady = isClerkConfigured();
   const { t } = await getTranslations();
   const fullName =
     [user?.firstName, user?.lastName].filter(Boolean).join(" ").trim() || t("app.userFallback");
@@ -28,7 +30,7 @@ export async function AppSidebarUser() {
         <p className="app-sidebar-user-name">{fullName}</p>
         <p className="app-sidebar-user-role">{t("app.administrator")}</p>
       </div>
-      <LogoutButton variant="sidebar" />
+      {clerkReady ? <LogoutButton variant="sidebar" /> : null}
     </div>
   );
 }

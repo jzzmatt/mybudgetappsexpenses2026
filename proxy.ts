@@ -25,9 +25,13 @@ const clerkHandler = clerkMiddleware(async (auth, request) => {
   }
 });
 
+function passthroughProxy(_request: NextRequest) {
+  return NextResponse.next();
+}
+
 export default function proxy(request: NextRequest, event: NextFetchEvent) {
   if (!isClerkConfigured()) {
-    return NextResponse.next();
+    return passthroughProxy(request);
   }
 
   return clerkHandler(request, event);

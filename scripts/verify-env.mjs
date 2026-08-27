@@ -30,23 +30,51 @@ function loadEnvFile(path) {
 loadEnvFile(".env.local");
 loadEnvFile(".env");
 
-const placeholders = {
-  NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: "pk_test_placeholder_key_for_build_purposes",
-  CLERK_SECRET_KEY: "sk_test_placeholder_key_for_build_purposes",
+const supabasePlaceholders = {
   NEXT_PUBLIC_SUPABASE_URL: "https://placeholder-project.supabase.co",
   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: "placeholder-publishable-key",
 };
 
-const required = Object.keys(placeholders);
-
-for (const key of required) {
+for (const [key, value] of Object.entries(supabasePlaceholders)) {
   if (!process.env[key]) {
-    process.env[key] = placeholders[key];
+    process.env[key] = value;
   }
 }
 
-for (const key of required) {
+const clerkUrlDefaults = {
+  NEXT_PUBLIC_CLERK_SIGN_IN_URL: "/login",
+  NEXT_PUBLIC_CLERK_SIGN_UP_URL: "/register",
+  NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL: "/dashboard",
+  NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL: "/dashboard",
+};
+
+for (const [key, value] of Object.entries(clerkUrlDefaults)) {
+  if (!process.env[key]) {
+    process.env[key] = value;
+  }
+}
+
+const clerkKeys = [
+  "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY",
+  "CLERK_SECRET_KEY",
+  "NEXT_PUBLIC_CLERK_SIGN_IN_URL",
+  "NEXT_PUBLIC_CLERK_SIGN_UP_URL",
+  "NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL",
+  "NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL",
+];
+
+for (const key of clerkKeys) {
   const value = process.env[key];
-  const isPlaceholder = value === placeholders[key];
+  console.log(`${key}: ${value ? "set" : "missing"}`);
+}
+
+for (const [key, value] of Object.entries(supabasePlaceholders)) {
+  const isPlaceholder = process.env[key] === value;
   console.log(`${key}: ${isPlaceholder ? "placeholder" : "set"}`);
+}
+
+if (!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || !process.env.CLERK_SECRET_KEY) {
+  console.warn(
+    "Clerk keys are missing. Auth will not work until NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY and CLERK_SECRET_KEY are set for this build.",
+  );
 }

@@ -26,20 +26,27 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const publishableKey =
-    getClerkPublishableKey() || "pk_test_placeholder_key_for_build_purposes";
+  const publishableKey = getClerkPublishableKey();
   const locale = await getLocale();
   const messages = getMessages(locale);
 
+  const body = (
+    <html lang={locale}>
+      <body>
+        <I18nProvider locale={locale} messages={messages}>
+          {children}
+        </I18nProvider>
+      </body>
+    </html>
+  );
+
+  if (!publishableKey) {
+    return body;
+  }
+
   return (
     <ClerkProvider publishableKey={publishableKey}>
-      <html lang={locale}>
-        <body>
-          <I18nProvider locale={locale} messages={messages}>
-            {children}
-          </I18nProvider>
-        </body>
-      </html>
+      {body}
     </ClerkProvider>
   );
 }

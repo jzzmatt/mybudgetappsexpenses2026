@@ -4,13 +4,13 @@ import { isClerkAPIResponseError } from "@clerk/nextjs/errors";
 import { useSignUp } from "@clerk/nextjs/legacy";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { AuthField } from "@/components/auth/auth-field";
 import { GoogleAuthButton } from "@/components/auth/google-auth-button";
 import { Button } from "@/components/ui/button";
+import { redirectAfterAuth } from "@/lib/clerk/client";
 import { useTranslations } from "@/lib/i18n/client";
 
 type FormValues = {
@@ -19,7 +19,6 @@ type FormValues = {
 };
 
 export function RegisterForm() {
-  const router = useRouter();
   const { isLoaded, signUp, setActive } = useSignUp();
   const { t } = useTranslations();
   const [message, setMessage] = useState<string>();
@@ -56,8 +55,7 @@ export function RegisterForm() {
 
       if (signUp.status === "complete") {
         await setActive({ session: signUp.createdSessionId });
-        router.replace("/dashboard");
-        router.refresh();
+        redirectAfterAuth("/dashboard");
         return;
       }
 

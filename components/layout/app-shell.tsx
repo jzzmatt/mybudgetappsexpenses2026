@@ -4,6 +4,7 @@ import { AppBottomNav } from "@/components/layout/app-bottom-nav";
 import { AppMobileSignOut } from "@/components/layout/app-mobile-sign-out";
 import { AppSidebarNav } from "@/components/layout/app-sidebar-nav";
 import { AppSidebarUser } from "@/components/layout/app-sidebar-user";
+import { isClerkConfigured } from "@/lib/clerk/config";
 import { getTranslations } from "@/lib/i18n/server";
 
 type AppShellProps = {
@@ -15,6 +16,7 @@ type AppShellProps = {
 
 export async function AppShell({ title, description, actions, children }: AppShellProps) {
   const { t } = await getTranslations();
+  const clerkReady = isClerkConfigured();
 
   return (
     <div className="app-shell">
@@ -40,7 +42,7 @@ export async function AppShell({ title, description, actions, children }: AppShe
           <div className="app-header-actions">
             <LanguageSelector />
             {actions}
-            <AppMobileSignOut />
+            {clerkReady ? <AppMobileSignOut /> : null}
           </div>
         </header>
         <main className="app-content" id="main-content">

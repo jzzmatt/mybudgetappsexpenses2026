@@ -3,12 +3,12 @@
 import { isClerkAPIResponseError } from "@clerk/nextjs/errors";
 import { useSignIn } from "@clerk/nextjs/legacy";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { AuthField } from "@/components/auth/auth-field";
 import { Button } from "@/components/ui/button";
+import { redirectAfterAuth } from "@/lib/clerk/client";
 
 const schema = z.object({
   code: z.string().min(6, "Enter the 6-digit code from your email."),
@@ -18,7 +18,6 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>;
 
 export function UpdatePasswordForm() {
-  const router = useRouter();
   const { isLoaded, signIn, setActive } = useSignIn();
   const [serverError, setServerError] = useState<string>();
   const {
@@ -43,8 +42,7 @@ export function UpdatePasswordForm() {
 
       if (result.status === "complete") {
         await setActive({ session: result.createdSessionId });
-        router.replace("/dashboard");
-        router.refresh();
+        redirectAfterAuth("/dashboard");
         return;
       }
 

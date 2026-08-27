@@ -4,13 +4,14 @@ import { isClerkAPIResponseError } from "@clerk/nextjs/errors";
 import { useSignIn } from "@clerk/nextjs/legacy";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { Suspense, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { AuthField } from "@/components/auth/auth-field";
 import { GoogleAuthButton } from "@/components/auth/google-auth-button";
 import { Button } from "@/components/ui/button";
+import { redirectAfterAuth } from "@/lib/clerk/client";
 import { useTranslations } from "@/lib/i18n/client";
 
 type FormValues = {
@@ -19,7 +20,6 @@ type FormValues = {
 };
 
 function LoginFormFields() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const { isLoaded, signIn, setActive } = useSignIn();
   const { t } = useTranslations();
@@ -57,8 +57,7 @@ function LoginFormFields() {
 
       if (result.status === "complete") {
         await setActive({ session: result.createdSessionId });
-        router.replace(searchParams.get("next") ?? "/dashboard");
-        router.refresh();
+        redirectAfterAuth(searchParams.get("next") ?? "/dashboard");
         return;
       }
 

@@ -279,6 +279,9 @@ export const frMessages: Messages = {
     resetPasswordTitle: "Réinitialiser le mot de passe",
     forgotPasswordTitle: "Mot de passe oublié",
     signOut: "Se déconnecter",
+    clerkUnavailable:
+      "Authentification indisponible. Configurez NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY et CLERK_SECRET_KEY sur Vercel (Production et Preview) et ajoutez ce domaine dans le tableau Clerk.",
+    clerkLoading: "Chargement de l'authentification…",
   },
   validation: {
     emailInvalid: "Entrez une adresse email valide.",
