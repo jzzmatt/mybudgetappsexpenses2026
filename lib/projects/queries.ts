@@ -367,5 +367,6 @@ export async function getProjectExpenseTotals(projectId: string): Promise<Projec
   return {
     byCurrency,
     currencies: Array.from(currencies).sort(),
+    expenseCount: data?.length ?? 0,
   };
 }

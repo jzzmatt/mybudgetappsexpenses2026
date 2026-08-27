@@ -1,17 +1,21 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ExpenseList } from "@/components/expenses/expense-list";
+import { ProjectExpenseList } from "@/components/expenses/project-expense-list";
+import { ProjectExpenseToolbar } from "@/components/expenses/project-expense-toolbar";
 import { ExpensePagination } from "@/components/expenses/expense-pagination";
+import { TopExpensesSection } from "@/components/expenses/top-expenses-section";
 import { AppShell } from "@/components/layout/app-shell";
 import { ListPageContent } from "@/components/layout/list-page-content";
 import { PageActionButton } from "@/components/layout/page-action-button";
 import { ProjectExpensesSummary } from "@/components/projects/project-expenses-summary";
 import { ProjectWorkspaceNav } from "@/components/projects/project-workspace-nav";
-import { parseExpenseSearchParams } from "@/lib/expenses/params";
-import { getExpenses } from "@/lib/expenses/queries";
+import { getCategories } from "@/lib/categories/queries";
+import { getProjectExpenseFilters, buildExpenseQueryString } from "@/lib/expenses/params";
+import { getExpenses, getTopProjectExpenses } from "@/lib/expenses/queries";
 import type { ExpenseListResult } from "@/lib/expenses/types";
 import { getProjectById, getProjectExpenseTotals } from "@/lib/projects/queries";
 import type { ProjectExpenseTotals } from "@/lib/projects/types";
+import { getVendors } from "@/lib/vendors/queries";
 
 type ProjectExpensesPageProps = {
   params: Promise<{ id: string }>;
@@ -27,11 +31,9 @@ export default async function ProjectExpensesPage({ params, searchParams }: Proj
     notFound();
   }
 
-  const filters = {
-    ...parseExpenseSearchParams(queryParams),
-    projectId: id,
-  };
+  const filters = getProjectExpenseFilters(id, queryParams);
   const basePath = `/projects/${id}/expenses`;
+  const addExpenseHref = `/expenses/new?project=${project.id}`;
 
   let result: ExpenseListResult = {
     expenses: [],
@@ -42,10 +44,19 @@ export default async function ProjectExpensesPage({ params, searchParams }: Proj
     totalBudgetByCurrency: {},
   };
   let loadError: string | undefined;
-  let totals: ProjectExpenseTotals = { byCurrency: {}, currencies: [] };
+  let totals: ProjectExpenseTotals = { byCurrency: {}, currencies: [], expenseCount: 0 };
+  let topExpenses: Awaited<ReturnType<typeof getTopProjectExpenses>> = [];
+  let categories: Awaited<ReturnType<typeof getCategories>> = [];
+  let vendors: Awaited<ReturnType<typeof getVendors>> = [];
 
   try {
-    [result, totals] = await Promise.all([getExpenses(filters), getProjectExpenseTotals(id)]);
+    [result, totals, topExpenses, categories, vendors] = await Promise.all([
+      getExpenses(filters),
+      getProjectExpenseTotals(id),
+      getTopProjectExpenses(id, 5),
+      getCategories(),
+      getVendors(),
+    ]);
   } catch (error) {
     loadError =
       error instanceof Error
@@ -53,36 +64,57 @@ export default async function ProjectExpensesPage({ params, searchParams }: Proj
         : "Unable to load expenses. Check your Supabase and Clerk integration.";
   }
 
-  const hasActiveFilters = Boolean(filters.search || filters.sort || filters.order);
+  const hasSearch = Boolean(filters.search);
+  const hasCategoryOrVendorFilter = Boolean(filters.categoryId || filters.vendorId);
 
   return (
     <AppShell
-      actions={<PageActionButton href={`/expenses/new?project=${project.id}`}>Add expense</PageActionButton>}
-      description={`All expenses linked to ${project.name}.`}
-      title={`${project.name} Expenses`}
+      actions={
+        <PageActionButton className="project-expenses-header-add" href={addExpenseHref}>
+          + Add Expense
+        </PageActionButton>
+      }
+      description={project.description ?? `All expenses linked to ${project.name}.`}
+      title={project.name}
     >
       {loadError ? (
         <p className="form-error page-error" role="alert">
           {loadError}
         </p>
       ) : null}
-      <ListPageContent>
+      <ListPageContent className="project-expenses-page">
         <div className="project-workspace-topbar">
           <Link className="auth-link" href="/projects">
             ← Back to My Projects
           </Link>
           <ProjectWorkspaceNav activeTab="expenses" projectId={project.id} projectName={project.name} />
         </div>
+
         <ProjectExpensesSummary project={project} totals={totals} />
-        <ExpenseList
+
+        <Link className="button project-expenses-mobile-add" href={addExpenseHref}>
+          + Add Expense
+        </Link>
+
+        <ProjectExpenseToolbar
+          key={buildExpenseQueryString(filters, { omitProjectId: true })}
           basePath={basePath}
-          emptyMessage={`No expenses are linked to ${project.name} yet.`}
+          categories={categories}
+          filters={filters}
+          vendors={vendors}
+        />
+
+        <TopExpensesSection expenses={topExpenses} project={project} />
+
+        <ProjectExpenseList
+          addExpenseHref={addExpenseHref}
+          basePath={basePath}
           expenses={result.expenses}
           filters={filters}
-          hasActiveFilters={hasActiveFilters}
-          hideProjectColumn
-          totalBudgetByCurrency={result.totalBudgetByCurrency}
+          hasCategoryOrVendorFilter={hasCategoryOrVendorFilter}
+          hasSearch={hasSearch}
         />
+
         <ExpensePagination
           basePath={basePath}
           filters={filters}

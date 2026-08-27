@@ -83,4 +83,5 @@ export type ProjectExpenseCurrencyTotals = {
 export type ProjectExpenseTotals = {
   byCurrency: Partial<Record<string, ProjectExpenseCurrencyTotals>>;
   currencies: string[];
+  expenseCount: number;
 };

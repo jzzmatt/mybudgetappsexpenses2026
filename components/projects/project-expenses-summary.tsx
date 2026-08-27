@@ -1,7 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/currency/format";
 import { isExpenseCurrency, type ExpenseCurrency } from "@/lib/currency/types";
-import { formatLabel } from "@/lib/expenses/format";
 import type { Project, ProjectExpenseTotals } from "@/lib/projects/types";
 
 type ProjectExpensesSummaryProps = {
@@ -47,47 +46,43 @@ export function ProjectExpensesSummary({ project, totals }: ProjectExpensesSumma
   });
 
   const items = [
+    ...budgetItems,
     {
-      key: "status",
-      label: "Status",
-      value: (
-        <span className={`status-badge status-${project.status}`}>
-          {formatLabel(project.status)}
-        </span>
-      ),
+      key: "expense-count",
+      label: "Number of Expenses",
+      value: String(totals.expenseCount),
       variant: "default" as const,
     },
-    ...budgetItems,
   ];
 
   if (budgetItems.length === 0) {
-    items.push(
+    items.unshift(
       {
         key: "budget-empty",
         label: "Total Budget",
-        value: formatCurrency(0),
+        value: formatCurrency(0, project.currency),
         variant: "default" as const,
       },
       {
         key: "paid-empty",
         label: "Total Paid",
-        value: formatCurrency(0),
+        value: formatCurrency(0, project.currency),
         variant: "paid" as const,
       },
       {
         key: "remaining-empty",
         label: "Total Remaining",
-        value: formatCurrency(0),
+        value: formatCurrency(0, project.currency),
         variant: "remaining" as const,
       },
     );
   }
 
   return (
-    <div className="budget-summary-grid">
+    <div className="budget-summary-grid project-expenses-kpi-grid">
       {items.map((item) => (
         <Card
-          className={`budget-summary-card${
+          className={`budget-summary-card project-expenses-kpi-card${
             item.variant === "paid"
               ? " project-expenses-paid-card"
               : item.variant === "remaining"

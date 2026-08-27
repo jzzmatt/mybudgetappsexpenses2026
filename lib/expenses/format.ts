@@ -30,6 +30,18 @@ export function calculateExpenseBudgetPercentage(
   return (budgetAmount / totalBudget) * 100;
 }
 
+export function calculateExpensePaidPercent(budgetAmount: number, paidAmount: number) {
+  const budget = Number(budgetAmount) || 0;
+  const paid = Number(paidAmount) || 0;
+
+  if (budget <= 0) {
+    return 0;
+  }
+
+  const percent = (paid / budget) * 100;
+  return Number.isFinite(percent) ? percent : 0;
+}
+
 export function formatExpensePercentage(value: number) {
   if (!Number.isFinite(value) || value <= 0) {
     return "0%";
