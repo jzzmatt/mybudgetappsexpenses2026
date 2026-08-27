@@ -1,8 +1,8 @@
-# Phase 06 — Project Scoped Expenses
+# Phase 11 — Ai Project Reporting
 
 ## Objective
 
-Refactor expense CRUD into Project context. Simplify form, inherit currency, add Expense Paid % and Project Budget Impact %, support overspending warning.
+Scope AI Financial Reporting to active Project and use centralized deterministic context. Generate executive summary, utilization, category/vendor analysis, pending items and recommendations.
 
 ## Required reading
 - docs/CURSOR_RULES.md

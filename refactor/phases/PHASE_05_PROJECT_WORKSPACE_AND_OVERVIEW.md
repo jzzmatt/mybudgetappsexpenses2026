@@ -2,26 +2,30 @@
 
 ## Objective
 
-Create Project workspace and Overview. Show Project Budget, Total Expense Budget, Total Paid, Total Expense Remaining, Available Budget, usage, allocation, charts and recent expenses. All values must use shared financial logic.
+Create Project workspace and Overview with Budget, Total Expense Budget, Paid, Expense Remaining, Available Budget, usage and charts using centralized calculations.
 
-## Acceptance Criteria
-
-- Phase requirements implemented.
-- No future phase implemented.
-- Unrelated functionality remains intact.
-- Security/RLS preserved.
-- Financial formulas match PRODUCT_MODEL.md.
-- Relevant checks pass.
-- Changed files and verification results reported.
-
-## Required Reading
-
+## Required reading
 - docs/CURSOR_RULES.md
 - docs/PRODUCT_MODEL.md
 - docs/ARCHITECTURE.md
 - docs/DATABASE_TARGET.md
 - docs/UX_FLOW.md
+- docs/ai/PAYMENT_PROOF_AI.md when relevant
+- docs/storage/PAYMENT_PROOF_STORAGE.md when relevant
 
-## Stop Condition
+## Acceptance Criteria
+- Requirements for this phase are implemented.
+- No future-phase functionality is introduced.
+- Existing unrelated functionality remains intact.
+- Financial calculations follow PRODUCT_MODEL.md.
+- Security/RLS is preserved.
+- Relevant tests/checks pass.
+- Data is not silently deleted or corrupted.
 
-STOP after this phase and wait for explicit user approval.
+## Cursor behavior
+Inspect before editing.
+Implement only this phase.
+Run verification.
+Review the diff.
+Report changed files, tests, risks and known failures.
+STOP and wait for explicit user approval.

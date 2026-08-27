@@ -1,8 +1,8 @@
-# Phase 06 — Project Scoped Expenses
+# Phase 12 — Final Ux Regression Release
 
 ## Objective
 
-Refactor expense CRUD into Project context. Simplify form, inherit currency, add Expense Paid % and Project Budget Impact %, support overspending warning.
+Simplify navigation, terminology, empty states, responsive/accessibility behavior. Test complete flow, RLS, calculations, PDF retention/access, AI draft confirmation, reports and build. Remove obsolete code only when proven unused.
 
 ## Required reading
 - docs/CURSOR_RULES.md

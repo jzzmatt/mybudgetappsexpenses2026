@@ -1,8 +1,8 @@
-# Phase 06 — Project Scoped Expenses
+# Phase 10 — Ai Payment Proof Import
 
 ## Objective
 
-Refactor expense CRUD into Project context. Simplify form, inherit currency, add Expense Paid % and Project Budget Impact %, support overspending warning.
+Implement PDF Payment Proof import: private upload, validation, AI structured extraction, Zod validation, editable draft, user confirmation, Expense creation and retention of original PDF. No direct AI database writes.
 
 ## Required reading
 - docs/CURSOR_RULES.md
