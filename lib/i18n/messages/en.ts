@@ -26,6 +26,7 @@ export const enMessages: Messages = {
     aiReport: "AI Report",
     projectWorkspace: "Project workspace navigation",
     backToProjects: "← Back to My Projects",
+    howItWorks: "How it works?",
   },
   common: {
     save: "Save",

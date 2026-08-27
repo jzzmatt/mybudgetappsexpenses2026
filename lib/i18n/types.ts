@@ -28,6 +28,7 @@ export type Messages = {
     aiReport: string;
     projectWorkspace: string;
     backToProjects: string;
+    howItWorks: string;
   };
   common: {
     save: string;

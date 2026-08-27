@@ -26,6 +26,7 @@ export const frMessages: Messages = {
     aiReport: "Rapport IA",
     projectWorkspace: "Navigation du projet",
     backToProjects: "← Retour à Mes Projets",
+    howItWorks: "Comment ça marche ?",
   },
   common: {
     save: "Enregistrer",
