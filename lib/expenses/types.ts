@@ -42,6 +42,9 @@ export type Expense = {
   paid_amount: number;
   balance: number;
   payment_method: string | null;
+  payment_reference: string | null;
+  payment_proof_path: string | null;
+  payment_proof_filename: string | null;
   priority: string | null;
   status: ExpenseStatus | string;
   notes: string | null;
@@ -60,6 +63,7 @@ export type ExpenseWithRelations = Expense & {
   project: ExpenseRelation | null;
   vendor: ExpenseRelation | null;
   derived?: ExpenseDerivedMetrics;
+  proofSignedUrl?: string | null;
 };
 
 export type ExpenseInput = {
@@ -72,9 +76,29 @@ export type ExpenseInput = {
   paid_amount?: number;
   currency?: ExpenseCurrency;
   payment_method?: ExpensePaymentMethod | string | null;
+  payment_reference?: string | null;
+  payment_proof_path?: string | null;
+  payment_proof_filename?: string | null;
   priority?: ExpensePriority | string | null;
   status?: ExpenseStatus | string;
   notes?: string | null;
+};
+
+export type ExpenseDraftFromProof = {
+  date: string | null;
+  description: string;
+  vendor_person: string | null;
+  paid_amount: number;
+  currency_detected: string | null;
+  payment_method: ExpensePaymentMethod | string | null;
+  payment_reference: string | null;
+  suggested_expense_budget: number;
+  suggested_status: ExpenseStatus;
+  notes: string | null;
+  extraction_warnings: string[];
+  payment_proof_path: string;
+  payment_proof_filename: string;
+  proof_signed_url?: string | null;
 };
 
 export type ExpenseFilters = {

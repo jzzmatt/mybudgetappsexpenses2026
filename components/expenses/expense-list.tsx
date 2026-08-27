@@ -144,6 +144,15 @@ export function ExpenseList({
                   />
                 </dd>
               </div>
+              {expense.payment_reference || expense.payment_proof_path ? (
+                <div>
+                  <dt>Proof / Ref</dt>
+                  <dd>
+                    {expense.payment_reference ? `${expense.payment_reference} ` : ""}
+                    {expense.payment_proof_path ? "📎 PDF" : ""}
+                  </dd>
+                </div>
+              ) : null}
               {hideProjectColumn ? null : (
                 <div>
                   <dt>Project</dt>
@@ -191,6 +200,7 @@ export function ExpenseList({
                 <th scope="col">Category</th>
                 {hideProjectColumn ? null : <th scope="col">Project</th>}
                 <th scope="col">Vendor</th>
+                <th scope="col">Ref / Proof</th>
                 <th scope="col">Currency</th>
                 <SortableHeader
                   basePath={basePath}
@@ -238,6 +248,19 @@ export function ExpenseList({
                   <td>{expense.category?.name ?? "—"}</td>
                   {hideProjectColumn ? null : <td>{expense.project?.name ?? "—"}</td>}
                   <td>{expense.vendor?.name ?? "—"}</td>
+                  <td>
+                    {expense.payment_reference ? (
+                      <span className="expense-ref-tag" title={`Ref: ${expense.payment_reference}`}>
+                        {expense.payment_reference}
+                      </span>
+                    ) : null}
+                    {expense.payment_proof_path ? (
+                      <span className="expense-proof-icon" title={expense.payment_proof_filename || "Proof attached"}>
+                        📎 PDF
+                      </span>
+                    ) : null}
+                    {!expense.payment_reference && !expense.payment_proof_path ? "—" : null}
+                  </td>
                   <td>{expense.currency}</td>
                   <td>{formatCurrency(expense.budget_amount, expense.currency)}</td>
                   <td className="expense-percentage-cell">
