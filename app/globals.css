@@ -2949,3 +2949,241 @@ select {
     display: none;
   }
 }
+
+.landing-page {
+  min-height: 100dvh;
+  background: var(--background);
+  color: var(--foreground);
+}
+
+.landing-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.landing-header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.landing-header-button,
+.landing-cta-button {
+  min-height: 44px;
+  padding: 0 18px;
+  text-decoration: none;
+}
+
+.landing-main {
+  width: min(100%, 1120px);
+  margin: 0 auto;
+  padding: 32px 24px 48px;
+}
+
+.landing-hero {
+  display: grid;
+  gap: 32px;
+  align-items: center;
+  margin-bottom: 48px;
+}
+
+.landing-hero-copy h1 {
+  margin: 0;
+  font-size: clamp(2rem, 4vw, 2.75rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+}
+
+.landing-subtitle {
+  margin: 16px 0 0;
+  max-width: 52ch;
+  color: var(--muted-foreground);
+  font-size: 1.0625rem;
+  line-height: 1.6;
+}
+
+.landing-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.landing-hero-visual {
+  position: relative;
+  min-height: 280px;
+}
+
+.landing-hero-card {
+  position: absolute;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+}
+
+.landing-hero-card--secondary {
+  top: 24px;
+  right: 0;
+  left: 32px;
+  padding: 20px;
+}
+
+.landing-hero-card--primary {
+  right: 32px;
+  bottom: 0;
+  left: 0;
+  padding: 24px;
+}
+
+.landing-hero-label {
+  display: block;
+  color: var(--muted-foreground);
+  font-size: 13px;
+}
+
+.landing-hero-value,
+.landing-hero-balance {
+  display: block;
+  margin-top: 6px;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.landing-hero-change {
+  display: block;
+  margin-top: 6px;
+  color: #059669;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.landing-section {
+  margin-bottom: 48px;
+}
+
+.landing-section h2 {
+  margin: 0 0 20px;
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.landing-steps {
+  display: grid;
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.landing-step {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 16px;
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+}
+
+.landing-step-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--primary) 12%, transparent);
+  color: var(--primary);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.landing-step h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.landing-step p {
+  margin: 6px 0 0;
+  color: var(--muted-foreground);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.landing-features {
+  display: grid;
+  gap: 16px;
+}
+
+.landing-feature-card {
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+}
+
+.landing-feature-card h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.landing-feature-card p {
+  margin: 8px 0 0;
+  color: var(--muted-foreground);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.landing-footer-cta {
+  padding: 32px 24px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(145deg, #dbeafe 0%, #ede9fe 55%, #f5f3ff 100%);
+  text-align: center;
+}
+
+.landing-footer-cta h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.landing-footer-cta p {
+  margin: 12px auto 20px;
+  max-width: 42ch;
+  color: var(--muted-foreground);
+  line-height: 1.5;
+}
+
+@media (min-width: 768px) {
+  .landing-hero {
+    grid-template-columns: 1.1fr 0.9fr;
+  }
+
+  .landing-features {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .landing-main {
+    padding: 48px 32px 64px;
+  }
+
+  .landing-header {
+    padding: 24px 32px;
+  }
+}

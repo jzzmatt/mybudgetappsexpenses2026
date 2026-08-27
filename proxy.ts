@@ -12,7 +12,7 @@ const isPublicRoute = createRouteMatcher([
 ]);
 
 const clerkHandler = clerkMiddleware(async (auth, request) => {
-  if (isPublicRoute(request)) {
+  if (isPublicRoute(request) || request.nextUrl.pathname === "/") {
     return;
   }
 

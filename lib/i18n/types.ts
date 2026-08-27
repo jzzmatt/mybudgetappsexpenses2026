@@ -282,6 +282,35 @@ export type Messages = {
     clerkUnavailable: string;
     clerkLoading: string;
   };
+  landing: {
+    title: string;
+    subtitle: string;
+    ctaPrimary: string;
+    ctaSecondary: string;
+    stepsTitle: string;
+    step1Title: string;
+    step1Description: string;
+    step2Title: string;
+    step2Description: string;
+    step3Title: string;
+    step3Description: string;
+    step4Title: string;
+    step4Description: string;
+    step5Title: string;
+    step5Description: string;
+    featuresTitle: string;
+    feature1Title: string;
+    feature1Description: string;
+    feature2Title: string;
+    feature2Description: string;
+    feature3Title: string;
+    feature3Description: string;
+    feature4Title: string;
+    feature4Description: string;
+    ctaFooterTitle: string;
+    ctaFooterDescription: string;
+    skipToContent: string;
+  };
   validation: {
     emailInvalid: string;
     passwordRequired: string;
