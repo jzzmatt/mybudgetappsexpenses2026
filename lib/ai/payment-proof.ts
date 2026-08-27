@@ -65,38 +65,36 @@ Return JSON matching this exact schema:
 }
 `.trim();
 
-  // We supply the PDF to GPT-4o vision / file input using a data URL
+  // PDFs must use Responses API input_file — image_url only accepts image MIME types.
   const dataUrl = `data:application/pdf;base64,${pdfBase64}`;
 
-  const completion = await client.chat.completions.create({
+  const response = await client.responses.create({
     model,
     temperature: 0.1,
-    response_format: { type: "json_object" },
-    messages: [
-      {
-        role: "system",
-        content: systemPrompt,
-      },
+    instructions: systemPrompt,
+    text: {
+      format: { type: "json_object" },
+    },
+    input: [
       {
         role: "user",
         content: [
           {
-            type: "text",
-            text: `Please analyze this payment proof PDF for Project workspace: "${project.name}" (Project Currency: ${project.currency}, Project Budget: ${project.budget_amount}). Original filename: ${filename}`,
+            type: "input_file",
+            filename,
+            file_data: dataUrl,
+            detail: "high",
           },
           {
-            type: "image_url",
-            image_url: {
-              url: dataUrl,
-              detail: "high",
-            },
+            type: "input_text",
+            text: `Please analyze this payment proof PDF for Project workspace: "${project.name}" (Project Currency: ${project.currency}, Project Budget: ${project.budget_amount}). Original filename: ${filename}`,
           },
         ],
       },
     ],
   });
 
-  const rawContent = completion.choices[0]?.message?.content;
+  const rawContent = response.output_text;
   if (!rawContent) {
     throw new Error("AI extraction returned an empty response.");
   }
