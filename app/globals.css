@@ -469,6 +469,14 @@ select {
   background: var(--background);
 }
 
+.app-shell-sidebar-hidden {
+  grid-template-columns: 1fr;
+}
+
+.app-shell-sidebar-hidden .app-sidebar {
+  display: none;
+}
+
 .app-sidebar {
   display: flex;
   flex-direction: column;
@@ -484,11 +492,104 @@ select {
   gap: 28px;
 }
 
+.app-sidebar-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
 .app-sidebar-brand {
   margin: 0;
   font-size: 14px;
   font-weight: 700;
   letter-spacing: 0.02em;
+}
+
+.app-sidebar-toggle {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid rgb(255 255 255 / 12%);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: #cbd5e1;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.2;
+  padding: 8px 10px;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.app-sidebar-toggle:hover,
+.app-sidebar-toggle:focus-visible {
+  background: rgb(255 255 255 / 8%);
+  border-color: rgb(255 255 255 / 20%);
+  color: #ffffff;
+  outline: none;
+}
+
+.app-sidebar-toggle-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+.app-sidebar-toggle-collapse {
+  padding: 8px;
+}
+
+.app-sidebar-toggle-collapse .app-sidebar-toggle-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.app-sidebar-toggle-expand {
+  border-color: var(--border);
+  color: var(--muted-foreground);
+  background: var(--surface);
+}
+
+.app-sidebar-toggle-expand:hover,
+.app-sidebar-toggle-expand:focus-visible {
+  background: color-mix(in srgb, var(--primary) 8%, var(--surface));
+  border-color: color-mix(in srgb, var(--primary) 35%, var(--border));
+  color: var(--foreground);
+}
+
+.app-header-title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.app-header-title-row h1 {
+  min-width: 0;
+}
+
+@media (min-width: 901px) {
+  .app-sidebar-toggle-collapse {
+    display: inline-flex;
+  }
+
+  .app-sidebar-toggle-expand {
+    display: inline-flex;
+  }
+
+  .app-shell-sidebar-hidden .app-sidebar-toggle-expand {
+    display: inline-flex;
+  }
 }
 
 .app-sidebar-nav {
