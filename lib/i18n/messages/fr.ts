@@ -8,6 +8,8 @@ export const frMessages: Messages = {
     userFallback: "Utilisateur",
     administrator: "Administrateur",
     account: "Compte",
+    hideSidebar: "Masquer la barre latérale",
+    showSidebar: "Afficher la barre latérale",
   },
   language: {
     label: "Langue",

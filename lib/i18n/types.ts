@@ -10,6 +10,8 @@ export type Messages = {
     userFallback: string;
     administrator: string;
     account: string;
+    hideSidebar: string;
+    showSidebar: string;
   };
   language: {
     label: string;

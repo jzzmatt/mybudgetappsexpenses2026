@@ -8,6 +8,8 @@ export const ptMessages: Messages = {
     userFallback: "Utilizador",
     administrator: "Administrador",
     account: "Conta",
+    hideSidebar: "Ocultar barra lateral",
+    showSidebar: "Mostrar barra lateral",
   },
   language: {
     label: "Idioma",

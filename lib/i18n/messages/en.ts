@@ -8,6 +8,8 @@ export const enMessages: Messages = {
     userFallback: "User",
     administrator: "Administrator",
     account: "Account",
+    hideSidebar: "Hide sidebar",
+    showSidebar: "Show sidebar",
   },
   language: {
     label: "Language",
