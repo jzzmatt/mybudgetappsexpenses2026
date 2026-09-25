@@ -1,6 +1,4 @@
 import Link from "next/link";
-import { CopyExpenseButton } from "@/components/expenses/copy-expense-button";
-import { DeleteExpenseButton } from "@/components/expenses/delete-expense-button";
 import { ExpenseActionsMenu } from "@/components/expenses/expense-actions-menu";
 import { ExpensePercentageBar } from "@/components/expenses/expense-percentage-bar";
 import { Card } from "@/components/ui/card";
@@ -232,7 +230,7 @@ export async function ProjectExpenseList({
 
                 return (
                   <tr key={expense.id}>
-                    <td>{formatExpenseDate(expense.date, locale)}</td>
+                    <td className="expense-table-nowrap">{formatExpenseDate(expense.date, locale)}</td>
                     <td>
                       <div className="project-expense-description-cell">
                         <span>{expense.description}</span>
@@ -242,11 +240,17 @@ export async function ProjectExpenseList({
                         />
                       </div>
                     </td>
-                    <td>{expense.category?.name ?? t("common.dash")}</td>
-                    <td>{expense.vendor?.name ?? t("common.dash")}</td>
-                    <td>{formatCurrency(expense.budget_amount, expense.currency, locale)}</td>
-                    <td>{formatCurrency(expense.paid_amount, expense.currency, locale)}</td>
-                    <td>{formatCurrency(expense.balance, expense.currency, locale)}</td>
+                    <td className="expense-table-nowrap">{expense.category?.name ?? t("common.dash")}</td>
+                    <td className="expense-table-nowrap">{expense.vendor?.name ?? t("common.dash")}</td>
+                    <td className="expense-table-nowrap">
+                      {formatCurrency(expense.budget_amount, expense.currency, locale)}
+                    </td>
+                    <td className="expense-table-nowrap">
+                      {formatCurrency(expense.paid_amount, expense.currency, locale)}
+                    </td>
+                    <td className="expense-table-nowrap">
+                      {formatCurrency(expense.balance, expense.currency, locale)}
+                    </td>
                     <td className="expense-percentage-cell">
                       <ExpensePercentageBar percent={paidPercent} labelSuffix={paidSuffix} />
                     </td>
@@ -256,14 +260,7 @@ export async function ProjectExpenseList({
                       </span>
                     </td>
                     <td className="category-table-actions project-expense-desktop-actions">
-                      <Link className="auth-link" href={`/expenses/${expense.id}/edit`}>
-                        {t("common.edit")}
-                      </Link>
-                      <CopyExpenseButton expense={expense} />
-                      <DeleteExpenseButton
-                        expenseDescription={expense.description}
-                        expenseId={expense.id}
-                      />
+                      <ExpenseActionsMenu expense={expense} />
                     </td>
                   </tr>
                 );

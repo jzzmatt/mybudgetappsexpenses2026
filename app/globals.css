@@ -764,6 +764,7 @@ select {
 .list-page-content {
   display: grid;
   gap: 20px;
+  min-width: 0;
 }
 
 .list-toolbar-card {
@@ -1553,6 +1554,7 @@ select {
 .category-empty-card {
   padding: 0;
   overflow: hidden;
+  min-width: 0;
 }
 
 .category-empty-card {
@@ -1572,6 +1574,8 @@ select {
 
 .category-table-wrap {
   overflow-x: auto;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .category-table {
@@ -1584,7 +1588,7 @@ select {
   padding: 14px 16px;
   border-bottom: 1px solid var(--border);
   text-align: left;
-  vertical-align: top;
+  vertical-align: middle;
 }
 
 .category-table th {
@@ -1737,14 +1741,41 @@ select {
   max-width: 640px;
 }
 
+.expense-table {
+  table-layout: fixed;
+}
+
 .expense-table th,
 .expense-table td {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.expense-table .expense-table-nowrap {
   white-space: nowrap;
 }
 
-.expense-table td:nth-child(2) {
+.expense-table .expense-table-description {
   white-space: normal;
-  min-width: 180px;
+  word-break: break-word;
+}
+
+.expense-table .category-table-actions {
+  overflow: visible;
+  width: 48px;
+  white-space: nowrap;
+}
+
+.expense-table .expense-percentage-cell {
+  min-width: 0;
+}
+
+.expense-table .expense-percentage-bar {
+  min-width: 0;
+}
+
+.expense-table .expense-percentage-label {
+  display: none;
 }
 
 .dashboard-page-content {
@@ -2048,7 +2079,7 @@ select {
 }
 
 .expense-percentage-cell {
-  min-width: 140px;
+  min-width: 120px;
 }
 
 .expense-percentage-bar {
@@ -2745,6 +2776,7 @@ select {
 .project-expense-list-section {
   display: grid;
   gap: 10px;
+  min-width: 0;
 }
 
 .top-expenses-heading,
@@ -2904,14 +2936,76 @@ select {
   display: block;
 }
 
+.project-expense-table {
+  table-layout: fixed;
+  width: 100%;
+}
+
+.project-expense-table th:nth-child(1),
+.project-expense-table td:nth-child(1) {
+  width: 9%;
+}
+
+.project-expense-table th:nth-child(2),
+.project-expense-table td:nth-child(2) {
+  width: 20%;
+}
+
+.project-expense-table th:nth-child(5),
+.project-expense-table td:nth-child(5),
+.project-expense-table th:nth-child(6),
+.project-expense-table td:nth-child(6),
+.project-expense-table th:nth-child(7),
+.project-expense-table td:nth-child(7) {
+  width: 11%;
+}
+
+.project-expense-table th:nth-child(8),
+.project-expense-table td:nth-child(8) {
+  width: 14%;
+}
+
+.project-expense-table th:nth-child(10),
+.project-expense-table td:nth-child(10) {
+  width: 48px;
+}
+
 .project-expense-table th,
 .project-expense-table td {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.project-expense-table .expense-table-nowrap {
   white-space: nowrap;
 }
 
 .project-expense-table td:nth-child(2) {
   white-space: normal;
-  min-width: 160px;
+  word-break: break-word;
+}
+
+.project-expense-table .category-table-actions {
+  overflow: visible;
+  width: 48px;
+  white-space: nowrap;
+}
+
+.project-expense-table .expense-percentage-cell {
+  min-width: 0;
+}
+
+.project-expense-table .expense-percentage-bar {
+  min-width: 0;
+}
+
+.project-expense-table .expense-percentage-label {
+  font-size: 11px;
+  min-width: 0;
+}
+
+.project-expense-desktop-actions {
+  justify-content: center;
 }
 
 .project-expense-description-cell {

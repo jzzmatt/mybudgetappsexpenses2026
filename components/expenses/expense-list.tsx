@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { CopyExpenseButton } from "@/components/expenses/copy-expense-button";
 import { DeleteExpenseButton } from "@/components/expenses/delete-expense-button";
+import { ExpenseActionsMenu } from "@/components/expenses/expense-actions-menu";
 import { ExpensePercentageBar } from "@/components/expenses/expense-percentage-bar";
 import { Card } from "@/components/ui/card";
 import {
@@ -245,12 +246,14 @@ export async function ExpenseList({
             <tbody>
               {expenses.map((expense) => (
                 <tr key={expense.id}>
-                  <td>{formatExpenseDate(expense.date, locale)}</td>
-                  <td>{expense.description}</td>
-                  <td>{expense.category?.name ?? t("common.dash")}</td>
-                  {hideProjectColumn ? null : <td>{expense.project?.name ?? t("common.dash")}</td>}
-                  <td>{expense.vendor?.name ?? t("common.dash")}</td>
-                  <td>
+                  <td className="expense-table-nowrap">{formatExpenseDate(expense.date, locale)}</td>
+                  <td className="expense-table-description">{expense.description}</td>
+                  <td className="expense-table-nowrap">{expense.category?.name ?? t("common.dash")}</td>
+                  {hideProjectColumn ? null : (
+                    <td className="expense-table-nowrap">{expense.project?.name ?? t("common.dash")}</td>
+                  )}
+                  <td className="expense-table-nowrap">{expense.vendor?.name ?? t("common.dash")}</td>
+                  <td className="expense-table-nowrap">
                     {expense.payment_reference ? (
                       <span className="expense-ref-tag" title={`Ref: ${expense.payment_reference}`}>
                         {expense.payment_reference}
@@ -266,29 +269,28 @@ export async function ExpenseList({
                     ) : null}
                     {!expense.payment_reference && !expense.payment_proof_path ? t("common.dash") : null}
                   </td>
-                  <td>{expense.currency}</td>
-                  <td>{formatCurrency(expense.budget_amount, expense.currency, locale)}</td>
+                  <td className="expense-table-nowrap">{expense.currency}</td>
+                  <td className="expense-table-nowrap">
+                    {formatCurrency(expense.budget_amount, expense.currency, locale)}
+                  </td>
                   <td className="expense-percentage-cell">
                     <ExpensePercentageBar
                       percent={getExpensePercentage(expense, totalBudgetByCurrency)}
                     />
                   </td>
-                  <td>{formatCurrency(expense.paid_amount, expense.currency, locale)}</td>
-                  <td>{formatCurrency(expense.balance, expense.currency, locale)}</td>
-                  <td>
+                  <td className="expense-table-nowrap">
+                    {formatCurrency(expense.paid_amount, expense.currency, locale)}
+                  </td>
+                  <td className="expense-table-nowrap">
+                    {formatCurrency(expense.balance, expense.currency, locale)}
+                  </td>
+                  <td className="expense-table-nowrap">
                     <span className={`status-badge status-${expense.status}`}>
                       {translateEnum(t, "status", expense.status)}
                     </span>
                   </td>
                   <td className="category-table-actions">
-                    <Link className="auth-link" href={`/expenses/${expense.id}/edit`}>
-                      {t("common.edit")}
-                    </Link>
-                    <CopyExpenseButton expense={expense} />
-                    <DeleteExpenseButton
-                      expenseDescription={expense.description}
-                      expenseId={expense.id}
-                    />
+                    <ExpenseActionsMenu expense={expense} />
                   </td>
                 </tr>
               ))}
