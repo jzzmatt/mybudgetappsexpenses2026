@@ -2274,7 +2274,7 @@ select {
     left: 0;
     z-index: 30;
     display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(7, minmax(0, 1fr));
     align-items: stretch;
     min-height: 60px;
     border-top: 1px solid var(--border);
@@ -3332,5 +3332,155 @@ select {
 
   .how-it-works-features {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.ai-cfo {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: 16px;
+  min-height: calc(100vh - 180px);
+}
+
+.ai-cfo-thread {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  min-width: 0;
+}
+
+.ai-cfo-message {
+  max-width: min(100%, 720px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  padding: 14px 16px;
+}
+
+.ai-cfo-message-user {
+  justify-self: end;
+  background: color-mix(in srgb, var(--primary) 8%, var(--surface));
+}
+
+.ai-cfo-author {
+  margin: 0 0 6px;
+  color: var(--muted-foreground);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.ai-cfo-reply p,
+.ai-cfo-message p {
+  margin: 0;
+  white-space: pre-wrap;
+  line-height: 1.5;
+}
+
+.ai-cfo-reply ul,
+.ai-cfo-evidence ul {
+  margin: 8px 0 0;
+  padding-left: 18px;
+}
+
+.ai-cfo-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ai-cfo-suggestion {
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--foreground);
+  padding: 8px 12px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.ai-cfo-suggestion:hover,
+.ai-cfo-suggestion:focus-visible {
+  border-color: var(--primary);
+  outline: none;
+}
+
+.ai-cfo-composer {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: end;
+  position: sticky;
+  bottom: 0;
+  padding-top: 8px;
+  background: var(--background);
+}
+
+.ai-cfo-composer textarea {
+  width: 100%;
+  resize: vertical;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--foreground);
+  padding: 10px 12px;
+}
+
+.ai-cfo-source,
+.ai-cfo-pending {
+  margin: 8px 0 0;
+  color: var(--muted-foreground);
+  font-size: 13px;
+}
+
+.ai-cfo-evidence summary {
+  cursor: pointer;
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.ai-cfo-evidence li {
+  display: grid;
+  grid-template-columns: minmax(90px, auto) minmax(0, 1fr) auto auto;
+  gap: 8px;
+  align-items: center;
+  margin-top: 8px;
+}
+
+@media (max-width: 700px) {
+  .ai-cfo-evidence li {
+    grid-template-columns: 1fr;
+  }
+
+  .ai-cfo {
+    min-height: calc(100vh - 240px);
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .ai-cfo {
+    color: #f8fafc;
+  }
+
+  .ai-cfo-message,
+  .ai-cfo-suggestion,
+  .ai-cfo-composer textarea {
+    background: #111827;
+    border-color: #334155;
+    color: #f8fafc;
+  }
+
+  .ai-cfo-message-user {
+    background: #1e3a5f;
+  }
+
+  .ai-cfo-author,
+  .ai-cfo-source,
+  .ai-cfo-pending {
+    color: #94a3b8;
+  }
+
+  .ai-cfo-composer {
+    background: transparent;
   }
 }

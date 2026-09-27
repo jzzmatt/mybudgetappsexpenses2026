@@ -84,6 +84,22 @@ export function NavIcon({ name }: NavIconProps) {
           />
         </svg>
       );
+    case "ai":
+      return (
+        <svg aria-hidden="true" fill="none" height="18" viewBox="0 0 18 18" width="18">
+          <path
+            d="M9 2.25v1.5M9 14.25v1.5M2.25 9h1.5M14.25 9h1.5M4.2 4.2l1.06 1.06M12.74 12.74l1.06 1.06M13.8 4.2l-1.06 1.06M5.26 12.74 4.2 13.8"
+            stroke="currentColor"
+            strokeLinecap="round"
+            strokeWidth="1.5"
+          />
+          <path
+            d="M9 6.25a2.75 2.75 0 1 0 0 5.5 2.75 2.75 0 0 0 0-5.5Z"
+            stroke="currentColor"
+            strokeWidth="1.5"
+          />
+        </svg>
+      );
     case "help":
       return (
         <svg aria-hidden="true" fill="none" height="18" viewBox="0 0 18 18" width="18">
