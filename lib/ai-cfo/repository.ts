@@ -22,6 +22,10 @@ export type AiCfoExpenseRecord = {
   balance: number;
   currency: string;
   status: string;
+  paidAt: string | null;
+  paymentMethod: string | null;
+  hasEvidence: boolean;
+  evidenceCount: number;
   categoryId: string | null;
   categoryName: string | null;
   projectId: string | null;
@@ -63,6 +67,10 @@ function normalizeExpense(row: Record<string, unknown>): AiCfoExpenseRecord {
     balance: asNumber(row.balance),
     currency: String(row.currency ?? ""),
     status: String(row.status ?? ""),
+    paidAt: row.paid_at ? String(row.paid_at) : null,
+    paymentMethod: row.payment_method ? String(row.payment_method) : null,
+    hasEvidence: evidenceCount(row) > 0,
+    evidenceCount: evidenceCount(row),
     categoryId: category?.id ?? (row.category_id ? String(row.category_id) : null),
     categoryName: category?.name ?? null,
     projectId: project?.id ?? (row.project_id ? String(row.project_id) : null),
@@ -79,6 +87,10 @@ const expenseSelect = `
   balance,
   currency,
   status,
+  paid_at,
+  payment_method,
+  payment_proof_path,
+  evidence:expense_payment_evidence(id),
   category_id,
   project_id,
   category:categories(id, name),
@@ -208,7 +220,17 @@ export function toEvidence(expense: AiCfoExpenseRecord): AiCfoEvidenceExpense {
     currency: expense.currency,
     status: expense.status,
     paymentStatus: describePaymentStatus(expense.status, expense.paidAmount, expense.budgetAmount),
+    paidAt: expense.paidAt,
+    paymentMethod: expense.paymentMethod,
+    hasEvidence: expense.hasEvidence,
+    evidenceCount: expense.evidenceCount,
   };
+}
+
+function evidenceCount(row: Record<string, unknown>) {
+  const related = row.evidence;
+  const relatedCount = Array.isArray(related) ? related.length : 0;
+  return relatedCount + (row.payment_proof_path ? 1 : 0);
 }
 
 export function sourceFromExpenses(expenses: AiCfoExpenseRecord[], periodLabel: string | null) {

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { CopyExpenseButton } from "@/components/expenses/copy-expense-button";
 import { DeleteExpenseButton } from "@/components/expenses/delete-expense-button";
 import { ExpenseActionsMenu } from "@/components/expenses/expense-actions-menu";
+import { ExpensePaymentActions } from "@/components/expenses/expense-payment-actions";
 import { ExpensePercentageBar } from "@/components/expenses/expense-percentage-bar";
 import { Card } from "@/components/ui/card";
 import {
@@ -115,6 +116,7 @@ export async function ExpenseList({
               <span className={`status-badge status-${expense.status}`}>
                 {translateEnum(t, "status", expense.status)}
               </span>
+              <ExpensePaymentActions expense={expense} returnTo={basePath} />
             </div>
             <dl className="list-mobile-card-details">
               <div>
@@ -288,6 +290,7 @@ export async function ExpenseList({
                     <span className={`status-badge status-${expense.status}`}>
                       {translateEnum(t, "status", expense.status)}
                     </span>
+                    <ExpensePaymentActions expense={expense} returnTo={basePath} />
                   </td>
                   <td className="category-table-actions">
                     <ExpenseActionsMenu expense={expense} />

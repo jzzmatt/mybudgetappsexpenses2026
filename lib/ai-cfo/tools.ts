@@ -473,7 +473,7 @@ function toolDescription(name: AiCfoToolName) {
     case "get_expenses_by_period":
       return "List expenses in a resolved date range.";
     case "get_payment_status":
-      return "Find matching expenses and return each payment status. Does not choose among multiple matches.";
+      return "Find matching expenses and return each payment status, paidAt, paymentMethod, hasEvidence, and evidenceCount. Does not choose among multiple matches or return file paths.";
     case "calculate_expense_total":
       return "Deterministic sum of matching expenses. Use basis paid for spending and budget for budgeted amounts.";
     case "calculate_category_total":

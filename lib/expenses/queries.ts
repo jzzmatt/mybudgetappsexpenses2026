@@ -33,6 +33,8 @@ const expenseSelect = `
   payment_reference,
   payment_proof_path,
   payment_proof_filename,
+  paid_at,
+  payment_note,
   priority,
   status,
   notes,
@@ -67,6 +69,8 @@ function normalizeExpense(row: Record<string, unknown>): ExpenseWithRelations {
 
   return {
     ...(expense as Expense),
+    paid_at: expense.paid_at ? String(expense.paid_at) : null,
+    payment_note: expense.payment_note ? String(expense.payment_note) : null,
     category: normalizeRelation(category as ExpenseRelation | ExpenseRelation[] | null),
     project: normalizeRelation(project as ExpenseRelation | ExpenseRelation[] | null),
     vendor: normalizeRelation(vendor as ExpenseRelation | ExpenseRelation[] | null),
@@ -292,9 +296,11 @@ export async function getExpenses(filters: ExpenseFilters = {}): Promise<Expense
     }
 
     return {
-      expenses: orderExpensesByIds(
-        (data ?? []).map((row) => normalizeExpense(row as Record<string, unknown>)),
-        pageIds,
+      expenses: await withEvidenceCounts(
+        orderExpensesByIds(
+          (data ?? []).map((row) => normalizeExpense(row as Record<string, unknown>)),
+          pageIds,
+        ),
       ),
       totalCount,
       page,
@@ -318,7 +324,7 @@ export async function getExpenses(filters: ExpenseFilters = {}): Promise<Expense
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
 
   return {
-    expenses: (data ?? []).map((row) => normalizeExpense(row as Record<string, unknown>)),
+    expenses: await withEvidenceCounts((data ?? []).map((row) => normalizeExpense(row as Record<string, unknown>))),
     totalCount,
     page,
     pageSize,
@@ -357,7 +363,67 @@ export async function getExpenseById(id: string): Promise<ExpenseWithRelations |
     expense.proofSignedUrl = signedUrl;
   }
 
+  expense.evidence = await loadExpenseEvidence(expense.id);
+  expense.evidenceCount = (expense.evidence?.length ?? 0) + (expense.payment_proof_path ? 1 : 0);
+
   return expense;
+}
+
+async function withEvidenceCounts(expenses: ExpenseWithRelations[]) {
+  if (expenses.length === 0) {
+    return expenses;
+  }
+
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("expense_payment_evidence")
+    .select("expense_id")
+    .in(
+      "expense_id",
+      expenses.map((expense) => expense.id),
+    );
+
+  if (error) {
+    return expenses.map((expense) => ({
+      ...expense,
+      evidenceCount: expense.payment_proof_path ? 1 : 0,
+    }));
+  }
+
+  const counts = new Map<string, number>();
+
+  for (const row of data ?? []) {
+    const id = String(row.expense_id);
+    counts.set(id, (counts.get(id) ?? 0) + 1);
+  }
+
+  return expenses.map((expense) => ({
+    ...expense,
+    evidenceCount: (counts.get(expense.id) ?? 0) + (expense.payment_proof_path ? 1 : 0),
+  }));
+}
+
+async function loadExpenseEvidence(expenseId: string) {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("expense_payment_evidence")
+    .select("id, evidence_type, file_name, mime_type, storage_path")
+    .eq("expense_id", expenseId)
+    .order("created_at", { ascending: true });
+
+  if (error || !data) {
+    return [];
+  }
+
+  return Promise.all(
+    data.map(async (row) => ({
+      id: String(row.id),
+      evidenceType: row.evidence_type === "image" ? ("image" as const) : ("receipt" as const),
+      fileName: String(row.file_name),
+      mimeType: String(row.mime_type),
+      signedUrl: await getPaymentProofSignedUrl(String(row.storage_path)),
+    })),
+  );
 }
 
 /**

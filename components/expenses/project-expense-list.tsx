@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ExpenseActionsMenu } from "@/components/expenses/expense-actions-menu";
+import { ExpensePaymentActions } from "@/components/expenses/expense-payment-actions";
 import { ExpensePercentageBar } from "@/components/expenses/expense-percentage-bar";
 import { Card } from "@/components/ui/card";
 import {
@@ -61,7 +62,7 @@ function PaymentProofIndicator({
   expense: ExpenseWithRelations;
   label: string;
 }) {
-  if (!expense.payment_proof_path) {
+  if (!expense.payment_proof_path && !(expense.evidenceCount && expense.evidenceCount > 0)) {
     return null;
   }
 
@@ -167,6 +168,7 @@ export async function ProjectExpenseList({
                   <span className={`status-badge status-${expense.status}`}>
                     {translateEnum(t, "status", expense.status)}
                   </span>
+                  <ExpensePaymentActions expense={expense} returnTo={basePath} />
                   <PaymentProofIndicator
                     expense={expense}
                     label={t("expenses.proofIndicator")}
@@ -258,6 +260,7 @@ export async function ProjectExpenseList({
                       <span className={`status-badge status-${expense.status}`}>
                         {translateEnum(t, "status", expense.status)}
                       </span>
+                      <ExpensePaymentActions expense={expense} returnTo={basePath} />
                     </td>
                     <td className="category-table-actions project-expense-desktop-actions">
                       <ExpenseActionsMenu expense={expense} />

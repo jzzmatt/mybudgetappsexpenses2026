@@ -9,6 +9,10 @@ export type AiCfoEvidenceExpense = {
   currency: string;
   status: string;
   paymentStatus: "paid" | "partial" | "unpaid";
+  paidAt?: string | null;
+  paymentMethod?: string | null;
+  hasEvidence?: boolean;
+  evidenceCount?: number;
 };
 
 export type AiCfoSource = {

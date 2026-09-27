@@ -65,6 +65,16 @@ export default async function ExpensesPage({ searchParams }: ExpensesPageProps) 
       actions={<PageActionButton href="/expenses/new">{t("common.add")}</PageActionButton>}
       title={t("expenses.title")}
     >
+      {params.paid === "1" ? (
+        <p className="payment-sheet-success" role="status">
+          ✓ {t("payments.paidSuccess")}
+        </p>
+      ) : null}
+      {typeof params.error === "string" ? (
+        <p className="form-error page-error" role="alert">
+          {params.error}
+        </p>
+      ) : null}
       {loadError ? (
         <p className="form-error page-error" role="alert">
           {loadError}
