@@ -32,6 +32,29 @@ export function shareAmount(paidAmount: number, budgetAmount: number) {
   return paidAmount > 0 ? paidAmount : budgetAmount;
 }
 
+/** WhatsApp Cloud API text body maximum. https://developers.facebook.com/docs/whatsapp/cloud-api/reference/messages#text-object */
+export const WHATSAPP_TEXT_MAX_LENGTH = 4096;
+
+export function whatsAppMessageLength(message: string) {
+  return Array.from(message).length;
+}
+
+export function generatePaidExpenseWhatsAppTemplate(input: PaidExpenseMessageInput) {
+  return { message: generatePaidExpenseWhatsAppMessage(input) };
+}
+
+export function prepareOutboundWhatsAppMessage(message: string) {
+  if (!message.trim()) {
+    return { ok: false as const, error: "empty" as const };
+  }
+
+  if (whatsAppMessageLength(message) > WHATSAPP_TEXT_MAX_LENGTH) {
+    return { ok: false as const, error: "too_long" as const };
+  }
+
+  return { ok: true as const, message };
+}
+
 export function generatePaidExpenseWhatsAppMessage(input: PaidExpenseMessageInput) {
   const description = input.description.trim();
   const amount = input.amountLabel.trim();

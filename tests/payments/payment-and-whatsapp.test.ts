@@ -6,15 +6,19 @@ import {
   needsEvidenceWarning,
   normalizePaymentNote,
   paymentAccess,
+  resolveExpenseStatus,
   shouldConfirmPayment,
   validateEvidenceFile,
 } from "@/lib/payments/rules";
 import {
   formatWhatsAppDate,
   generatePaidExpenseWhatsAppMessage,
+  generatePaidExpenseWhatsAppTemplate,
   messageExposesInternals,
   messageMentionsAttachment,
+  prepareOutboundWhatsAppMessage,
   shareAmount,
+  WHATSAPP_TEXT_MAX_LENGTH,
 } from "@/lib/whatsapp/message";
 import { normalizeWhatsAppNumber } from "@/lib/whatsapp/phone";
 import {
@@ -44,6 +48,14 @@ describe("payment confirmation", () => {
   it("does not ask again when the expense is already paid", () => {
     assert.equal(shouldConfirmPayment("paid", "paid"), false);
     assert.equal(shouldConfirmPayment("paid", "pending"), false);
+  });
+
+  it("sets paid only after payment confirmation and keeps the saved status otherwise", () => {
+    assert.equal(resolveExpenseStatus("pending", true), "paid");
+    assert.equal(resolveExpenseStatus("partial", true), "paid");
+    assert.equal(resolveExpenseStatus("pending", false), "pending");
+    assert.equal(resolveExpenseStatus("paid", false), "paid");
+    assert.equal(resolveExpenseStatus("paid", true), "paid");
   });
 
   it("accepts a PDF receipt and an image", () => {
@@ -133,6 +145,22 @@ describe("WhatsApp paid expense message", () => {
     assert.equal(isWhatsAppConfigured({}), false);
     assert.deepEqual(publicWhatsAppStatus(false), { configured: false });
     assert.equal(sanitizeWhatsAppError("Bearer EAA123secret failed").includes("EAA123secret"), false);
+  });
+
+  it("sends the edited message and keeps the generated template free of attachment text", () => {
+    const template = generatePaidExpenseWhatsAppTemplate({ ...expense, locale: "pt" });
+    const edited = "Olá João,\n\nA despesa Cartão Lombongo foi paga.\n\nValor: 50.000 Kz.\nObrigado!";
+    const outbound = prepareOutboundWhatsAppMessage(edited);
+    const payload = buildWhatsAppTextPayload("244923000000", outbound.ok ? outbound.message : "");
+
+    assert.equal(template.message, generatePaidExpenseWhatsAppMessage({ ...expense, locale: "pt" }));
+    assert.equal(messageMentionsAttachment(template.message), false);
+    assert.equal(outbound.ok && outbound.message, edited);
+    assert.equal(payload.text.body, edited);
+    assert.equal(prepareOutboundWhatsAppMessage("   ").ok, false);
+    assert.equal(prepareOutboundWhatsAppMessage("a".repeat(WHATSAPP_TEXT_MAX_LENGTH + 1)).ok, false);
+    const typedAttachment = prepareOutboundWhatsAppMessage("Comprovativo em anexo");
+    assert.equal(typedAttachment.ok && typedAttachment.message, "Comprovativo em anexo");
   });
 
   it("does not offer WhatsApp sharing for an unpaid expense", () => {

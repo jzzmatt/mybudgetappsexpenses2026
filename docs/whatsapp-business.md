@@ -1,6 +1,6 @@
 # WhatsApp Business Cloud API
 
-Paid expenses can be shared from BudgetApp. The server sends the payment text first, then each comprovativo or picture as its own WhatsApp document or image. The text never says that a file is attached.
+Paid expenses can be shared from BudgetApp. The server sends the payment text first, then each comprovativo or picture as its own WhatsApp document or image. The text never says that a file is attached. BudgetApp fills the share dialog with that text, and the user can edit it before sending. The server sends the edited text exactly, then each file as its own message.
 
 Credentials stay in server environment variables. They are not sent to the browser.
 

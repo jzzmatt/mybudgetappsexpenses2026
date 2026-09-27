@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { getTranslations } from "@/lib/i18n/server";
 import { fileFromForm, revalidateExpensePaths, storePaymentEvidence } from "@/lib/payments/commit";
-import { isPaymentDate, normalizePaymentNote, shouldConfirmPayment } from "@/lib/payments/rules";
+import { isPaymentDate, normalizePaymentNote, resolveExpenseStatus, shouldConfirmPayment } from "@/lib/payments/rules";
 import { removePaymentEvidenceFile } from "@/lib/payments/storage";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { ensureUserRecord } from "@/lib/users/ensure-user";
@@ -276,7 +276,7 @@ export async function updateExpenseAction(expenseId: string, formData: FormData)
       payment_proof_path: parsed.data.payment_proof_path,
       payment_proof_filename: parsed.data.payment_proof_filename,
       priority: parsed.data.priority,
-      status: parsed.data.status,
+      status: resolveExpenseStatus(existing.status, becomingPaid),
       notes: parsed.data.notes,
       ...(paidAt ? { paid_at: paidAt } : {}),
       ...(paymentNote !== null && (becomingPaid || formData.has("payment_note")) ? { payment_note: paymentNote } : {}),
@@ -300,7 +300,7 @@ export async function updateExpenseAction(expenseId: string, formData: FormData)
         currency: expenseCurrency,
         payment_method: parsed.data.payment_method,
         priority: parsed.data.priority,
-        status: parsed.data.status,
+        status: existing.status,
         notes: parsed.data.notes,
       })
       .eq("id", expenseId);

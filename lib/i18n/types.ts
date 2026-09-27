@@ -224,7 +224,10 @@ export type Messages = {
     shareViaWhatsApp: string;
     sharePaidExpense: string;
     whatsappNumber: string;
+    message: string;
     messagePreview: string;
+    messageTooLong: string;
+    messageEmpty: string;
     sendViaWhatsApp: string;
     paymentInformationSent: string;
     unableToSend: string;

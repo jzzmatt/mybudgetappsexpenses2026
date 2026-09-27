@@ -1,20 +1,17 @@
 import { NextResponse } from "next/server";
-import { formatCurrency } from "@/lib/currency/format";
-import { isExpenseCurrency } from "@/lib/currency/types";
 import { readEvidenceFiles } from "@/lib/payments/commit";
 import { canSharePaidExpense, paymentAccess } from "@/lib/payments/rules";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { ensureUserRecord } from "@/lib/users/ensure-user";
-import { getTranslations } from "@/lib/i18n/server";
-import { translateEnum } from "@/lib/i18n/translator";
 import { deliverPaidExpenseWhatsApp, readWhatsAppServerConfig } from "@/lib/whatsapp/send";
-import { formatWhatsAppDate, generatePaidExpenseWhatsAppMessage, shareAmount } from "@/lib/whatsapp/message";
+import { prepareOutboundWhatsAppMessage } from "@/lib/whatsapp/message";
 import { normalizeWhatsAppNumber } from "@/lib/whatsapp/phone";
 import { publicWhatsAppStatus } from "@/lib/whatsapp/payload";
 import { z } from "zod";
 
 const bodySchema = z.object({
   phone: z.string().trim().min(8).max(24),
+  message: z.string(),
 });
 
 type RouteContext = {
@@ -35,7 +32,6 @@ export async function POST(request: Request, context: RouteContext) {
   }
 
   const { id } = await context.params;
-  const { t, locale } = await getTranslations();
   let body: unknown;
 
   try {
@@ -82,19 +78,13 @@ export async function POST(request: Request, context: RouteContext) {
     return NextResponse.json({ error: "not_configured" }, { status: 503 });
   }
 
-  const category = oneName(data.category);
-  const project = oneName(data.project);
-  const currency = isExpenseCurrency(String(data.currency)) ? data.currency : "KZ";
-  const amount = shareAmount(Number(data.paid_amount ?? 0), Number(data.budget_amount ?? 0));
-  const message = generatePaidExpenseWhatsAppMessage({
-    description: String(data.description ?? ""),
-    amountLabel: formatCurrency(amount, currency, locale),
-    paymentDateLabel: formatWhatsAppDate(String(data.paid_at ?? "")),
-    paymentMethodLabel: data.payment_method ? translateEnum(t, "paymentMethod", String(data.payment_method)) : "—",
-    categoryName: category,
-    projectName: project,
-    locale,
-  });
+  const outbound = prepareOutboundWhatsAppMessage(parsed.data.message);
+
+  if (!outbound.ok) {
+    return NextResponse.json({ error: outbound.error === "too_long" ? "message_too_long" : "message_empty" }, { status: 400 });
+  }
+
+  const message = outbound.message;
 
   let files: { fileName: string; mimeType: string; bytes: Uint8Array }[] = [];
 
@@ -150,12 +140,4 @@ export async function POST(request: Request, context: RouteContext) {
     recipient: phone.display,
     sentAt: new Date().toISOString(),
   });
-}
-
-function oneName(value: { name?: string } | { name?: string }[] | null) {
-  if (!value) {
-    return "";
-  }
-
-  return Array.isArray(value) ? value[0]?.name ?? "" : value.name ?? "";
 }
