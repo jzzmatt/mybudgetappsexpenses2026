@@ -17,6 +17,14 @@ export function shouldConfirmPayment(previousStatus: string, nextStatus: string)
   return nextStatus === "paid" && previousStatus !== "paid";
 }
 
+export function resolveExpenseStatus(currentStatus: string, paymentConfirmed: boolean) {
+  if (paymentConfirmed && currentStatus !== "paid") {
+    return "paid";
+  }
+
+  return currentStatus;
+}
+
 export function canSharePaidExpense(status: string) {
   return status === "paid";
 }

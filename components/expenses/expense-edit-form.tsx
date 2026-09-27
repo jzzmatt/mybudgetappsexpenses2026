@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRef, useState, type FormEvent } from "react";
+import { useRef, useState } from "react";
 import { AuthField } from "@/components/auth/auth-field";
 import { CopyExpenseButton } from "@/components/expenses/copy-expense-button";
 import { PaymentConfirmationModal, type PaymentConfirmationResult } from "@/components/expenses/payment-confirmation-modal";
@@ -16,7 +16,6 @@ import { formatCurrency } from "@/lib/expenses/format";
 import {
   EXPENSE_PAYMENT_METHODS,
   EXPENSE_PRIORITIES,
-  EXPENSE_STATUSES,
   type ExpenseWithRelations,
 } from "@/lib/expenses/types";
 import { useTranslations } from "@/lib/i18n/client";
@@ -62,15 +61,6 @@ export function ExpenseEditForm({ expense, categories, projects, vendors }: Expe
     inheritedCurrency,
     locale,
   );
-
-  function onSubmit(event: FormEvent<HTMLFormElement>) {
-    const status = String(new FormData(event.currentTarget).get("status") ?? "");
-
-    if (shouldConfirmPayment(expense.status, status) && confirmedRef.current?.value !== "1") {
-      event.preventDefault();
-      setConfirmOpen(true);
-    }
-  }
 
   function confirmPayment(result: PaymentConfirmationResult) {
     if (paidAtRef.current) {
@@ -136,7 +126,7 @@ export function ExpenseEditForm({ expense, categories, projects, vendors }: Expe
           ) : null}
         </div>
       ) : null}
-      <form action={updateExpense} className="category-form" onSubmit={onSubmit} ref={formRef}>
+      <form action={updateExpense} className="category-form" ref={formRef}>
         <input defaultValue="" name="payment_confirmed" ref={confirmedRef} type="hidden" />
         <input name="confirm_paid_at" ref={paidAtRef} type="hidden" />
         <input name="confirm_payment_note" ref={noteRef} type="hidden" />
@@ -279,16 +269,21 @@ export function ExpenseEditForm({ expense, categories, projects, vendors }: Expe
           </select>
         </label>
 
-        <label className="auth-field" htmlFor="expense-status">
-          <span>{t("expenses.status")}</span>
-          <select defaultValue={expense.status} id="expense-status" name="status" required>
-            {EXPENSE_STATUSES.map((status) => (
-              <option key={status} value={status}>
-                {translateEnum(t, "status", status)}
-              </option>
-            ))}
-          </select>
-        </label>
+        <div className="auth-field">
+          <span id="expense-status-label">{t("expenses.status")}</span>
+          <p aria-labelledby="expense-status-label" className="expense-status-readonly">
+            <span className={`status-badge status-${expense.status}`}>
+              {expense.status === "paid" ? "✓ " : ""}
+              {translateEnum(t, "status", expense.status)}
+            </span>
+            {shouldConfirmPayment(expense.status, "paid") ? (
+              <button className="button button-outline button-small" onClick={() => setConfirmOpen(true)} type="button">
+                {t("payments.markAsPaid")}
+              </button>
+            ) : null}
+          </p>
+          <input name="status" type="hidden" value={expense.status} />
+        </div>
 
         {expense.status === "paid" ? (
           <>

@@ -2,7 +2,12 @@
 
 import { useState } from "react";
 import { useTranslations } from "@/lib/i18n/client";
-import { generatePaidExpenseWhatsAppMessage } from "@/lib/whatsapp/message";
+import {
+  generatePaidExpenseWhatsAppTemplate,
+  prepareOutboundWhatsAppMessage,
+  WHATSAPP_TEXT_MAX_LENGTH,
+  whatsAppMessageLength,
+} from "@/lib/whatsapp/message";
 
 type WhatsAppShareButtonProps = {
   expenseId: string;
@@ -22,17 +27,33 @@ export function WhatsAppShareButton(props: WhatsAppShareButtonProps) {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [sent, setSent] = useState<{ recipient: string; sentAt: string } | null>(null);
-  const preview = generatePaidExpenseWhatsAppMessage({
-    description: props.description,
-    amountLabel: props.amountLabel,
-    paymentDateLabel: props.paymentDateLabel,
-    paymentMethodLabel: props.paymentMethodLabel,
-    categoryName: props.categoryName,
-    projectName: props.projectName,
-    locale,
-  });
+  const [message, setMessage] = useState("");
+  const messageLength = whatsAppMessageLength(message);
+  const outbound = prepareOutboundWhatsAppMessage(message);
+
+  function openShare() {
+    setMessage(
+      generatePaidExpenseWhatsAppTemplate({
+        description: props.description,
+        amountLabel: props.amountLabel,
+        paymentDateLabel: props.paymentDateLabel,
+        paymentMethodLabel: props.paymentMethodLabel,
+        categoryName: props.categoryName,
+        projectName: props.projectName,
+        locale,
+      }).message,
+    );
+    setOpen(true);
+    setError(null);
+    setSent(null);
+  }
 
   async function send() {
+    if (!outbound.ok) {
+      setError(outbound.error === "too_long" ? t("payments.messageTooLong") : t("payments.messageEmpty"));
+      return;
+    }
+
     setPending(true);
     setError(null);
 
@@ -40,7 +61,7 @@ export function WhatsAppShareButton(props: WhatsAppShareButtonProps) {
       const response = await fetch(`/api/expenses/${props.expenseId}/whatsapp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone }),
+        body: JSON.stringify({ phone, message: outbound.message }),
       });
       const payload = (await response.json()) as { error?: string; recipient?: string; sentAt?: string };
 
@@ -49,6 +70,10 @@ export function WhatsAppShareButton(props: WhatsAppShareButtonProps) {
           setError(t("payments.phoneInvalid"));
         } else if (payload.error === "not_configured") {
           setError(t("payments.whatsappNotConfigured"));
+        } else if (payload.error === "message_too_long") {
+          setError(t("payments.messageTooLong"));
+        } else if (payload.error === "message_empty") {
+          setError(t("payments.messageEmpty"));
         } else {
           setError(t("payments.unableToSend"));
         }
@@ -71,11 +96,7 @@ export function WhatsAppShareButton(props: WhatsAppShareButtonProps) {
       <button
         aria-label={t("payments.sharePaidExpense")}
         className="button button-outline button-small"
-        onClick={() => {
-          setOpen(true);
-          setError(null);
-          setSent(null);
-        }}
+        onClick={openShare}
         type="button"
       >
         {t("payments.shareViaWhatsApp")}
@@ -118,9 +139,21 @@ export function WhatsAppShareButton(props: WhatsAppShareButtonProps) {
               <input onChange={(event) => setPhone(event.target.value)} placeholder="+244 …" value={phone} />
             </label>
             <label>
-              {t("payments.messagePreview")}
-              <textarea readOnly rows={8} value={preview} />
+              {t("payments.message")}
+              <textarea onChange={(event) => setMessage(event.target.value)} rows={10} value={message} />
             </label>
+            <p className="whatsapp-message-count">
+              {messageLength} / {WHATSAPP_TEXT_MAX_LENGTH}
+            </p>
+            {!outbound.ok ? (
+              <p className="form-error" role="alert">
+                {outbound.error === "too_long" ? t("payments.messageTooLong") : t("payments.messageEmpty")}
+              </p>
+            ) : null}
+            <div>
+              <p className="whatsapp-preview-label">{t("payments.messagePreview")}</p>
+              <pre className="whatsapp-message-preview">{message}</pre>
+            </div>
             {sent ? (
               <p className="payment-sheet-success" role="status">
                 ✓ {t("payments.paymentInformationSent")}
@@ -139,7 +172,7 @@ export function WhatsAppShareButton(props: WhatsAppShareButtonProps) {
               <button className="button button-outline button-small" onClick={() => setOpen(false)} type="button">
                 {t("common.cancel")}
               </button>
-              <button className="button button-small" disabled={pending || Boolean(sent)} onClick={() => void send()} type="button">
+              <button className="button button-small" disabled={pending || Boolean(sent) || !outbound.ok} onClick={() => void send()} type="button">
                 {t("payments.sendViaWhatsApp")}
               </button>
             </div>
