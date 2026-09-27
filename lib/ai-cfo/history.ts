@@ -6,7 +6,7 @@ export async function loadConversation(userId: string, conversationId: string) {
   const supabase = await createSupabaseServerClient();
   const { data: conversation, error } = await supabase
     .from("ai_cfo_conversations")
-    .select("id")
+    .select("id, active_project_id, pending_question")
     .eq("user_id", userId)
     .eq("id", conversationId)
     .maybeSingle();
@@ -29,6 +29,8 @@ export async function loadConversation(userId: string, conversationId: string) {
 
   return {
     id: conversationId,
+    activeProjectId: conversation.active_project_id ? String(conversation.active_project_id) : null,
+    pendingQuestion: conversation.pending_question ? String(conversation.pending_question) : null,
     messages: messages
       .filter((message) => message.role === "user" || message.role === "assistant")
       .map((message) => ({
@@ -43,6 +45,8 @@ export async function saveConversationTurn(input: {
   conversationId?: string;
   userMessage: string;
   assistantMessage: string;
+  activeProjectId?: string | null;
+  pendingQuestion?: string | null;
 }) {
   try {
     const supabase = await createSupabaseServerClient();
@@ -54,6 +58,8 @@ export async function saveConversationTurn(input: {
         .insert({
           user_id: input.userId,
           title: input.userMessage.slice(0, 80),
+          active_project_id: input.activeProjectId ?? null,
+          pending_question: input.pendingQuestion ?? null,
         })
         .select("id")
         .single();
@@ -65,11 +71,21 @@ export async function saveConversationTurn(input: {
 
       conversationId = String(data.id);
     } else {
-      await supabase
-        .from("ai_cfo_conversations")
-        .update({ updated_at: new Date().toISOString() })
-        .eq("user_id", input.userId)
-        .eq("id", conversationId);
+      const update: {
+        updated_at: string;
+        active_project_id?: string | null;
+        pending_question?: string | null;
+      } = { updated_at: new Date().toISOString() };
+
+      if (input.activeProjectId !== undefined) {
+        update.active_project_id = input.activeProjectId;
+      }
+
+      if (input.pendingQuestion !== undefined) {
+        update.pending_question = input.pendingQuestion;
+      }
+
+      await supabase.from("ai_cfo_conversations").update(update).eq("user_id", input.userId).eq("id", conversationId);
     }
 
     const { error: messageError } = await supabase.from("ai_cfo_messages").insert([

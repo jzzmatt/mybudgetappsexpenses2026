@@ -22,6 +22,19 @@ User
 
 Financial sums use `paid_amount` for spending (`basis: "paid"`) and `budget_amount` for budgeted amounts (`basis: "budget"`). Payment status comes from `expenses.status` (`pending`, `partial`, `paid`). There is no separate payments table.
 
+## Project context
+
+Financial tools do not run until a project is resolved. The server matches the question against the signed-in user's projects:
+
+- no project and no active context: `project_selection_required`
+- unknown name: `project_not_found`
+- several matches: `project_selection_ambiguous`
+- one authorized project: tools receive that `projectId`
+
+The active project is stored on `ai_cfo_conversations.active_project_id`. A project named in a later question is used for that question only and does not replace the active project. Project ids from the model are ignored unless they are already in the authorized set. Another user's project id is denied the same way as a missing project.
+
+Apply `supabase/migrations/20260927133000_ai_cfo_project_context.sql` after the conversation migration.
+
 ## Tools
 
 All tools are read-only and ignore any user id supplied by the model.

@@ -45,6 +45,7 @@ export async function runAiCfoChat(input: {
   message: string;
   locale: Locale;
   history: HistoryMessage[];
+  queryProjects: { id: string; name: string }[];
 }) {
   const startedAt = Date.now();
   const requestId = crypto.randomUUID();
@@ -78,7 +79,12 @@ export async function runAiCfoChat(input: {
   const messages: ModelMessage[] = [
     {
       role: "system",
-      content: buildAiCfoSystemPrompt(input.locale, toIsoDate(today.year, today.month, today.day), timeZone),
+      content: buildAiCfoSystemPrompt(
+        input.locale,
+        toIsoDate(today.year, today.month, today.day),
+        timeZone,
+        input.queryProjects,
+      ),
     },
     ...input.history.slice(-10).map((message) => ({
       role: message.role,
@@ -155,7 +161,9 @@ export async function runAiCfoChat(input: {
 
         try {
           const args = toolCall.function.arguments ? JSON.parse(toolCall.function.arguments) : {};
-          payload = await executeAiCfoTool(input.userId, name, args);
+          payload = await executeAiCfoTool(input.userId, name, args, {
+            projectIds: input.queryProjects.map((project) => project.id),
+          });
         } catch (error) {
           if (error instanceof AiCfoDatabaseError) {
             throw error;

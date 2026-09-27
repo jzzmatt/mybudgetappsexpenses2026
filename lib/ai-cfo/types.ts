@@ -18,9 +18,21 @@ export type AiCfoSource = {
   periodLabel: string | null;
 };
 
+export type AiCfoProjectRef = {
+  id: string;
+  name: string;
+  description?: string | null;
+};
+
 export type AiCfoChatResponse = {
-  reply: string;
+  type: "answer" | "project_selection_required" | "project_selection_ambiguous" | "project_not_found";
+  message: string;
   conversationId: string | null;
-  evidence: AiCfoEvidenceExpense[];
-  source: AiCfoSource | null;
+  projectContext: AiCfoProjectRef | null;
+  queryProject?: AiCfoProjectRef | null;
+  evidence?: AiCfoEvidenceExpense[];
+  source?: AiCfoSource | null;
+  originalQuestion?: string;
+  projects?: AiCfoProjectRef[];
+  allowMultiple?: boolean;
 };

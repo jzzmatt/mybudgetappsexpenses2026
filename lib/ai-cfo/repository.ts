@@ -90,6 +90,7 @@ export type ExpenseReadFilters = {
   endDate?: string;
   categoryId?: string;
   projectId?: string;
+  projectIds?: string[];
   status?: string;
   statuses?: string[];
   limit?: number;
@@ -154,7 +155,11 @@ export async function listUserExpenses(userId: string, filters: ExpenseReadFilte
     query = query.eq("category_id", filters.categoryId);
   }
 
-  if (filters.projectId) {
+  if (filters.projectIds && filters.projectIds.length > 0) {
+    query = filters.projectIds.length === 1
+      ? query.eq("project_id", filters.projectIds[0])
+      : query.in("project_id", filters.projectIds);
+  } else if (filters.projectId) {
     query = query.eq("project_id", filters.projectId);
   }
 

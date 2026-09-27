@@ -267,6 +267,19 @@ export type Messages = {
     rateLimited: string;
     unauthorized: string;
     you: string;
+    projectLabel: string;
+    selectProject: string;
+    selectProjectPrompt: string;
+    projectNotFound: string;
+    projectAmbiguous: string;
+    projectSelected: string;
+    projectChanged: string;
+    searchProjects: string;
+    select: string;
+    changeProject: string;
+    noProjects: string;
+    answeredUsing: string;
+    applyProjects: string;
   };
   aiReport: {
     title: string;

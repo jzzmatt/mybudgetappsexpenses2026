@@ -14,6 +14,7 @@ import {
   type AiCfoExpenseRecord,
   type AiCfoNamedRecord,
 } from "@/lib/ai-cfo/repository";
+import { bindAuthorizedProjects } from "@/lib/ai-cfo/project-context";
 import { toolArgsSchema, type ToolArgs } from "@/lib/ai-cfo/schemas";
 import type { AiCfoEvidenceExpense, AiCfoSource } from "@/lib/ai-cfo/types";
 
@@ -25,6 +26,8 @@ export const AI_CFO_TOOL_NAMES = [
   "get_category",
   "search_projects",
   "get_project",
+  "list_user_projects",
+  "resolve_user_project",
   "search_expenses",
   "get_expense",
   "get_expenses_by_category",
@@ -41,6 +44,26 @@ export const AI_CFO_TOOL_NAMES = [
 ] as const;
 
 export type AiCfoToolName = (typeof AI_CFO_TOOL_NAMES)[number];
+
+const PROJECT_SCOPED_TOOLS = new Set<AiCfoToolName>([
+  "search_expenses",
+  "get_expense",
+  "get_expenses_by_category",
+  "get_expenses_by_project",
+  "get_expenses_by_period",
+  "get_payment_status",
+  "calculate_expense_total",
+  "calculate_category_total",
+  "calculate_project_total",
+  "get_monthly_summary",
+  "get_budget_summary",
+  "get_budget_vs_actual",
+  "get_unpaid_expenses",
+]);
+
+export type AiCfoToolContext = {
+  projectIds: string[];
+};
 
 type ToolPayload = {
   success: boolean;
@@ -130,6 +153,7 @@ export async function executeAiCfoTool(
   userId: string,
   name: string,
   rawArgs: unknown,
+  context: AiCfoToolContext = { projectIds: [] },
   now = new Date(),
   timeZone = process.env.AI_CFO_TIMEZONE || AI_CFO_DEFAULT_TIMEZONE,
 ): Promise<ToolPayload> {
@@ -144,6 +168,16 @@ export async function executeAiCfoTool(
   }
 
   const args = parsed.data;
+  const scope = bindAuthorizedProjects(context.projectIds, args.projectId);
+
+  if (PROJECT_SCOPED_TOOLS.has(name as AiCfoToolName) && scope.rejectedUnscopedProject) {
+    return { success: false, error: "access_denied" };
+  }
+
+  if (PROJECT_SCOPED_TOOLS.has(name as AiCfoToolName) && scope.projectIds.length === 0) {
+    return { success: false, error: "project_required" };
+  }
+
   const dates = dateFilters(args, now, timeZone);
 
   if ("error" in dates) {
@@ -172,9 +206,35 @@ export async function executeAiCfoTool(
       }
       return { success: true, matched: true, category: namedPayload(resolved.record) };
     }
+    case "list_user_projects":
+    case "resolve_user_project":
     case "search_projects":
     case "get_project": {
-      const resolved = await resolveProject(userId, args);
+      const resolved = await resolveProject(
+        userId,
+        name === "list_user_projects" ? { ...args, projectName: undefined } : args,
+      );
+      if (name === "resolve_user_project") {
+        if (resolved.status === "unique") {
+          return { success: true, status: "exact_match", project: namedPayload(resolved.record) };
+        }
+        if (resolved.status === "ambiguous") {
+          return { success: true, status: "multiple_matches", projects: resolved.records.map(namedPayload) };
+        }
+        return { success: true, status: "no_match", projects: [] };
+      }
+      if (name === "list_user_projects") {
+        if (resolved.status === "list") {
+          return { success: true, projects: resolved.projects.map(namedPayload) };
+        }
+        if (resolved.status === "unique") {
+          return { success: true, projects: [namedPayload(resolved.record)] };
+        }
+        if (resolved.status === "ambiguous") {
+          return { success: true, projects: resolved.records.map(namedPayload) };
+        }
+        return { success: true, projects: [] };
+      }
       if (resolved.status === "list") {
         return { success: true, projects: resolved.projects.map(namedPayload) };
       }
@@ -191,7 +251,7 @@ export async function executeAiCfoTool(
         return { success: false, error: "invalid_arguments" };
       }
       const expense = await getUserExpense(userId, args.expenseId);
-      if (!expense) {
+      if (!expense || !scope.projectIds.includes(expense.projectId ?? "")) {
         return { success: true, matched: false, status: "not_found" };
       }
       return withEvidence([expense], null, { matched: true, expense: toEvidence(expense) });
@@ -206,10 +266,10 @@ export async function executeAiCfoTool(
     case "calculate_project_total":
     case "get_monthly_summary":
     case "get_unpaid_expenses":
-      return executeExpenseTool(userId, name, args, dates);
+      return executeExpenseTool(userId, name, args, dates, scope.projectIds);
     case "get_budget_summary":
     case "get_budget_vs_actual":
-      return executeBudgetTool(userId, name, args, dates);
+      return executeBudgetTool(userId, name, args, dates, scope.projectIds);
     default:
       return { success: false, error: "unknown_tool" };
   }
@@ -220,9 +280,9 @@ async function executeExpenseTool(
   name: string,
   args: ToolArgs,
   dates: { startDate?: string; endDate?: string; label: string | null },
+  projectIds: string[],
 ): Promise<ToolPayload> {
   let categoryId = args.categoryId;
-  let projectId = args.projectId;
 
   if (name === "calculate_category_total" || name === "get_expenses_by_category" || args.categoryName) {
     const resolved = await resolveCategory(userId, args);
@@ -235,21 +295,10 @@ async function executeExpenseTool(
     categoryId = resolved.record.id;
   }
 
-  if (name === "calculate_project_total" || name === "get_expenses_by_project" || args.projectName) {
-    const resolved = await resolveProject(userId, args);
-    if (resolved.status === "ambiguous") {
-      return { success: true, ambiguous: true, matches: resolved.records.map(namedPayload) };
-    }
-    if (resolved.status !== "unique") {
-      return { success: true, matched: false, status: "not_found" };
-    }
-    projectId = resolved.record.id;
-  }
-
   const needsText = name === "search_expenses" || name === "get_payment_status";
-  const queryText = args.query ?? args.categoryName ?? args.projectName;
+  const queryText = args.query ?? args.categoryName;
 
-  if (needsText && !queryText && !categoryId && !projectId) {
+  if (needsText && !queryText && !categoryId) {
     return { success: false, error: "narrow_the_query" };
   }
 
@@ -257,7 +306,7 @@ async function executeExpenseTool(
     startDate: dates.startDate,
     endDate: dates.endDate,
     categoryId,
-    projectId,
+    projectIds,
     status: name === "get_unpaid_expenses" ? undefined : args.status,
     statuses: name === "get_unpaid_expenses" ? ["pending", "partial"] : undefined,
     limit: name.startsWith("calculate_") || name === "get_monthly_summary" ? TOTAL_LIMIT : (args.limit ?? 50),
@@ -266,7 +315,7 @@ async function executeExpenseTool(
   const filterByText =
     Boolean(queryText) &&
     (needsText ||
-      ((name === "calculate_expense_total" || name === "get_monthly_summary") && !categoryId && !projectId));
+      ((name === "calculate_expense_total" || name === "get_monthly_summary") && !categoryId));
   const filtered = filterByText && queryText ? expenses.filter((expense) => matchesExpenseText(expense, queryText)) : expenses;
   const basis = args.basis ?? "paid";
 
@@ -308,20 +357,12 @@ async function executeExpenseTool(
 async function executeBudgetTool(
   userId: string,
   name: string,
-  args: ToolArgs,
+  _args: ToolArgs,
   dates: { startDate?: string; endDate?: string; label: string | null },
+  projectIds: string[],
 ): Promise<ToolPayload> {
-  const resolved = await resolveProject(userId, args);
-
-  if (resolved.status === "ambiguous") {
-    return { success: true, ambiguous: true, matches: resolved.records.map(namedPayload) };
-  }
-
-  const projects = resolved.status === "unique" ? [resolved.record] : resolved.status === "list" ? resolved.projects : [];
-
-  if (args.projectName && resolved.status === "none") {
-    return { success: true, matched: false, status: "not_found" };
-  }
+  const owned = await listUserProjects(userId);
+  const projects = owned.filter((project) => projectIds.includes(project.id));
 
   if (name === "get_budget_summary") {
     return {
@@ -415,11 +456,14 @@ function toolDescription(name: AiCfoToolName) {
     case "get_category":
       return "Read one category that belongs to the authenticated user.";
     case "search_projects":
-      return "Find the authenticated user's projects by name.";
+    case "list_user_projects":
+      return "List projects owned by the authenticated user. Optional search narrows the list. Never returns another user's projects.";
+    case "resolve_user_project":
+      return "Resolve one project name to exact_match, multiple_matches, or no_match for the authenticated user.";
     case "get_project":
       return "Read one project that belongs to the authenticated user, including its budget.";
     case "search_expenses":
-      return "Search the authenticated user's expenses by description, category, project, status, or period.";
+      return "Search expenses inside the already authorized project context.";
     case "get_expense":
       return "Read one expense by id. The id must belong to the authenticated user.";
     case "get_expenses_by_category":
