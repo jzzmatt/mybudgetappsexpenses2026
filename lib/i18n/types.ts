@@ -31,6 +31,8 @@ export type Messages = {
     projectWorkspace: string;
     backToProjects: string;
     howItWorks: string;
+    aiCfo: string;
+    aiCfoShort: string;
   };
   common: {
     save: string;
@@ -238,6 +240,33 @@ export type Messages = {
     loadError: string;
     projectReport: string;
     globalReport: string;
+  };
+  aiCfo: {
+    title: string;
+    description: string;
+    placeholder: string;
+    send: string;
+    greeting: string;
+    thinking: string;
+    suggestionMonth: string;
+    suggestionUnpaid: string;
+    suggestionLargest: string;
+    suggestionByCategory: string;
+    suggestionCompare: string;
+    suggestionLast3Months: string;
+    suggestionBudget: string;
+    suggestionPayment: string;
+    viewEvidence: string;
+    basedOn: string;
+    expenses: string;
+    categories: string;
+    projects: string;
+    period: string;
+    unavailable: string;
+    dataUnavailable: string;
+    rateLimited: string;
+    unauthorized: string;
+    you: string;
   };
   aiReport: {
     title: string;
