@@ -20,7 +20,7 @@ User
   → reply, evidence, and source summary
 ```
 
-Financial sums use `paid_amount` for spending (`basis: "paid"`) and `budget_amount` for budgeted amounts (`basis: "budget"`). Payment status comes from `expenses.status` (`pending`, `partial`, `paid`). There is no separate payments table.
+Financial sums use `paid_amount` for spending (`basis: "paid"`) and `budget_amount` for budgeted amounts (`basis: "budget"`). Payment status comes from `expenses.status` (`pending`, `partial`, `paid`). `paid_at` and `payment_method` describe a paid expense. Evidence existence is `hasEvidence` and `evidenceCount`. Storage paths are not sent to the model. There is no separate payments table.
 
 ## Project context
 

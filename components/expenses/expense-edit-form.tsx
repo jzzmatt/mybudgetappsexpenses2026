@@ -1,13 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useRef, useState, type FormEvent } from "react";
 import { AuthField } from "@/components/auth/auth-field";
 import { CopyExpenseButton } from "@/components/expenses/copy-expense-button";
+import { PaymentConfirmationModal, type PaymentConfirmationResult } from "@/components/expenses/payment-confirmation-modal";
+import { WhatsAppShareButton } from "@/components/expenses/whatsapp-share-button";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { CURRENCY_LABELS, DEFAULT_EXPENSE_CURRENCY } from "@/lib/currency/types";
-import { updateExpenseAction } from "@/lib/expenses/actions";
+import { removePaymentEvidenceAction, updateExpenseAction } from "@/lib/expenses/actions";
+import { shouldConfirmPayment, canSharePaidExpense } from "@/lib/payments/rules";
+import { formatWhatsAppDate, shareAmount } from "@/lib/whatsapp/message";
 import { formatCurrency } from "@/lib/expenses/format";
 import {
   EXPENSE_PAYMENT_METHODS,
@@ -32,6 +36,14 @@ type ExpenseEditFormProps = {
 export function ExpenseEditForm({ expense, categories, projects, vendors }: ExpenseEditFormProps) {
   const { t, locale } = useTranslations();
   const updateExpense = updateExpenseAction.bind(null, expense.id);
+  const formRef = useRef<HTMLFormElement>(null);
+  const paidAtRef = useRef<HTMLInputElement>(null);
+  const noteRef = useRef<HTMLInputElement>(null);
+  const confirmedRef = useRef<HTMLInputElement>(null);
+  const methodRef = useRef<HTMLSelectElement>(null);
+  const receiptRef = useRef<HTMLInputElement>(null);
+  const pictureRef = useRef<HTMLInputElement>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   const [selectedProjectId, setSelectedProjectId] = useState<string>(expense.project_id || "");
   const [budgetAmount, setBudgetAmount] = useState<number>(Number(expense.budget_amount) || 0);
@@ -45,9 +57,91 @@ export function ExpenseEditForm({ expense, categories, projects, vendors }: Expe
       ? willCauseProjectOverspending(projectBudget, 0, budgetAmount)
       : null;
 
+  const amountLabel = formatCurrency(
+    shareAmount(Number(expense.paid_amount), Number(expense.budget_amount)),
+    inheritedCurrency,
+    locale,
+  );
+
+  function onSubmit(event: FormEvent<HTMLFormElement>) {
+    const status = String(new FormData(event.currentTarget).get("status") ?? "");
+
+    if (shouldConfirmPayment(expense.status, status) && confirmedRef.current?.value !== "1") {
+      event.preventDefault();
+      setConfirmOpen(true);
+    }
+  }
+
+  function confirmPayment(result: PaymentConfirmationResult) {
+    if (paidAtRef.current) {
+      paidAtRef.current.value = result.paidAt;
+    }
+    if (noteRef.current) {
+      noteRef.current.value = result.paymentNote;
+    }
+    if (confirmedRef.current) {
+      confirmedRef.current.value = "1";
+    }
+    if (methodRef.current) {
+      methodRef.current.value = result.paymentMethod;
+    }
+    assignFile(receiptRef.current, result.receipt);
+    assignFile(pictureRef.current, result.picture);
+    setConfirmOpen(false);
+    formRef.current?.requestSubmit();
+  }
+
   return (
     <Card className="category-form-card expense-form-card">
-      <form action={updateExpense} className="category-form">
+      {canSharePaidExpense(expense.status) ? (
+        <div className="payment-paid-summary">
+          <p>
+            ✓ {t("payments.paid")}
+            {expense.paid_at ? ` · ${t("payments.paymentDate")}: ${formatWhatsAppDate(expense.paid_at)}` : ""}
+          </p>
+          {expense.payment_note ? <p>{expense.payment_note}</p> : null}
+          <WhatsAppShareButton
+            amountLabel={amountLabel}
+            categoryName={expense.category?.name ?? "—"}
+            description={expense.description}
+            evidenceNames={[
+              ...(expense.payment_proof_filename ? [expense.payment_proof_filename] : []),
+              ...(expense.evidence?.map((item) => item.fileName) ?? []),
+            ]}
+            expenseId={expense.id}
+            paymentDateLabel={formatWhatsAppDate(expense.paid_at ?? "")}
+            paymentMethodLabel={expense.payment_method ? translateEnum(t, "paymentMethod", expense.payment_method) : "—"}
+            projectName={expense.project?.name ?? "—"}
+          />
+          {expense.evidence && expense.evidence.length > 0 ? (
+            <ul className="payment-evidence-list">
+              {expense.evidence.map((item) => (
+                <li key={item.id}>
+                  <span>
+                    📎 {item.fileName}
+                  </span>
+                  {item.signedUrl ? (
+                    <a className="button button-outline button-small" href={item.signedUrl} rel="noopener noreferrer" target="_blank">
+                      {t("payments.viewEvidence")}
+                    </a>
+                  ) : null}
+                  <form action={removePaymentEvidenceAction.bind(null, item.id)}>
+                    <button className="button button-outline button-small" type="submit">
+                      {t("payments.removeEvidence")}
+                    </button>
+                  </form>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+        </div>
+      ) : null}
+      <form action={updateExpense} className="category-form" onSubmit={onSubmit} ref={formRef}>
+        <input defaultValue="" name="payment_confirmed" ref={confirmedRef} type="hidden" />
+        <input name="confirm_paid_at" ref={paidAtRef} type="hidden" />
+        <input name="confirm_payment_note" ref={noteRef} type="hidden" />
+        <input name="receipt" ref={receiptRef} type="file" hidden />
+        <input name="picture" ref={pictureRef} type="file" hidden />
         <label className="auth-field" htmlFor="expense-project">
           <span>{t("expenses.project")}</span>
           <select
@@ -162,6 +256,7 @@ export function ExpenseEditForm({ expense, categories, projects, vendors }: Expe
             defaultValue={expense.payment_method ?? ""}
             id="expense-payment-method"
             name="payment_method"
+            ref={methodRef}
           >
             <option value="">{t("common.optional")}</option>
             {EXPENSE_PAYMENT_METHODS.map((method) => (
@@ -194,6 +289,19 @@ export function ExpenseEditForm({ expense, categories, projects, vendors }: Expe
             ))}
           </select>
         </label>
+
+        {expense.status === "paid" ? (
+          <>
+            <label className="auth-field" htmlFor="expense-paid-at">
+              <span>{t("payments.paymentDate")}</span>
+              <input defaultValue={expense.paid_at ?? ""} id="expense-paid-at" name="paid_at" type="date" />
+            </label>
+            <label className="auth-field" htmlFor="expense-payment-note">
+              <span>{t("payments.paymentDescription")}</span>
+              <textarea defaultValue={expense.payment_note ?? ""} id="expense-payment-note" maxLength={500} name="payment_note" rows={3} />
+            </label>
+          </>
+        ) : null}
 
         <label className="auth-field" htmlFor="expense-notes">
           <span>{t("expenses.notes")}</span>
@@ -247,6 +355,28 @@ export function ExpenseEditForm({ expense, categories, projects, vendors }: Expe
           </Link>
         </div>
       </form>
+      <PaymentConfirmationModal
+        amountLabel={amountLabel}
+        defaultMethod={expense.payment_method ?? ""}
+        description={expense.description}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={confirmPayment}
+        open={confirmOpen}
+      />
     </Card>
   );
+}
+
+function assignFile(input: HTMLInputElement | null, file: File | null) {
+  if (!input) {
+    return;
+  }
+
+  const transfer = new DataTransfer();
+
+  if (file) {
+    transfer.items.add(file);
+  }
+
+  input.files = transfer.files;
 }

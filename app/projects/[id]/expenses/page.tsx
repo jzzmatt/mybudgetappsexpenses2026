@@ -78,6 +78,16 @@ export default async function ProjectExpensesPage({ params, searchParams }: Proj
       }
       title={project.name}
     >
+      {queryParams.paid === "1" ? (
+        <p className="payment-sheet-success" role="status">
+          ✓ {t("payments.paidSuccess")}
+        </p>
+      ) : null}
+      {typeof queryParams.error === "string" ? (
+        <p className="form-error page-error" role="alert">
+          {queryParams.error}
+        </p>
+      ) : null}
       {loadError ? (
         <p className="form-error page-error" role="alert">
           {loadError}

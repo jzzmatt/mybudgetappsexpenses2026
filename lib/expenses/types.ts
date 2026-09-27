@@ -49,6 +49,8 @@ export type Expense = {
   payment_reference: string | null;
   payment_proof_path: string | null;
   payment_proof_filename: string | null;
+  paid_at: string | null;
+  payment_note: string | null;
   priority: string | null;
   status: ExpenseStatus | string;
   notes: string | null;
@@ -62,12 +64,22 @@ export type ExpenseDerivedMetrics = {
   projectBudgetImpactPercent: number;
 };
 
+export type PaymentEvidenceItem = {
+  id: string;
+  evidenceType: "receipt" | "image";
+  fileName: string;
+  mimeType: string;
+  signedUrl: string | null;
+};
+
 export type ExpenseWithRelations = Expense & {
   category: ExpenseRelation | null;
   project: ExpenseRelation | null;
   vendor: ExpenseRelation | null;
   derived?: ExpenseDerivedMetrics;
   proofSignedUrl?: string | null;
+  evidence?: PaymentEvidenceItem[];
+  evidenceCount?: number;
 };
 
 export type ExpenseInput = {
