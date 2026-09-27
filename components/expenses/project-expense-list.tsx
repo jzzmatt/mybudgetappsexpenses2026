@@ -184,6 +184,18 @@ export async function ProjectExpenseList({
         <div className="category-table-wrap">
           <table className="category-table list-table project-expense-table">
             <caption className="sr-only">{t("expenses.allExpenses")}</caption>
+            <colgroup>
+              <col className="project-expense-col-date" />
+              <col className="project-expense-col-description" />
+              <col className="project-expense-col-category" />
+              <col className="project-expense-col-vendor" />
+              <col className="project-expense-col-budget" />
+              <col className="project-expense-col-paid" />
+              <col className="project-expense-col-remaining" />
+              <col className="project-expense-col-percent" />
+              <col className="project-expense-col-status" />
+              <col className="project-expense-col-actions" />
+            </colgroup>
             <thead>
               <tr>
                 <SortableHeader basePath={basePath} field="date" filters={filters} label={t("expenses.date")} />
@@ -242,8 +254,8 @@ export async function ProjectExpenseList({
                         />
                       </div>
                     </td>
-                    <td className="expense-table-nowrap">{expense.category?.name ?? t("common.dash")}</td>
-                    <td className="expense-table-nowrap">{expense.vendor?.name ?? t("common.dash")}</td>
+                    <td>{expense.category?.name ?? t("common.dash")}</td>
+                    <td>{expense.vendor?.name ?? t("common.dash")}</td>
                     <td className="expense-table-nowrap">
                       {formatCurrency(expense.budget_amount, expense.currency, locale)}
                     </td>
@@ -256,7 +268,7 @@ export async function ProjectExpenseList({
                     <td className="expense-percentage-cell">
                       <ExpensePercentageBar percent={paidPercent} labelSuffix={paidSuffix} />
                     </td>
-                    <td>
+                    <td className="project-expense-status-cell">
                       <span className={`status-badge status-${expense.status}`}>
                         {translateEnum(t, "status", expense.status)}
                       </span>
