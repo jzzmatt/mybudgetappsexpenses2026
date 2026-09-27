@@ -32,8 +32,8 @@ export function shareAmount(paidAmount: number, budgetAmount: number) {
   return paidAmount > 0 ? paidAmount : budgetAmount;
 }
 
-/** WhatsApp Cloud API text body maximum. https://developers.facebook.com/docs/whatsapp/cloud-api/reference/messages#text-object */
-export const WHATSAPP_TEXT_MAX_LENGTH = 4096;
+/** WhatsApp client text limit. WaAPI types `message` as a string and does not publish a smaller maximum. */
+export const WHATSAPP_TEXT_MAX_LENGTH = 65536;
 
 export function whatsAppMessageLength(message: string) {
   return Array.from(message).length;

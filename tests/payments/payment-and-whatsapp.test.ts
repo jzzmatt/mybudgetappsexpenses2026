@@ -20,14 +20,17 @@ import {
   shareAmount,
   WHATSAPP_TEXT_MAX_LENGTH,
 } from "@/lib/whatsapp/message";
+import { deliverPaidExpenseWhatsApp } from "@/lib/whatsapp/gateway";
 import { normalizeWhatsAppNumber } from "@/lib/whatsapp/phone";
 import {
-  buildWhatsAppDocumentPayload,
-  buildWhatsAppTextPayload,
+  buildWaapiMediaPayload,
+  buildWaapiTextPayload,
   isWhatsAppConfigured,
   planWhatsAppDelivery,
   publicWhatsAppStatus,
   sanitizeWhatsAppError,
+  waapiActionAccepted,
+  waapiActionUrl,
 } from "@/lib/whatsapp/payload";
 
 const expense = {
@@ -120,14 +123,33 @@ describe("WhatsApp paid expense message", () => {
       { fileName: "comprovativo.pdf", mimeType: "application/pdf" },
       { fileName: "payment.jpg", mimeType: "image/jpeg" },
     ]);
-    const text = buildWhatsAppTextPayload("244923000000", generatePaidExpenseWhatsAppMessage({ ...expense, locale: "en", amountLabel: "Kz 50,000.00" }));
-    const document = buildWhatsAppDocumentPayload("244923000000", "media-1", "comprovativo.pdf");
+    const text = buildWaapiTextPayload("244923000000", generatePaidExpenseWhatsAppMessage({ ...expense, locale: "en", amountLabel: "Kz 50,000.00" }));
+    const pdf = buildWaapiMediaPayload("244923000000", {
+      fileName: "comprovativo.pdf",
+      mimeType: "application/pdf",
+      bytes: Uint8Array.from([1, 2, 3]),
+    });
+    const image = buildWaapiMediaPayload("244923000000", {
+      fileName: "payment.jpg",
+      mimeType: "image/jpeg",
+      bytes: Uint8Array.from([4, 5]),
+    });
+    const webp = buildWaapiMediaPayload("244923000000", {
+      fileName: "payment.webp",
+      mimeType: "image/webp",
+      bytes: Uint8Array.from([6]),
+    });
 
     assert.deepEqual(plan.steps.map((step) => step.type), ["text", "document", "image"]);
-    assert.equal(text.type, "text");
-    assert.equal(text.text.body.includes("Payment proof attached"), false);
-    assert.equal(document.type, "document");
-    assert.equal("document" in text, false);
+    assert.equal(text.chatId, "244923000000@c.us");
+    assert.equal(text.message.includes("Payment proof attached"), false);
+    assert.equal("mediaUrl" in text, false);
+    assert.equal(pdf.mediaName, "comprovativo.pdf");
+    assert.equal(pdf.mediaBase64, Buffer.from(Uint8Array.from([1, 2, 3])).toString("base64"));
+    assert.equal(pdf.asDocument, true);
+    assert.equal(image.asDocument, false);
+    assert.equal(webp.asDocument, true);
+    assert.equal("mediaUrl" in pdf || "mediaCaption" in pdf, false);
   });
 
   it("sends only the payment message when there is no evidence", () => {
@@ -143,20 +165,26 @@ describe("WhatsApp paid expense message", () => {
     assert.equal(normalizeWhatsAppNumber("abc").ok, false);
     assert.equal(normalizeWhatsAppNumber("+244 923 000 000").ok, true);
     assert.equal(isWhatsAppConfigured({}), false);
+    assert.equal(isWhatsAppConfigured({ WAAPI_API_TOKEN: "token", WAAPI_INSTANCE_ID: "abc" }), false);
+    assert.equal(isWhatsAppConfigured({ WAAPI_API_TOKEN: "  ", WAAPI_INSTANCE_ID: "42" }), false);
+    assert.equal(isWhatsAppConfigured({ WAAPI_API_TOKEN: "token", WAAPI_INSTANCE_ID: "42" }), true);
     assert.deepEqual(publicWhatsAppStatus(false), { configured: false });
     assert.equal(sanitizeWhatsAppError("Bearer EAA123secret failed").includes("EAA123secret"), false);
+    assert.equal(waapiActionAccepted({ status: "success", data: { status: "error" } }), false);
+    assert.equal(waapiActionAccepted({ status: "success", data: { status: "success" } }), true);
+    assert.equal(waapiActionUrl("42", "send-message"), "https://waapi.app/api/v1/instances/42/client/action/send-message");
   });
 
   it("sends the edited message and keeps the generated template free of attachment text", () => {
     const template = generatePaidExpenseWhatsAppTemplate({ ...expense, locale: "pt" });
     const edited = "Olá João,\n\nA despesa Cartão Lombongo foi paga.\n\nValor: 50.000 Kz.\nObrigado!";
     const outbound = prepareOutboundWhatsAppMessage(edited);
-    const payload = buildWhatsAppTextPayload("244923000000", outbound.ok ? outbound.message : "");
+    const payload = buildWaapiTextPayload("244923000000", outbound.ok ? outbound.message : "");
 
     assert.equal(template.message, generatePaidExpenseWhatsAppMessage({ ...expense, locale: "pt" }));
     assert.equal(messageMentionsAttachment(template.message), false);
     assert.equal(outbound.ok && outbound.message, edited);
-    assert.equal(payload.text.body, edited);
+    assert.equal(payload.message, edited);
     assert.equal(prepareOutboundWhatsAppMessage("   ").ok, false);
     assert.equal(prepareOutboundWhatsAppMessage("a".repeat(WHATSAPP_TEXT_MAX_LENGTH + 1)).ok, false);
     const typedAttachment = prepareOutboundWhatsAppMessage("Comprovativo em anexo");
@@ -169,5 +197,49 @@ describe("WhatsApp paid expense message", () => {
     assert.equal(formatWhatsAppDate("2026-09-27"), "27/09/2026");
     assert.equal(shareAmount(0, 50000), 50000);
     assert.equal(shareAmount(25000, 50000), 25000);
+  });
+});
+
+describe("WaAPI gateway", () => {
+  const config = { token: "waapi-token", instanceId: "42" };
+
+  it("sends the edited text, then each file as base64, and treats a nested error as a failure", async () => {
+    const calls: { url: string; body: Record<string, unknown> }[] = [];
+    const fetchImpl: typeof fetch = async (input, init) => {
+      calls.push({ url: String(input), body: JSON.parse(String(init?.body)) as Record<string, unknown> });
+      const failedMedia = calls.length === 3;
+      return new Response(
+        JSON.stringify({
+          status: "success",
+          data: { status: failedMedia ? "error" : "success", message: failedMedia ? "Bearer waapi-token rejected" : "ok" },
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } },
+      );
+    };
+
+    const sent = await deliverPaidExpenseWhatsApp({
+      to: "244923000000",
+      body: "Olá João",
+      files: [
+        { fileName: "comprovativo.pdf", mimeType: "application/pdf", bytes: Uint8Array.from([9]) },
+        { fileName: "foto.jpg", mimeType: "image/jpeg", bytes: Uint8Array.from([8]) },
+      ],
+      config,
+      fetchImpl,
+    });
+
+    assert.equal(sent.ok, false);
+    assert.equal(calls.length, 3);
+    assert.equal(calls[0]?.url, "https://waapi.app/api/v1/instances/42/client/action/send-message");
+    assert.equal(calls[0]?.body.message, "Olá João");
+    assert.equal(calls[0]?.body.chatId, "244923000000@c.us");
+    assert.equal(calls[1]?.url.endsWith("/send-media"), true);
+    assert.equal(calls[1]?.body.mediaName, "comprovativo.pdf");
+    assert.equal(calls[1]?.body.asDocument, true);
+    assert.equal("mediaUrl" in (calls[1]?.body ?? {}), false);
+    assert.equal("mediaCaption" in (calls[1]?.body ?? {}), false);
+    assert.equal(calls[2]?.body.mediaName, "foto.jpg");
+    assert.equal(calls[2]?.body.asDocument, false);
+    assert.equal(calls.every((call) => call.url.startsWith("https://waapi.app/")), true);
   });
 });

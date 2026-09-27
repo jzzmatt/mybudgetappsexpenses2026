@@ -1,34 +1,29 @@
-# WhatsApp Business Cloud API
+# WhatsApp via WaAPI
 
-Paid expenses can be shared from BudgetApp. The server sends the payment text first, then each comprovativo or picture as its own WhatsApp document or image. The text never says that a file is attached. BudgetApp fills the share dialog with that text, and the user can edit it before sending. The server sends the edited text exactly, then each file as its own message.
+Paid expenses can be shared from BudgetApp. The server sends the payment text first, then each comprovativo or picture as its own WhatsApp message. The text never says that a file is attached. BudgetApp fills the share dialog with that text, and the user can edit it before sending. The server sends the edited text exactly, then each file as its own message.
 
-Credentials stay in server environment variables. They are not sent to the browser.
+The WhatsApp gateway is [WaAPI](https://waapi.app) (`https://waapi.app/api/v1`). Credentials stay in server environment variables. They are not sent to the browser.
 
 ```env
-WHATSAPP_ACCESS_TOKEN=
-WHATSAPP_PHONE_NUMBER_ID=
-WHATSAPP_BUSINESS_ACCOUNT_ID=
-WHATSAPP_API_VERSION=v22.0
+WAAPI_API_TOKEN=
+WAAPI_INSTANCE_ID=
 ```
 
-`WHATSAPP_API_VERSION` should be a Graph API version Meta currently supports. `v22.0` is the default used by this app.
+`WAAPI_INSTANCE_ID` is the numeric instance id from the WaAPI dashboard.
 
 ## Setup
 
-1. Create a Meta Developer account at [developers.facebook.com](https://developers.facebook.com/).
-2. Create a Meta application.
-3. Add the WhatsApp product to that application.
-4. Create or select a WhatsApp Business Account.
-5. Add and verify the business phone number that will send messages.
-6. Generate a system user or temporary access token with `whatsapp_business_messaging` permission.
-7. Copy the Phone Number ID from the WhatsApp API setup page into `WHATSAPP_PHONE_NUMBER_ID`.
-8. Set `WHATSAPP_ACCESS_TOKEN`, `WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_BUSINESS_ACCOUNT_ID`, and `WHATSAPP_API_VERSION` in the server environment. Do not commit the values.
-9. Configure the webhook only if you need delivery status callbacks. Sending does not require a webhook.
-10. Send a text message to a number that has opted in, using the API setup tool.
-11. Send a PDF with the media upload endpoint, then a document message that references the returned media id.
-12. Send a JPEG the same way with an image message.
-13. Put the production token and production phone number id in the hosting environment.
-14. If Meta requires a template for business-initiated messages outside the customer care window, create that template in WhatsApp Manager and use it for production. The in-app sender currently posts a session text message plus media messages.
-15. Mark an expense as paid in BudgetApp, open Share via WhatsApp, confirm the number, and send. The recipient should get the payment text and, when files exist, each file in a following message.
+1. Create an account at [waapi.app](https://waapi.app).
+2. Create a WhatsApp instance and scan the QR code so the instance is ready.
+3. Copy the API token into `WAAPI_API_TOKEN`.
+4. Copy the numeric instance id into `WAAPI_INSTANCE_ID`.
+5. Set both variables in the server environment (for example Vercel) and redeploy. Do not commit the values.
+6. Mark an expense as paid in BudgetApp, open Share via WhatsApp, confirm the number, and send.
 
-Apply `supabase/migrations/20260927150000_payment_evidence_and_share_logs.sql` before using payment evidence or share logs. Evidence files stay in the private `payment-proofs` bucket. The server downloads them and uploads the bytes to WhatsApp. Signed storage URLs are not placed in the message.
+The server posts the edited text to `POST /instances/{id}/client/action/send-message` with `chatId` set to `{digits}@c.us` and `message` set to the edited text. Each file is then posted to `POST /instances/{id}/client/action/send-media` as `mediaBase64` with `mediaName`. PDF and WebP files are sent with `asDocument: true`. JPEG and PNG files are sent with `asDocument: false`. Those requests do not include `mediaUrl` or a caption.
+
+A WaAPI HTTP 200 response counts as a successful send only when both the outer `status` and `data.status` are `success`.
+
+The share dialog counts characters up to 65536, the WhatsApp client text limit. WaAPI does not publish a smaller maximum for `message`.
+
+Apply `supabase/migrations/20260927150000_payment_evidence_and_share_logs.sql` before using payment evidence or share logs. Evidence files stay in the private `payment-proofs` bucket. The server downloads them and sends the bytes as base64. Storage URLs are not placed in the message.
