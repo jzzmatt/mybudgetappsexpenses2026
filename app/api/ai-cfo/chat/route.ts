@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { markFavoriteUsed } from "@/lib/ai-cfo/favorite-repository";
 import { saveConversationTurn, loadConversation } from "@/lib/ai-cfo/history";
 import { resolveProjectContext, type CfoProject } from "@/lib/ai-cfo/project-context";
 import { consumeAiCfoRateLimit } from "@/lib/ai-cfo/rate-limit";
@@ -126,6 +127,7 @@ export async function POST(request: Request) {
         projects: projects.map(toPublicProject),
         conversationId: history?.id ?? null,
         projectContext: activeProject ? toPublicProject(activeProject) : null,
+        favoriteId: parsed.data.favoriteId ?? null,
       });
     }
 
@@ -161,6 +163,7 @@ export async function POST(request: Request) {
       queryProjects: chosen,
       activeProject: chosen.length === 1 ? chosen[0] : activeProject,
       clearPending: true,
+      favoriteId: parsed.data.favoriteId,
     });
   }
 
@@ -172,23 +175,25 @@ export async function POST(request: Request) {
   });
 
   if (decision.state === "required") {
+    const prompt = parsed.data.favoriteId ? t("aiCfo.favoriteSelectProject") : t("aiCfo.selectProjectPrompt");
     const conversationId = await saveConversationTurn({
       userId,
       conversationId: history?.id,
       userMessage: message,
-      assistantMessage: t("aiCfo.selectProjectPrompt"),
+      assistantMessage: prompt,
       activeProjectId: activeProject?.id ?? null,
       pendingQuestion: message,
     });
 
     return NextResponse.json({
       type: "project_selection_required",
-      message: t("aiCfo.selectProjectPrompt"),
+      message: prompt,
       originalQuestion: message,
       projects: projects.map(toPublicProject),
       allowMultiple: decision.allowMultiple,
       conversationId,
       projectContext: activeProject ? toPublicProject(activeProject) : null,
+      favoriteId: parsed.data.favoriteId ?? null,
     });
   }
 
@@ -209,6 +214,7 @@ export async function POST(request: Request) {
       projects: projects.map(toPublicProject),
       conversationId,
       projectContext: activeProject ? toPublicProject(activeProject) : null,
+      favoriteId: parsed.data.favoriteId ?? null,
     });
   }
 
@@ -229,6 +235,7 @@ export async function POST(request: Request) {
       projects: decision.projects.map(toPublicProject),
       conversationId,
       projectContext: activeProject ? toPublicProject(activeProject) : null,
+      favoriteId: parsed.data.favoriteId ?? null,
     });
   }
 
@@ -248,6 +255,7 @@ export async function POST(request: Request) {
     queryProjects: decision.queryProjects,
     activeProject: nextActive,
     clearPending: true,
+    favoriteId: parsed.data.favoriteId,
   });
 }
 
@@ -260,6 +268,7 @@ async function answerQuestion(input: {
   queryProjects: CfoProject[];
   activeProject: CfoProject | null;
   clearPending: boolean;
+  favoriteId?: string;
 }) {
   try {
     const result = await runAiCfoChat({
@@ -269,6 +278,14 @@ async function answerQuestion(input: {
       history: input.historyMessages,
       queryProjects: input.queryProjects.map((project) => ({ id: project.id, name: project.name })),
     });
+
+    if (input.favoriteId) {
+      try {
+        await markFavoriteUsed(input.userId, input.favoriteId);
+      } catch (error) {
+        console.error("ai-cfo favorite usage", error instanceof Error ? error.name : "unknown");
+      }
+    }
 
     const conversationId = await saveConversationTurn({
       userId: input.userId,
@@ -287,6 +304,7 @@ async function answerQuestion(input: {
       queryProject: input.queryProjects[0] ? toPublicProject(input.queryProjects[0]) : null,
       evidence: result.evidence,
       source: result.source,
+      favoriteId: input.favoriteId ?? null,
     });
   } catch (error) {
     if (error instanceof AiCfoDatabaseError) {

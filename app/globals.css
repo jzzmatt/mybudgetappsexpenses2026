@@ -3337,9 +3337,247 @@ select {
 
 .ai-cfo {
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr) auto;
   gap: 16px;
   min-height: calc(100vh - 180px);
+  align-items: start;
+}
+
+.ai-cfo-main {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 16px;
+  min-width: 0;
+  min-height: calc(100vh - 180px);
+}
+
+.ai-cfo-favorites {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  min-width: 0;
+}
+
+.ai-cfo-favorites-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: var(--foreground);
+  padding: 12px;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+}
+
+.ai-cfo-favorites-body {
+  display: none;
+  gap: 8px;
+  padding: 0 12px 12px;
+}
+
+.ai-cfo-favorites.is-open .ai-cfo-favorites-body {
+  display: grid;
+}
+
+.ai-cfo-favorites-body input,
+.ai-cfo-dialog-card input,
+.ai-cfo-dialog-card textarea {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--background);
+  color: var(--foreground);
+  padding: 8px 10px;
+}
+
+.ai-cfo-favorites-body ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+  max-height: 240px;
+  overflow: auto;
+}
+
+.ai-cfo-favorites-body li {
+  position: relative;
+  display: grid;
+  gap: 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 8px;
+}
+
+.ai-cfo-favorite-run {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 2px 8px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  padding: 0;
+  cursor: pointer;
+}
+
+.ai-cfo-favorite-run span[aria-hidden="true"] {
+  grid-row: span 2;
+  align-self: center;
+}
+
+.ai-cfo-favorite-run strong,
+.ai-cfo-favorite-run span {
+  min-width: 0;
+}
+
+.ai-cfo-favorite-run span {
+  color: var(--muted-foreground);
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ai-cfo-favorite-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.ai-cfo-favorite-menu {
+  position: absolute;
+  z-index: 5;
+  right: 8px;
+  bottom: 42px;
+  display: grid;
+  min-width: 180px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+  padding: 4px;
+}
+
+.ai-cfo-favorite-menu button {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  padding: 8px 10px;
+  cursor: pointer;
+}
+
+.ai-cfo-favorite-empty,
+.ai-cfo-favorite-notice {
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: 13px;
+}
+
+.ai-cfo-favorite-notice {
+  color: var(--foreground);
+  font-weight: 700;
+}
+
+.ai-cfo-message-tools {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+.ai-cfo-favorite-star {
+  border: 0;
+  background: transparent;
+  color: var(--primary);
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+}
+
+.ai-cfo-dialog {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  align-items: end;
+  justify-content: center;
+  padding: 16px;
+  background: color-mix(in srgb, #0f172a 45%, transparent);
+}
+
+.ai-cfo-dialog-card {
+  display: grid;
+  gap: 12px;
+  width: min(100%, 480px);
+  border: 1px solid var(--border);
+  border-radius: 16px 16px 0 0;
+  background: var(--surface);
+  padding: 16px;
+  padding-bottom: calc(16px + env(safe-area-inset-bottom));
+}
+
+.ai-cfo-dialog-card h2,
+.ai-cfo-dialog-card label {
+  margin: 0;
+  display: grid;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.ai-cfo-dialog-card h2 {
+  font-size: 18px;
+}
+
+.ai-cfo-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+@media (min-width: 701px) {
+  .ai-cfo-dialog {
+    align-items: center;
+  }
+
+  .ai-cfo-dialog-card {
+    border-radius: var(--radius-lg);
+    padding-bottom: 16px;
+  }
+}
+
+@media (min-width: 901px) {
+  .ai-cfo {
+    grid-template-columns: minmax(240px, 280px) minmax(0, 1fr);
+  }
+
+  .ai-cfo-favorites {
+    position: sticky;
+    top: 12px;
+    max-height: calc(100vh - 140px);
+    overflow: auto;
+  }
+
+  .ai-cfo-favorites-body,
+  .ai-cfo-favorites.is-open .ai-cfo-favorites-body {
+    display: grid;
+  }
+
+  .ai-cfo-favorites-body ul {
+    max-height: none;
+  }
+
+  .ai-cfo-favorites-chevron {
+    display: none;
+  }
+
+  .ai-cfo-favorites-toggle {
+    cursor: default;
+  }
 }
 
 .ai-cfo-project-bar {
@@ -3591,7 +3829,8 @@ select {
     grid-template-columns: 1fr;
   }
 
-  .ai-cfo {
+  .ai-cfo,
+  .ai-cfo-main {
     min-height: calc(100vh - 240px);
   }
 }
@@ -3606,7 +3845,14 @@ select {
   .ai-cfo-composer textarea,
   .ai-cfo-project-trigger,
   .ai-cfo-project-sheet-card,
-  .ai-cfo-project-card {
+  .ai-cfo-project-card,
+  .ai-cfo-favorites,
+  .ai-cfo-favorites-body li,
+  .ai-cfo-favorite-menu,
+  .ai-cfo-dialog-card,
+  .ai-cfo-favorites-body input,
+  .ai-cfo-dialog-card input,
+  .ai-cfo-dialog-card textarea {
     background: #111827;
     border-color: #334155;
     color: #f8fafc;
@@ -3618,8 +3864,16 @@ select {
 
   .ai-cfo-author,
   .ai-cfo-source,
-  .ai-cfo-pending {
+  .ai-cfo-pending,
+  .ai-cfo-favorite-empty,
+  .ai-cfo-favorite-run span {
     color: #94a3b8;
+  }
+
+  .ai-cfo-favorites-toggle,
+  .ai-cfo-favorite-star,
+  .ai-cfo-favorite-notice {
+    color: #f8fafc;
   }
 
   .ai-cfo-composer {

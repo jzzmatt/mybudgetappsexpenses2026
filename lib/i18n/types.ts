@@ -280,6 +280,24 @@ export type Messages = {
     noProjects: string;
     answeredUsing: string;
     applyProjects: string;
+    addToFavorites: string;
+    savedToFavorites: string;
+    runQuestion: string;
+    editQuestion: string;
+    removeFromFavorites: string;
+    favoriteQuestions: string;
+    searchFavorites: string;
+    saveFavorite: string;
+    favoriteTitle: string;
+    favoriteQuestion: string;
+    duplicateFavorite: string;
+    favoriteLimit: string;
+    noFavorites: string;
+    favoriteNoMatches: string;
+    favoriteProject: string;
+    favoriteSelectProject: string;
+    favoriteMissing: string;
+    moreActions: string;
   };
   aiReport: {
     title: string;

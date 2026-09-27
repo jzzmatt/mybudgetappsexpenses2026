@@ -35,4 +35,5 @@ export type AiCfoChatResponse = {
   originalQuestion?: string;
   projects?: AiCfoProjectRef[];
   allowMultiple?: boolean;
+  favoriteId?: string | null;
 };
