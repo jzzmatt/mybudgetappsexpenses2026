@@ -3,6 +3,8 @@ export type WhatsAppEvidenceFile = {
   mimeType: string;
 };
 
+export const WAAPI_API_BASE = "https://waapi.app/api/v1";
+
 export function planWhatsAppDelivery(files: WhatsAppEvidenceFile[]) {
   const documents = files.filter((file) => file.mimeType === "application/pdf");
   const images = files.filter((file) => file.mimeType.startsWith("image/"));
@@ -18,44 +20,62 @@ export function planWhatsAppDelivery(files: WhatsAppEvidenceFile[]) {
   };
 }
 
-export function buildWhatsAppTextPayload(to: string, body: string) {
+export function waapiChatId(digits: string) {
+  return `${digits}@c.us`;
+}
+
+export function waapiActionUrl(instanceId: string, action: "send-message" | "send-media") {
+  return `${WAAPI_API_BASE}/instances/${instanceId}/client/action/${action}`;
+}
+
+export function buildWaapiTextPayload(digits: string, message: string) {
   return {
-    messaging_product: "whatsapp" as const,
-    to,
-    type: "text" as const,
-    text: { body },
+    chatId: waapiChatId(digits),
+    message,
   };
 }
 
-export function buildWhatsAppDocumentPayload(to: string, mediaId: string, filename: string) {
+export function waapiSendAsDocument(mimeType: string) {
+  return mimeType === "application/pdf" || mimeType === "image/webp";
+}
+
+export function buildWaapiMediaPayload(
+  digits: string,
+  file: { fileName: string; mimeType: string; bytes: Uint8Array },
+) {
   return {
-    messaging_product: "whatsapp" as const,
-    to,
-    type: "document" as const,
-    document: { id: mediaId, filename },
+    chatId: waapiChatId(digits),
+    mediaBase64: Buffer.from(file.bytes).toString("base64"),
+    mediaName: file.fileName,
+    asDocument: waapiSendAsDocument(file.mimeType),
   };
 }
 
-export function buildWhatsAppImagePayload(to: string, mediaId: string) {
-  return {
-    messaging_product: "whatsapp" as const,
-    to,
-    type: "image" as const,
-    image: { id: mediaId },
-  };
+export type WaapiActionBody = {
+  status?: string;
+  data?: { status?: string };
+};
+
+export function waapiActionAccepted(payload: WaapiActionBody | null | undefined) {
+  return payload?.status === "success" && payload.data?.status === "success";
 }
 
-export function isWhatsAppConfigured(env: { WHATSAPP_ACCESS_TOKEN?: string; WHATSAPP_PHONE_NUMBER_ID?: string }) {
-  return Boolean(env.WHATSAPP_ACCESS_TOKEN?.trim() && env.WHATSAPP_PHONE_NUMBER_ID?.trim());
+export function isWhatsAppConfigured(env: { WAAPI_API_TOKEN?: string; WAAPI_INSTANCE_ID?: string }) {
+  const token = env.WAAPI_API_TOKEN?.trim() ?? "";
+  const instanceId = env.WAAPI_INSTANCE_ID?.trim() ?? "";
+  return token.length > 0 && /^\d+$/.test(instanceId);
 }
 
 export function publicWhatsAppStatus(configured: boolean) {
   return { configured };
 }
 
-export function sanitizeWhatsAppError(message: string) {
-  return message
-    .replace(/Bearer\s+\S+/gi, "Bearer [redacted]")
-    .replace(/EAA[A-Za-z0-9]+/g, "[redacted]")
-    .slice(0, 300);
+export function sanitizeWhatsAppError(message: string, token?: string) {
+  let sanitized = message.replace(/Bearer\s+\S+/gi, "Bearer [redacted]").replace(/EAA[A-Za-z0-9]+/g, "[redacted]");
+
+  if (token) {
+    sanitized = sanitized.split(token).join("[redacted]");
+  }
+
+  return sanitized.slice(0, 300);
 }
