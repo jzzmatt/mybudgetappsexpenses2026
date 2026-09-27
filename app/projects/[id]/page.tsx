@@ -4,12 +4,14 @@ import { AppShell } from "@/components/layout/app-shell";
 import { ListPageContent } from "@/components/layout/list-page-content";
 import { PageActionButton } from "@/components/layout/page-action-button";
 import { ProjectOverviewKpis } from "@/components/projects/project-overview-kpis";
+import { TopExpensesSection } from "@/components/expenses/top-expenses-section";
 import { ProjectRecentExpensesCard } from "@/components/projects/project-recent-expenses-card";
 import { ProjectUsageAllocationCard } from "@/components/projects/project-usage-allocation-card";
 import { ProjectWorkspaceNav } from "@/components/projects/project-workspace-nav";
 import { DashboardChartsSection } from "@/components/dashboard/dashboard-charts-section";
 import { formatCurrency } from "@/lib/currency/format";
 import { getTranslations } from "@/lib/i18n/server";
+import { getTopProjectExpenses } from "@/lib/expenses/queries";
 import { getProjectOverview } from "@/lib/projects/queries";
 
 type ProjectOverviewPageProps = {
@@ -19,7 +21,10 @@ type ProjectOverviewPageProps = {
 export default async function ProjectOverviewPage({ params }: ProjectOverviewPageProps) {
   const { id } = await params;
   const { t, locale } = await getTranslations();
-  const data = await getProjectOverview(id);
+  const [data, topExpenses] = await Promise.all([
+    getProjectOverview(id),
+    getTopProjectExpenses(id, 5),
+  ]);
 
   if (!data) {
     notFound();
@@ -71,6 +76,8 @@ export default async function ProjectOverviewPage({ params }: ProjectOverviewPag
           expenses={recentExpenses}
           projectId={project.id}
         />
+
+        <TopExpensesSection expenses={topExpenses} project={project} />
       </ListPageContent>
     </AppShell>
   );

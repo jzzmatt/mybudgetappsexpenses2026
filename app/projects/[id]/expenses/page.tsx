@@ -3,7 +3,6 @@ import { notFound } from "next/navigation";
 import { ProjectExpenseList } from "@/components/expenses/project-expense-list";
 import { ProjectExpenseToolbar } from "@/components/expenses/project-expense-toolbar";
 import { ExpensePagination } from "@/components/expenses/expense-pagination";
-import { TopExpensesSection } from "@/components/expenses/top-expenses-section";
 import { AppShell } from "@/components/layout/app-shell";
 import { ListPageContent } from "@/components/layout/list-page-content";
 import { PageActionButton } from "@/components/layout/page-action-button";
@@ -11,7 +10,7 @@ import { ProjectExpensesSummary } from "@/components/projects/project-expenses-s
 import { ProjectWorkspaceNav } from "@/components/projects/project-workspace-nav";
 import { getCategories } from "@/lib/categories/queries";
 import { getProjectExpenseFilters, buildExpenseQueryString } from "@/lib/expenses/params";
-import { getExpenses, getTopProjectExpenses } from "@/lib/expenses/queries";
+import { getExpenses } from "@/lib/expenses/queries";
 import type { ExpenseListResult } from "@/lib/expenses/types";
 import { getTranslations } from "@/lib/i18n/server";
 import { getProjectById, getProjectExpenseTotals } from "@/lib/projects/queries";
@@ -47,15 +46,13 @@ export default async function ProjectExpensesPage({ params, searchParams }: Proj
   };
   let loadError: string | undefined;
   let totals: ProjectExpenseTotals = { byCurrency: {}, currencies: [], expenseCount: 0 };
-  let topExpenses: Awaited<ReturnType<typeof getTopProjectExpenses>> = [];
   let categories: Awaited<ReturnType<typeof getCategories>> = [];
   let vendors: Awaited<ReturnType<typeof getVendors>> = [];
 
   try {
-    [result, totals, topExpenses, categories, vendors] = await Promise.all([
+    [result, totals, categories, vendors] = await Promise.all([
       getExpenses(filters),
       getProjectExpenseTotals(id),
-      getTopProjectExpenses(id, 5),
       getCategories(),
       getVendors(),
     ]);
@@ -114,8 +111,6 @@ export default async function ProjectExpensesPage({ params, searchParams }: Proj
           filters={filters}
           vendors={vendors}
         />
-
-        <TopExpensesSection expenses={topExpenses} project={project} />
 
         <ProjectExpenseList
           addExpenseHref={addExpenseHref}
