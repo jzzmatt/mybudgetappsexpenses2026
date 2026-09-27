@@ -27,9 +27,30 @@ export const toolArgsSchema = z.object({
   limit: z.number().int().min(1).max(50).optional(),
 });
 
-export const chatRequestSchema = z.object({
-  message: z.string().trim().min(1).max(2000),
-  conversationId: z.string().uuid().optional(),
-});
+export const chatRequestSchema = z
+  .object({
+    message: z.string().trim().min(1).max(2000).optional(),
+    conversationId: z.string().uuid().optional(),
+    projectId: z.string().uuid().optional(),
+    activeProjectId: z.string().uuid().optional(),
+    projectIds: z.array(z.string().uuid()).max(8).optional(),
+    originalQuestion: z.string().trim().min(1).max(2000).optional(),
+    intent: z.enum(["ask", "select_project", "change_project"]).optional(),
+  })
+  .superRefine((value, context) => {
+    const intent = value.intent ?? "ask";
+
+    if (intent === "ask" && !value.message) {
+      context.addIssue({ code: "custom", message: "message is required", path: ["message"] });
+    }
+
+    if (intent === "change_project" && !value.projectId) {
+      context.addIssue({ code: "custom", message: "projectId is required", path: ["projectId"] });
+    }
+
+    if (intent === "select_project" && !value.projectId && (!value.projectIds || value.projectIds.length === 0)) {
+      context.addIssue({ code: "custom", message: "projectId is required", path: ["projectId"] });
+    }
+  });
 
 export type ToolArgs = z.infer<typeof toolArgsSchema>;
