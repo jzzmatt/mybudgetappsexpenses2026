@@ -35,6 +35,7 @@ export const chatRequestSchema = z
     activeProjectId: z.string().uuid().optional(),
     projectIds: z.array(z.string().uuid()).max(8).optional(),
     originalQuestion: z.string().trim().min(1).max(2000).optional(),
+    favoriteId: z.string().uuid().optional(),
     intent: z.enum(["ask", "select_project", "change_project"]).optional(),
   })
   .superRefine((value, context) => {

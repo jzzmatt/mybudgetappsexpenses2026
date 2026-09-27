@@ -35,6 +35,14 @@ The active project is stored on `ai_cfo_conversations.active_project_id`. A proj
 
 Apply `supabase/migrations/20260927133000_ai_cfo_project_context.sql` after the conversation migration.
 
+## Favorite questions
+
+A favorite stores the question and a display title. It does not store the previous answer, total, or expense list. Running a favorite sends `favorite.question` through `POST /api/ai-cfo/chat` with the same authentication, project resolution, and financial tools as a typed question. The active project is used unless the saved question names a project. If no project can be resolved, the existing project selector appears, and choosing a project continues that same question. Usage is counted only after a fresh answer is produced.
+
+Favorites are private to the signed-in user. List, create, update, and delete use `/api/ai-cfo/favorites` and reject another user's id as not found. The maximum is `AI_CFO_MAX_FAVORITES` (default 20). Exact duplicates are rejected after whitespace and case are normalized.
+
+Apply `supabase/migrations/20260927143000_ai_cfo_favorite_questions.sql`.
+
 ## Tools
 
 All tools are read-only and ignore any user id supplied by the model.
@@ -69,6 +77,7 @@ OPENAI_API_KEY=
 AI_CFO_MODEL=
 AI_CFO_RATE_LIMIT=30
 AI_CFO_TIMEZONE=Africa/Luanda
+AI_CFO_MAX_FAVORITES=20
 ```
 
 `OPENAI_API_KEY` stays on the server. `AI_CFO_MODEL` overrides `OPENAI_MODEL` for this feature only. The default timezone is `Africa/Luanda` because expense dates are calendar dates for this product. Do not commit real keys.
@@ -80,6 +89,8 @@ Each request logs `user_id`, `request_id`, tool name, duration, success, model, 
 ## Tests
 
 `tests/ai-cfo/finance.test.ts` covers category totals, last-3-month grouping, multiple payment matches, separate currencies, August 31 / September 1, leap years, the Luanda date line, ambiguous names, prompt-injection refusals, and the rate limiter.
+
+`tests/ai-cfo/favorites.test.ts` covers title labels, question-only storage, fresh totals after the rows change, active-project resolution, explicit project override, private access, duplicates, and the favorite limit.
 
 Live model answers still depend on `OPENAI_API_KEY` and the signed-in user's rows.
 
