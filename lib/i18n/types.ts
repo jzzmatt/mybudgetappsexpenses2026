@@ -297,6 +297,8 @@ export type Messages = {
     createdAt: string;
     confirmedAt: string;
     failureReason: string;
+    notificationErrorReceiptNotSent: string;
+    notificationErrorSendFailed: string;
     reviewLoading: string;
     inProgress: string;
     retryNotification: string;

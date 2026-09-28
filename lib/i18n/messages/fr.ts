@@ -297,6 +297,8 @@ export const frMessages: Messages = {
     createdAt: "Créé",
     confirmedAt: "Confirmé",
     failureReason: "Motif de l'échec",
+    notificationErrorReceiptNotSent: "Le message de paiement a été envoyé, mais le justificatif n'a pas été livré.",
+    notificationErrorSendFailed: "Cette notification n'a pas pu être livrée via WhatsApp.",
     reviewLoading: "Préparation du lot de paiement…",
     inProgress: "Cette notification est déjà en cours d'envoi.",
     retryNotification: "Renvoyer la notification",

@@ -296,6 +296,8 @@ export const enMessages: Messages = {
     createdAt: "Created",
     confirmedAt: "Confirmed",
     failureReason: "Failure reason",
+    notificationErrorReceiptNotSent: "The payment message was sent, but the receipt file was not delivered.",
+    notificationErrorSendFailed: "WhatsApp could not deliver this notification.",
     reviewLoading: "Preparing the payment batch…",
     inProgress: "This notification is already being sent.",
     retryNotification: "Retry notification",

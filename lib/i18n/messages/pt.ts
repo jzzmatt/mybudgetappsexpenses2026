@@ -296,6 +296,8 @@ export const ptMessages: Messages = {
     createdAt: "Criado",
     confirmedAt: "Confirmado",
     failureReason: "Motivo da falha",
+    notificationErrorReceiptNotSent: "A mensagem de pagamento foi enviada, mas o comprovativo não foi entregue.",
+    notificationErrorSendFailed: "Não foi possível entregar esta notificação via WhatsApp.",
     reviewLoading: "A preparar o lote de pagamento…",
     inProgress: "Esta notificação já está a ser enviada.",
     retryNotification: "Tentar notificação outra vez",

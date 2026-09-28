@@ -4306,12 +4306,98 @@ select {
   font-weight: 650;
 }
 
+.notification-mobile-cards {
+  display: none;
+  gap: 12px;
+}
+
+.notification-desktop-table {
+  display: block;
+}
+
+.notification-list-card {
+  display: grid;
+  gap: 12px;
+}
+
+.notification-message-block {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.notification-message-label {
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: 11px;
+  font-weight: 650;
+  text-transform: uppercase;
+}
+
+.notification-message-preview {
+  margin: 0;
+  max-height: 12rem;
+  overflow: auto;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--foreground);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.notification-error {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #fef2f2;
+  color: #b91c1c;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.notification-error-label {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.notification-col-reference { width: 14%; }
+.notification-col-status { width: 10%; }
+.notification-col-recipient { width: 14%; }
+.notification-col-total { width: 11%; }
+.notification-col-receipts { width: 8%; }
+.notification-col-when { width: 12%; }
+.notification-col-message { width: 24%; }
+.notification-col-action { width: 7%; }
+
+.notification-list-table .notification-message-preview {
+  max-height: 9rem;
+  padding: 8px 10px;
+  font-size: 12px;
+}
+
 @media (max-width: 767px) {
   .payment-desktop-table {
     display: none;
   }
 
   .payment-mobile-cards {
+    display: grid;
+  }
+
+  .notification-desktop-table {
+    display: none;
+  }
+
+  .notification-mobile-cards {
     display: grid;
   }
 
