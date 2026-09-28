@@ -1,3 +1,4 @@
+import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import { readPaymentEvidenceFiles } from "@/lib/payments/commit";
 import { getPaymentShareView } from "@/lib/payments/queries";
@@ -89,6 +90,7 @@ export async function POST(request: Request, context: RouteContext) {
       channel: "whatsapp",
       message,
       status: "pending",
+      metadata: { attachmentCount: files.length },
     })
     .select("id")
     .maybeSingle();
@@ -117,6 +119,10 @@ export async function POST(request: Request, context: RouteContext) {
   if (!sent.ok) {
     return NextResponse.json({ error: "send_failed" }, { status: 502 });
   }
+
+  revalidatePath(`/payments/${id}`);
+  revalidatePath("/payments");
+  revalidatePath("/notifications");
 
   return NextResponse.json({
     ok: true,

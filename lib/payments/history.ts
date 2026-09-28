@@ -1,5 +1,6 @@
 import "server-only";
 
+import { listPaymentEvidenceMeta } from "@/lib/payments/commit";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { ensureUserRecord } from "@/lib/users/ensure-user";
 
@@ -48,6 +49,7 @@ export type PaymentBatchDetail = PaymentBatchListItem & {
   }[];
   notifications: PaymentNotificationListItem[];
   attachmentCount: number;
+  evidenceFiles: { fileName: string; expenseId: string | null }[];
 };
 
 export async function listPaymentBatches(): Promise<PaymentBatchListItem[]> {
@@ -81,7 +83,7 @@ export async function listPaymentBatches(): Promise<PaymentBatchListItem[]> {
 }
 
 export async function getPaymentBatchDetail(paymentId: string): Promise<PaymentBatchDetail | null> {
-  await ensureUserRecord();
+  const userId = await ensureUserRecord();
   const batch = await readOneBatch(paymentId);
 
   if (!batch) {
@@ -98,12 +100,9 @@ export async function getPaymentBatchDetail(paymentId: string): Promise<PaymentB
     .from("payment_expenses")
     .select("amount, expense:expenses(id, description, status, date, currency, vendor:vendors(name), category:categories(name))")
     .eq("payment_id", paymentId);
-  const { data: evidence } = await supabase
-    .from("expense_payment_evidence")
-    .select("expense_id, storage_path")
-    .eq("payment_id", paymentId);
+  const evidence = await listPaymentEvidenceMeta(userId, paymentId);
   const notifications = await listPaymentNotifications(paymentId);
-  const evidenceIds = new Set((evidence ?? []).flatMap((row) => (row.expense_id ? [String(row.expense_id)] : [])));
+  const evidenceIds = new Set(evidence.flatMap((file) => (file.expenseId ? [file.expenseId] : [])));
   const expenses = (lines ?? []).flatMap((line) => {
     const expense = Array.isArray(line.expense) ? line.expense[0] : line.expense;
 
@@ -130,7 +129,8 @@ export async function getPaymentBatchDetail(paymentId: string): Promise<PaymentB
     paymentMethod: payment?.payment_method ? String(payment.payment_method) : null,
     expenses,
     notifications: notifications.filter((item) => item.paymentId === paymentId),
-    attachmentCount: new Set((evidence ?? []).map((row) => String(row.storage_path))).size,
+    attachmentCount: evidence.length,
+    evidenceFiles: evidence.map((file) => ({ fileName: file.fileName, expenseId: file.expenseId })),
   };
 }
 

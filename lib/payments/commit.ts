@@ -104,32 +104,76 @@ export async function readEvidenceFiles(userId: string, expenseId: string, legac
   return downloaded;
 }
 
-export async function readPaymentEvidenceFiles(userId: string, paymentId: string) {
+const EVIDENCE_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+export type PaymentEvidenceMeta = {
+  storagePath: string;
+  fileName: string;
+  mimeType: string;
+  expenseId: string | null;
+};
+
+export async function listPaymentEvidenceMeta(userId: string, paymentId: string): Promise<PaymentEvidenceMeta[]> {
+  if (!EVIDENCE_ID.test(paymentId)) {
+    return [];
+  }
+
   const supabase = await createSupabaseServerClient();
-  const { data, error } = await supabase
-    .from("expense_payment_evidence")
-    .select("storage_path, file_name, mime_type")
+  const { data: lines, error: lineError } = await supabase
+    .from("payment_expenses")
+    .select("expense_id")
     .eq("user_id", userId)
-    .eq("payment_id", paymentId)
+    .eq("payment_id", paymentId);
+
+  if (lineError) {
+    throw new Error(lineError.message);
+  }
+
+  const expenseIds = (lines ?? []).map((row) => String(row.expense_id)).filter((id) => EVIDENCE_ID.test(id));
+  let query = supabase
+    .from("expense_payment_evidence")
+    .select("expense_id, storage_path, file_name, mime_type")
+    .eq("user_id", userId)
     .order("created_at", { ascending: true });
+  query = expenseIds.length > 0
+    ? query.or(`payment_id.eq.${paymentId},expense_id.in.(${expenseIds.join(",")})`)
+    : query.eq("payment_id", paymentId);
+
+  const { data, error } = await query;
 
   if (error) {
     throw new Error(error.message);
   }
 
-  const downloaded = [];
+  const unique = new Map<string, PaymentEvidenceMeta>();
 
-  for (const file of data ?? []) {
-    const storagePath = String(file.storage_path);
+  for (const row of data ?? []) {
+    const storagePath = String(row.storage_path);
 
-    if (!storagePath.startsWith(`${userId}/`)) {
-      throw new Error("evidence_forbidden");
+    if (!storagePath.startsWith(`${userId}/`) || unique.has(storagePath)) {
+      continue;
     }
 
+    unique.set(storagePath, {
+      storagePath,
+      fileName: String(row.file_name),
+      mimeType: String(row.mime_type),
+      expenseId: row.expense_id ? String(row.expense_id) : null,
+    });
+  }
+
+  return [...unique.values()];
+}
+
+export async function readPaymentEvidenceFiles(userId: string, paymentId: string) {
+  const files = await listPaymentEvidenceMeta(userId, paymentId);
+  const downloaded = [];
+
+  for (const file of files) {
     downloaded.push({
-      fileName: String(file.file_name),
-      mimeType: String(file.mime_type),
-      bytes: await downloadPaymentEvidenceFile(storagePath),
+      fileName: file.fileName,
+      mimeType: file.mimeType,
+      bytes: await downloadPaymentEvidenceFile(file.storagePath),
     });
   }
 

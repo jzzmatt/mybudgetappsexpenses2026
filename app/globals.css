@@ -4155,6 +4155,138 @@ select {
   gap: 16px;
 }
 
+.batch-detail > .card {
+  padding: 16px;
+  min-width: 0;
+}
+
+.batch-detail > .card h2 {
+  margin: 0 0 12px;
+  font-size: 18px;
+}
+
+.batch-detail-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.batch-detail-header h2,
+.batch-detail-header p {
+  margin: 0;
+}
+
+.batch-detail-header p {
+  margin-top: 8px;
+}
+
+.batch-summary {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0;
+}
+
+.batch-summary div {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.batch-summary dt {
+  color: var(--muted-foreground);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.batch-summary dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+  font-weight: 650;
+}
+
+.payment-mobile-cards {
+  display: none;
+  gap: 12px;
+}
+
+.payment-desktop-table {
+  display: block;
+}
+
+.payment-batch-table {
+  width: 100%;
+  min-width: 0;
+  table-layout: fixed;
+  border-collapse: collapse;
+}
+
+.payment-col-reference { width: 22%; }
+.payment-col-status { width: 14%; }
+.payment-col-total { width: 18%; }
+.payment-col-count { width: 14%; }
+.payment-col-date { width: 16%; }
+.payment-col-action { width: 16%; }
+
+.payment-line-description { width: 26%; }
+.payment-line-category { width: 14%; }
+.payment-line-vendor { width: 14%; }
+.payment-line-date { width: 14%; }
+.payment-line-amount { width: 16%; }
+.payment-line-receipt { width: 16%; }
+
+.payment-note-channel { width: 12%; }
+.payment-note-status { width: 14%; }
+.payment-note-recipient { width: 18%; }
+.payment-note-when { width: 16%; }
+.payment-note-message { width: 40%; }
+
+.payment-batch-table th,
+.payment-batch-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  vertical-align: top;
+  overflow-wrap: anywhere;
+  white-space: normal;
+  font-weight: 500;
+}
+
+.payment-batch-table thead th {
+  color: var(--muted-foreground);
+  background: var(--surface);
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.payment-batch-table tbody th {
+  font-weight: 650;
+}
+
+@media (max-width: 767px) {
+  .payment-desktop-table {
+    display: none;
+  }
+
+  .payment-mobile-cards {
+    display: grid;
+  }
+
+  .batch-detail-header {
+    flex-direction: column;
+  }
+
+  .batch-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 .batch-review-actions {
   display: flex;
   flex-wrap: wrap;

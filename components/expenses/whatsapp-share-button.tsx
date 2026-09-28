@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useTranslations } from "@/lib/i18n/client";
 import {
   generatePaidExpenseWhatsAppTemplate,
@@ -25,6 +26,7 @@ type WhatsAppShareButtonProps = {
 
 export function WhatsAppShareButton(props: WhatsAppShareButtonProps) {
   const { t, locale } = useTranslations();
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [phone, setPhone] = useState("+");
   const [pending, setPending] = useState(false);
@@ -89,6 +91,7 @@ export function WhatsAppShareButton(props: WhatsAppShareButtonProps) {
         recipient: payload.recipient ?? phone,
         sentAt: payload.sentAt ?? new Date().toISOString(),
       });
+      router.refresh();
     } catch {
       setError(t("payments.unableToSend"));
     } finally {
