@@ -2274,26 +2274,38 @@ select {
     left: 0;
     z-index: 30;
     display: grid;
-    grid-template-columns: repeat(7, minmax(0, 1fr));
+    grid-template-columns: repeat(5, minmax(0, 1fr));
     align-items: stretch;
-    min-height: 60px;
+    min-height: 62px;
     border-top: 1px solid var(--border);
     background: var(--surface);
-    padding: 6px 8px calc(6px + env(safe-area-inset-bottom));
+    padding: 6px 6px calc(6px + env(safe-area-inset-bottom));
   }
 
   .app-bottom-nav-link,
   .app-bottom-nav-more-trigger {
     display: grid;
     justify-items: center;
-    gap: 4px;
+    align-content: center;
+    gap: 3px;
+    min-width: 0;
     border-radius: var(--radius-md);
     color: var(--muted-foreground);
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 600;
-    padding: 6px 4px;
+    line-height: 1.15;
+    padding: 6px 2px;
     text-align: center;
     text-decoration: none;
+  }
+
+  .app-bottom-nav-link span,
+  .app-bottom-nav-more-trigger span {
+    display: block;
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .app-bottom-nav-link svg,
@@ -2349,6 +2361,11 @@ select {
   .app-bottom-nav-menu a:hover,
   .app-bottom-nav-menu a:focus-visible {
     background: #f3f4f6;
+  }
+
+  .app-bottom-nav-menu-link-active {
+    background: color-mix(in srgb, var(--primary) 12%, transparent);
+    color: var(--primary);
   }
 
   .app-mobile-sign-out {
@@ -4008,6 +4025,26 @@ select {
   margin: 0 0 12px;
   color: #166534;
   font-weight: 700;
+}
+
+.payment-sheet-success-animate {
+  animation: whatsapp-send-success 520ms ease;
+}
+
+@keyframes whatsapp-send-success {
+  0% {
+    opacity: 0;
+    transform: translateY(6px) scale(0.98);
+  }
+
+  45% {
+    opacity: 1;
+    transform: translateY(0) scale(1.02);
+  }
+
+  100% {
+    transform: translateY(0) scale(1);
+  }
 }
 
 @media (min-width: 701px) {

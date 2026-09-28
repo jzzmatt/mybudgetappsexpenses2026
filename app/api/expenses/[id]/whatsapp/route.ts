@@ -141,5 +141,7 @@ export async function POST(request: Request, context: RouteContext) {
     ok: true,
     recipient: phone.display,
     sentAt: new Date().toISOString(),
+    attachmentCount: files.length,
+    attachmentsSent: sent.attachmentsSent,
   });
 }

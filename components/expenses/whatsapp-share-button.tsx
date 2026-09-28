@@ -31,7 +31,7 @@ export function WhatsAppShareButton(props: WhatsAppShareButtonProps) {
   const [phone, setPhone] = useState("+");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [sent, setSent] = useState<{ recipient: string; sentAt: string } | null>(null);
+  const [sent, setSent] = useState<{ recipient: string; sentAt: string; attachmentCount: number } | null>(null);
   const [message, setMessage] = useState("");
   const messageLength = whatsAppMessageLength(message);
   const outbound = prepareOutboundWhatsAppMessage(message);
@@ -70,7 +70,13 @@ export function WhatsAppShareButton(props: WhatsAppShareButtonProps) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ phone, message: outbound.message }),
       });
-      const payload = (await response.json()) as { error?: string; recipient?: string; sentAt?: string };
+      const payload = (await response.json()) as {
+        error?: string;
+        recipient?: string;
+        sentAt?: string;
+        attachmentCount?: number;
+        attachmentsSent?: number;
+      };
 
       if (!response.ok) {
         if (payload.error === "invalid_phone") {
@@ -90,6 +96,7 @@ export function WhatsAppShareButton(props: WhatsAppShareButtonProps) {
       setSent({
         recipient: payload.recipient ?? phone,
         sentAt: payload.sentAt ?? new Date().toISOString(),
+        attachmentCount: payload.attachmentsSent ?? payload.attachmentCount ?? 0,
       });
       router.refresh();
     } catch {
@@ -170,8 +177,14 @@ export function WhatsAppShareButton(props: WhatsAppShareButtonProps) {
               <pre className="whatsapp-message-preview">{message}</pre>
             </div>
             {sent ? (
-              <p className="payment-sheet-success" role="status">
-                ✓ {t("payments.paymentInformationSent")}
+              <p className="payment-sheet-success payment-sheet-success-animate" role="status">
+                <span aria-hidden="true" className="whatsapp-send-check">✓</span> {t("payments.paymentInformationSent")}
+                {sent.attachmentCount > 0 ? (
+                  <>
+                    <br />
+                    {t("payments.receiptsSentViaWhatsApp", { count: sent.attachmentCount })}
+                  </>
+                ) : null}
                 <br />
                 {t("payments.recipient")}: {sent.recipient}
                 <br />

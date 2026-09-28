@@ -8,6 +8,7 @@ import {
   paymentAccess,
   resolveExpenseStatus,
   shouldConfirmPayment,
+  resolveStoredEvidenceMimeType,
   validateEvidenceFile,
 } from "@/lib/payments/rules";
 import {
@@ -203,6 +204,11 @@ describe("WhatsApp paid expense message", () => {
 describe("WaAPI gateway", () => {
   const config = { token: "waapi-token", instanceId: "42" };
 
+  it("normalizes stored evidence mime types from the file name", () => {
+    assert.equal(resolveStoredEvidenceMimeType("comprovativo.pdf", ""), "application/pdf");
+    assert.equal(resolveStoredEvidenceMimeType("photo.JPG", "application/octet-stream"), "image/jpeg");
+  });
+
   it("sends the edited text, then each file as base64, and treats a nested error as a failure", async () => {
     const calls: { url: string; body: Record<string, unknown> }[] = [];
     const fetchImpl: typeof fetch = async (input, init) => {
@@ -229,6 +235,7 @@ describe("WaAPI gateway", () => {
     });
 
     assert.equal(sent.ok, false);
+    assert.equal("attachmentsSent" in sent ? sent.attachmentsSent : undefined, undefined);
     assert.equal(calls.length, 3);
     assert.equal(calls[0]?.url, "https://waapi.app/api/v1/instances/42/client/action/send-message");
     assert.equal(calls[0]?.body.message, "Olá João");
@@ -241,5 +248,23 @@ describe("WaAPI gateway", () => {
     assert.equal(calls[2]?.body.mediaName, "foto.jpg");
     assert.equal(calls[2]?.body.asDocument, false);
     assert.equal(calls.every((call) => call.url.startsWith("https://waapi.app/")), true);
+  });
+
+  it("reports how many receipts were sent after the text message", async () => {
+    const fetchImpl: typeof fetch = async () => new Response(
+      JSON.stringify({ status: "success", data: { status: "success" } }),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+    );
+
+    const sent = await deliverPaidExpenseWhatsApp({
+      to: "244923000000",
+      body: "Pagamento",
+      files: [{ fileName: "comprovativo.pdf", mimeType: "application/pdf", bytes: Uint8Array.from([7]) }],
+      config,
+      fetchImpl,
+    });
+
+    assert.equal(sent.ok, true);
+    assert.equal(sent.attachmentsSent, 1);
   });
 });

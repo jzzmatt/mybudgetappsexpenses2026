@@ -1,6 +1,6 @@
 import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
-import { readPaymentEvidenceFiles } from "@/lib/payments/commit";
+import { listPaymentEvidenceMeta, readPaymentEvidenceFiles } from "@/lib/payments/commit";
 import { getPaymentShareView } from "@/lib/payments/queries";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { ensureUserRecord } from "@/lib/users/ensure-user";
@@ -72,11 +72,17 @@ export async function POST(request: Request, context: RouteContext) {
   }
 
   const message = outbound.message;
+  let expectedEvidence: Awaited<ReturnType<typeof listPaymentEvidenceMeta>> = [];
   let files: { fileName: string; mimeType: string; bytes: Uint8Array }[] = [];
 
   try {
+    expectedEvidence = await listPaymentEvidenceMeta(userId, id);
     files = await readPaymentEvidenceFiles(userId, id);
   } catch {
+    return NextResponse.json({ error: "unavailable" }, { status: 503 });
+  }
+
+  if (expectedEvidence.length > 0 && files.length !== expectedEvidence.length) {
     return NextResponse.json({ error: "unavailable" }, { status: 503 });
   }
 
@@ -102,21 +108,25 @@ export async function POST(request: Request, context: RouteContext) {
     config,
   });
 
+  const receiptsMissing = sent.ok
+    && expectedEvidence.length > 0
+    && sent.attachmentsSent !== expectedEvidence.length;
+
   if (logRow?.id) {
     await supabase
       .from("expense_share_logs")
       .update({
-        status: sent.ok ? "sent" : "failed",
-        sent_at: sent.ok ? new Date().toISOString() : null,
-        error_message: sent.ok ? null : sent.error,
-        waapi_message_id: sent.ok ? sent.messageId : null,
-        waapi_reference_id: sent.ok ? sent.referenceId : null,
+        status: sent.ok && !receiptsMissing ? "sent" : "failed",
+        sent_at: sent.ok && !receiptsMissing ? new Date().toISOString() : null,
+        error_message: !sent.ok ? sent.error : receiptsMissing ? "receipt_send_failed" : null,
+        waapi_message_id: sent.ok && !receiptsMissing ? sent.messageId : null,
+        waapi_reference_id: sent.ok && !receiptsMissing ? sent.referenceId : null,
       })
       .eq("id", logRow.id)
       .eq("user_id", userId);
   }
 
-  if (!sent.ok) {
+  if (!sent.ok || receiptsMissing) {
     return NextResponse.json({ error: "send_failed" }, { status: 502 });
   }
 
@@ -128,5 +138,7 @@ export async function POST(request: Request, context: RouteContext) {
     ok: true,
     recipient: phone.display,
     sentAt: new Date().toISOString(),
+    attachmentCount: files.length,
+    attachmentsSent: sent.attachmentsSent,
   });
 }

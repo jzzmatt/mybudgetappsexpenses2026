@@ -1,7 +1,7 @@
 import "server-only";
 
 import { revalidatePath } from "next/cache";
-import { validateEvidenceFile } from "@/lib/payments/rules";
+import { resolveStoredEvidenceMimeType, validateEvidenceFile } from "@/lib/payments/rules";
 import { downloadPaymentEvidenceFile, removePaymentEvidenceFile, uploadPaymentEvidenceFile } from "@/lib/payments/storage";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -130,25 +130,88 @@ export async function listPaymentEvidenceMeta(userId: string, paymentId: string)
   }
 
   const expenseIds = (lines ?? []).map((row) => String(row.expense_id)).filter((id) => EVIDENCE_ID.test(id));
-  let query = supabase
-    .from("expense_payment_evidence")
-    .select("expense_id, storage_path, file_name, mime_type")
-    .eq("user_id", userId)
-    .order("created_at", { ascending: true });
-  query = expenseIds.length > 0
-    ? query.or(`payment_id.eq.${paymentId},expense_id.in.(${expenseIds.join(",")})`)
-    : query.eq("payment_id", paymentId);
-
-  const { data, error } = await query;
-
-  if (error) {
-    throw new Error(error.message);
-  }
-
   const unique = new Map<string, PaymentEvidenceMeta>();
 
-  for (const row of data ?? []) {
+  if (expenseIds.length > 0) {
+    const { data: paymentEvidence, error: paymentEvidenceError } = await supabase
+      .from("expense_payment_evidence")
+      .select("expense_id, storage_path, file_name, mime_type")
+      .eq("user_id", userId)
+      .eq("payment_id", paymentId)
+      .order("created_at", { ascending: true });
+
+    if (paymentEvidenceError) {
+      throw new Error(paymentEvidenceError.message);
+    }
+
+    addEvidenceRows(unique, userId, paymentEvidence ?? []);
+
+    const { data: expenseEvidence, error: expenseEvidenceError } = await supabase
+      .from("expense_payment_evidence")
+      .select("expense_id, storage_path, file_name, mime_type")
+      .eq("user_id", userId)
+      .in("expense_id", expenseIds)
+      .order("created_at", { ascending: true });
+
+    if (expenseEvidenceError) {
+      throw new Error(expenseEvidenceError.message);
+    }
+
+    addEvidenceRows(unique, userId, expenseEvidence ?? []);
+  } else {
+    const { data, error } = await supabase
+      .from("expense_payment_evidence")
+      .select("expense_id, storage_path, file_name, mime_type")
+      .eq("user_id", userId)
+      .eq("payment_id", paymentId)
+      .order("created_at", { ascending: true });
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    addEvidenceRows(unique, userId, data ?? []);
+  }
+
+  const { data: legacyLines, error: legacyError } = await supabase
+    .from("payment_expenses")
+    .select("expense_id, expense:expenses(payment_proof_path, payment_proof_filename)")
+    .eq("user_id", userId)
+    .eq("payment_id", paymentId);
+
+  if (legacyError) {
+    throw new Error(legacyError.message);
+  }
+
+  for (const line of legacyLines ?? []) {
+    const expense = Array.isArray(line.expense) ? line.expense[0] : line.expense;
+    const storagePath = expense?.payment_proof_path ? String(expense.payment_proof_path) : "";
+
+    if (!storagePath.startsWith(`${userId}/`) || unique.has(storagePath)) {
+      continue;
+    }
+
+    const fileName = expense?.payment_proof_filename ? String(expense.payment_proof_filename) : "payment-proof.pdf";
+
+    unique.set(storagePath, {
+      storagePath,
+      fileName,
+      mimeType: resolveStoredEvidenceMimeType(fileName, "application/pdf"),
+      expenseId: String(line.expense_id),
+    });
+  }
+
+  return [...unique.values()];
+}
+
+function addEvidenceRows(
+  unique: Map<string, PaymentEvidenceMeta>,
+  userId: string,
+  rows: { expense_id: string | null; storage_path: string; file_name: string; mime_type: string }[],
+) {
+  for (const row of rows) {
     const storagePath = String(row.storage_path);
+    const fileName = String(row.file_name);
 
     if (!storagePath.startsWith(`${userId}/`) || unique.has(storagePath)) {
       continue;
@@ -156,13 +219,11 @@ export async function listPaymentEvidenceMeta(userId: string, paymentId: string)
 
     unique.set(storagePath, {
       storagePath,
-      fileName: String(row.file_name),
-      mimeType: String(row.mime_type),
+      fileName,
+      mimeType: resolveStoredEvidenceMimeType(fileName, String(row.mime_type)),
       expenseId: row.expense_id ? String(row.expense_id) : null,
     });
   }
-
-  return [...unique.values()];
 }
 
 export async function readPaymentEvidenceFiles(userId: string, paymentId: string) {
@@ -170,10 +231,21 @@ export async function readPaymentEvidenceFiles(userId: string, paymentId: string
   const downloaded = [];
 
   for (const file of files) {
+    const bytes = await downloadPaymentEvidenceFile(file.storagePath);
+    const mimeType = resolveStoredEvidenceMimeType(file.fileName, file.mimeType);
+
+    if (bytes.length === 0) {
+      throw new Error("download_failed");
+    }
+
+    if (mimeType !== "application/pdf" && !mimeType.startsWith("image/")) {
+      throw new Error("unsupported_evidence");
+    }
+
     downloaded.push({
       fileName: file.fileName,
-      mimeType: file.mimeType,
-      bytes: await downloadPaymentEvidenceFile(file.storagePath),
+      mimeType,
+      bytes,
     });
   }
 

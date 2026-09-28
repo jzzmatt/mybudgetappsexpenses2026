@@ -35,6 +35,7 @@ export type Messages = {
     aiCfoShort: string;
     payments: string;
     notifications: string;
+    more: string;
   };
   common: {
     save: string;
@@ -232,6 +233,7 @@ export type Messages = {
     messageEmpty: string;
     sendViaWhatsApp: string;
     paymentInformationSent: string;
+    receiptsSentViaWhatsApp: string;
     unableToSend: string;
     whatsappNotConfigured: string;
     withoutEvidence: string;

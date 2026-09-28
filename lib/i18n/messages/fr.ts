@@ -33,6 +33,7 @@ export const frMessages: Messages = {
     aiCfoShort: "AI CFO",
     payments: "Paiements",
     notifications: "Notifications",
+    more: "Plus",
   },
   common: {
     save: "Enregistrer",
@@ -232,6 +233,7 @@ export const frMessages: Messages = {
     messageEmpty: "Saisissez un message avant l'envoi.",
     sendViaWhatsApp: "Envoyer via WhatsApp",
     paymentInformationSent: "Informations de paiement envoyées via WhatsApp",
+    receiptsSentViaWhatsApp: "{count} justificatif(s) envoyé(s) via WhatsApp",
     unableToSend: "Impossible d'envoyer les informations de paiement via WhatsApp. Veuillez réessayer.",
     whatsappNotConfigured: "L'envoi WhatsApp n'est pas configuré. Contactez l'administrateur.",
     withoutEvidence: "Voulez-vous vraiment marquer cette dépense comme payée sans ajouter de preuve de paiement ?",

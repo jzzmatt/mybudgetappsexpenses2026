@@ -37,20 +37,38 @@ export async function deliverPaidExpenseWhatsApp(input: {
   let referenceId = text.referenceId;
   const documents = input.files.filter((file) => file.mimeType === "application/pdf");
   const images = input.files.filter((file) => file.mimeType.startsWith("image/"));
+  const mediaFiles = [...documents, ...images];
+  let attachmentsSent = 0;
 
-  for (const file of [...documents, ...images]) {
+  if (mediaFiles.length > 0) {
+    await pause(650);
+  }
+
+  for (const file of mediaFiles) {
     const sent = await postAction(fetchImpl, input.config, "send-media", buildWaapiMediaPayload(input.to, file));
 
     if (!sent.ok) {
       return sent;
     }
 
+    attachmentsSent += 1;
+
     if (!referenceId && sent.messageId) {
       referenceId = sent.messageId;
     }
   }
 
-  return { ok: true as const, messageId: text.messageId, referenceId };
+  if (input.files.length > 0 && attachmentsSent !== input.files.length) {
+    return { ok: false as const, error: "send_failed" };
+  }
+
+  return { ok: true as const, messageId: text.messageId, referenceId, attachmentsSent };
+}
+
+function pause(ms: number) {
+  return new Promise<void>((resolve) => {
+    setTimeout(resolve, ms);
+  });
 }
 
 async function postAction(

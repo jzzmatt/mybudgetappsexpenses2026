@@ -34,5 +34,6 @@ export async function sendWhatsAppNotification(input: {
     ok: true as const,
     messageId: result.messageId,
     referenceId: result.referenceId,
+    attachmentsSent: result.attachmentsSent,
   };
 }
