@@ -87,13 +87,19 @@ export async function POST(request: Request, context: RouteContext) {
     return NextResponse.json({ error: "unavailable" }, { status: 503 });
   }
 
-  const outbound = receiptsOnly ? { ok: true as const, message: parsed.data.message.trim() } : prepareOutboundWhatsAppMessage(parsed.data.message);
+  let message: string;
 
-  if (!receiptsOnly && !outbound.ok) {
-    return NextResponse.json({ error: outbound.error === "too_long" ? "message_too_long" : "message_empty" }, { status: 400 });
+  if (receiptsOnly) {
+    message = `[receipts-only] ${files.map((file) => file.fileName).join(", ")}`;
+  } else {
+    const outbound = prepareOutboundWhatsAppMessage(parsed.data.message);
+
+    if (!outbound.ok) {
+      return NextResponse.json({ error: outbound.error === "too_long" ? "message_too_long" : "message_empty" }, { status: 400 });
+    }
+
+    message = outbound.message;
   }
-
-  const message = receiptsOnly ? `[receipts-only] ${files.map((file) => file.fileName).join(", ")}` : outbound.message;
 
   const supabase = await createSupabaseServerClient();
   const { data: logRow } = await supabase
