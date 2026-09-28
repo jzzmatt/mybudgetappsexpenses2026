@@ -8,9 +8,9 @@ import type { Locale } from "@/lib/i18n/config";
 import { renderPaymentNotification, type PaymentBatchPreview } from "@/lib/notifications/composer";
 import { sendWhatsAppNotification } from "@/lib/notifications/whatsapp-channel";
 import { paymentErrorCode } from "@/lib/payments/bulk";
-import { fileFromForm, revalidateExpensePaths } from "@/lib/payments/commit";
+import { fileFromForm, listPaymentEvidenceMeta, readPaymentEvidenceFiles, revalidateExpensePaths } from "@/lib/payments/commit";
 import { isPaymentDate } from "@/lib/payments/rules";
-import { downloadPaymentEvidenceFile, removePaymentEvidenceFile, uploadEvidenceObjects } from "@/lib/payments/storage";
+import { removePaymentEvidenceFile, uploadEvidenceObjects } from "@/lib/payments/storage";
 import type { PaymentEvidenceInput } from "@/lib/payments/record";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { EXPENSE_PAYMENT_METHODS } from "@/lib/expenses/types";
@@ -18,14 +18,6 @@ import { formatWhatsAppDate, prepareOutboundWhatsAppMessage } from "@/lib/whatsa
 import { normalizeWhatsAppNumber } from "@/lib/whatsapp/phone";
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-
-type EvidenceRow = {
-  expense_id: string | null;
-  payment_id: string | null;
-  storage_path: string;
-  file_name: string;
-  mime_type: string;
-};
 
 export function isPaymentUuid(value: string) {
   return UUID_PATTERN.test(value);
@@ -108,12 +100,12 @@ export async function loadPaymentBatchPreview(
     }];
   });
 
-  const evidence = await loadEvidenceRows(userId, paymentId, expenses.map((expense) => expense.id));
-  const evidenceExpenseIds = new Set(evidence.flatMap((row) => (row.expense_id ? [String(row.expense_id)] : [])));
-  const attachmentCount = new Set(evidence.map((row) => row.storage_path)).size + Math.max(0, extraAttachments);
+  const evidence = await listPaymentEvidenceMeta(userId, paymentId);
+  const evidenceExpenseIds = new Set(evidence.flatMap((file) => (file.expenseId ? [file.expenseId] : [])));
+  const attachmentCount = evidence.length + Math.max(0, extraAttachments);
   const views = expenses.map((expense) => ({
     ...expense,
-    hasEvidence: evidenceExpenseIds.has(expense.id) || (expenses.length === 1 && evidence.some((row) => row.payment_id === paymentId)),
+    hasEvidence: evidenceExpenseIds.has(expense.id),
   }));
 
   return {
@@ -374,16 +366,16 @@ export async function dispatchBatchNotification(input: {
     }
   }
 
-  const { data: expenseRows } = await supabase
-    .from("payment_expenses")
-    .select("expense_id")
-    .eq("payment_id", input.paymentId)
-    .eq("user_id", input.userId);
-  const expenseIds = (expenseRows ?? []).map((row) => String(row.expense_id));
   let files: { fileName: string; mimeType: string; bytes: Uint8Array }[];
+  let expectedEvidenceCount = 0;
 
   try {
-    files = await downloadEvidenceFiles(input.userId, input.paymentId, expenseIds);
+    expectedEvidenceCount = (await listPaymentEvidenceMeta(input.userId, input.paymentId)).length;
+    files = await readPaymentEvidenceFiles(input.userId, input.paymentId);
+
+    if (expectedEvidenceCount > 0 && files.length !== expectedEvidenceCount) {
+      throw new Error("unavailable");
+    }
   } catch {
     await recordShareLog({
       userId: input.userId,
@@ -419,15 +411,18 @@ export async function dispatchBatchNotification(input: {
     message: outbound.message,
     files,
   });
+  const receiptsMissing = sent.ok
+    && expectedEvidenceCount > 0
+    && sent.attachmentsSent !== expectedEvidenceCount;
 
   await supabase
     .from("expense_share_logs")
     .update({
-      status: sent.ok ? "sent" : "failed",
-      error_message: sent.ok ? null : sent.error,
-      sent_at: sent.ok ? new Date().toISOString() : null,
-      waapi_message_id: sent.ok ? sent.messageId : null,
-      waapi_reference_id: sent.ok ? sent.referenceId : null,
+      status: sent.ok && !receiptsMissing ? "sent" : "failed",
+      error_message: !sent.ok ? sent.error : receiptsMissing ? "receipt_send_failed" : null,
+      sent_at: sent.ok && !receiptsMissing ? new Date().toISOString() : null,
+      waapi_message_id: sent.ok && !receiptsMissing ? sent.messageId : null,
+      waapi_reference_id: sent.ok && !receiptsMissing ? sent.referenceId : null,
       metadata: { idempotencyKey: input.idempotencyKey, attachmentCount: files.length },
     })
     .eq("id", pending.id)
@@ -436,8 +431,12 @@ export async function dispatchBatchNotification(input: {
   await markBatchPending(input.userId, input.paymentId);
   revalidatePaymentViews(payment.project_id ? String(payment.project_id) : null);
 
-  if (!sent.ok) {
-    return { ok: false as const, error: sent.error, notificationStatus: "failed" as const };
+  if (!sent.ok || receiptsMissing) {
+    return {
+      ok: false as const,
+      error: receiptsMissing ? "receipt_send_failed" : sent.error,
+      notificationStatus: "failed" as const,
+    };
   }
 
   return {
@@ -448,49 +447,6 @@ export async function dispatchBatchNotification(input: {
     referenceId: sent.referenceId,
     attachmentCount: files.length,
   };
-}
-
-async function loadEvidenceRows(userId: string, paymentId: string, expenseIds: string[]) {
-  const supabase = await createSupabaseServerClient();
-  let query = supabase
-    .from("expense_payment_evidence")
-    .select("expense_id, payment_id, storage_path, file_name, mime_type")
-    .eq("user_id", userId);
-
-  query = expenseIds.length > 0
-    ? query.or(`payment_id.eq.${paymentId},expense_id.in.(${expenseIds.join(",")})`)
-    : query.eq("payment_id", paymentId);
-
-  const { data, error } = await query;
-
-  if (error || !data) {
-    return [];
-  }
-
-  return data as EvidenceRow[];
-}
-
-async function downloadEvidenceFiles(userId: string, paymentId: string, expenseIds: string[]) {
-  const rows = await loadEvidenceRows(userId, paymentId, expenseIds);
-  const unique = new Map<string, EvidenceRow>();
-
-  for (const row of rows) {
-    if (row.storage_path.startsWith(`${userId}/`)) {
-      unique.set(row.storage_path, row);
-    }
-  }
-
-  const files = [];
-
-  for (const row of unique.values()) {
-    files.push({
-      fileName: row.file_name,
-      mimeType: row.mime_type,
-      bytes: await downloadPaymentEvidenceFile(row.storage_path),
-    });
-  }
-
-  return files;
 }
 
 async function findActiveShareLog(userId: string, paymentId: string, idempotencyKey: string) {

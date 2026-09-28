@@ -112,3 +112,27 @@ function extensionOf(filename: string) {
   const index = filename.lastIndexOf(".");
   return index >= 0 ? filename.slice(index).toLowerCase() : "";
 }
+
+const MIME_BY_EXTENSION: Record<string, string> = {
+  ".pdf": "application/pdf",
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".png": "image/png",
+  ".webp": "image/webp",
+};
+
+export function resolveStoredEvidenceMimeType(fileName: string, storedMimeType: string | null | undefined) {
+  const stored = storedMimeType?.trim().toLowerCase() ?? "";
+
+  if (stored === "application/pdf" || stored.startsWith("image/")) {
+    return stored === "image/jpg" ? "image/jpeg" : stored;
+  }
+
+  const inferred = MIME_BY_EXTENSION[extensionOf(fileName)];
+
+  if (inferred) {
+    return inferred;
+  }
+
+  return stored;
+}

@@ -22,3 +22,5 @@ export const mobileNavItems: NavItem[] = [
   primaryNavItems[2],
   primaryNavItems[3],
 ];
+
+export const mobileOverflowNavItems: NavItem[] = primaryNavItems.slice(4);
