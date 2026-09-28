@@ -234,6 +234,8 @@ export type Messages = {
     sendViaWhatsApp: string;
     paymentInformationSent: string;
     receiptsSentViaWhatsApp: string;
+    receiptSendFailedTextSent: string;
+    sendReceiptsOnly: string;
     unableToSend: string;
     whatsappNotConfigured: string;
     withoutEvidence: string;

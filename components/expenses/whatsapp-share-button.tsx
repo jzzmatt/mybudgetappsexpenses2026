@@ -32,6 +32,8 @@ export function WhatsAppShareButton(props: WhatsAppShareButtonProps) {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [sent, setSent] = useState<{ recipient: string; sentAt: string; attachmentCount: number } | null>(null);
+  const [receiptsOnly, setReceiptsOnly] = useState(false);
+  const [textSentWithoutReceipt, setTextSentWithoutReceipt] = useState(false);
   const [message, setMessage] = useState("");
   const messageLength = whatsAppMessageLength(message);
   const outbound = prepareOutboundWhatsAppMessage(message);
@@ -52,6 +54,8 @@ export function WhatsAppShareButton(props: WhatsAppShareButtonProps) {
     setOpen(true);
     setError(null);
     setSent(null);
+    setReceiptsOnly(false);
+    setTextSentWithoutReceipt(false);
   }
 
   async function send() {
@@ -68,10 +72,11 @@ export function WhatsAppShareButton(props: WhatsAppShareButtonProps) {
       const response = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone, message: outbound.message }),
+        body: JSON.stringify({ phone, message: outbound.message, receiptsOnly }),
       });
       const payload = (await response.json()) as {
         error?: string;
+        textSent?: boolean;
         recipient?: string;
         sentAt?: string;
         attachmentCount?: number;
@@ -79,6 +84,13 @@ export function WhatsAppShareButton(props: WhatsAppShareButtonProps) {
       };
 
       if (!response.ok) {
+        if (payload.error === "receipt_send_failed" && payload.textSent) {
+          setTextSentWithoutReceipt(true);
+          setReceiptsOnly(true);
+          setError(t("payments.receiptSendFailedTextSent"));
+          return;
+        }
+
         if (payload.error === "invalid_phone") {
           setError(t("payments.phoneInvalid"));
         } else if (payload.error === "not_configured") {
@@ -176,10 +188,15 @@ export function WhatsAppShareButton(props: WhatsAppShareButtonProps) {
               <p className="whatsapp-preview-label">{t("payments.messagePreview")}</p>
               <pre className="whatsapp-message-preview">{message}</pre>
             </div>
-            {sent ? (
+            {textSentWithoutReceipt ? (
               <p className="payment-sheet-success payment-sheet-success-animate" role="status">
                 <span aria-hidden="true" className="whatsapp-send-check">✓</span> {t("payments.paymentInformationSent")}
-                {sent.attachmentCount > 0 ? (
+              </p>
+            ) : null}
+            {sent ? (
+              <p className="payment-sheet-success payment-sheet-success-animate" role="status">
+                <span aria-hidden="true" className="whatsapp-send-check">✓</span> {receiptsOnly ? t("payments.receiptsSentViaWhatsApp", { count: sent.attachmentCount }) : t("payments.paymentInformationSent")}
+                {!receiptsOnly && sent.attachmentCount > 0 ? (
                   <>
                     <br />
                     {t("payments.receiptsSentViaWhatsApp", { count: sent.attachmentCount })}
@@ -200,8 +217,8 @@ export function WhatsAppShareButton(props: WhatsAppShareButtonProps) {
               <button className="button button-outline button-small" onClick={() => setOpen(false)} type="button">
                 {t("common.cancel")}
               </button>
-              <button className="button button-small" disabled={pending || Boolean(sent) || !outbound.ok} onClick={() => void send()} type="button">
-                {t("payments.sendViaWhatsApp")}
+              <button className="button button-small" disabled={pending || (Boolean(sent) && !receiptsOnly) || (!receiptsOnly && !outbound.ok)} onClick={() => void send()} type="button">
+                {receiptsOnly ? t("payments.sendReceiptsOnly") : t("payments.sendViaWhatsApp")}
               </button>
             </div>
           </div>

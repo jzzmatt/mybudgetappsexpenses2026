@@ -24,13 +24,13 @@ export function waapiChatId(digits: string) {
   return `${digits}@c.us`;
 }
 
-export function waapiActionUrl(instanceId: string, action: "send-message" | "send-media") {
+export function waapiActionUrl(instanceId: string, action: "send-message" | "send-media" | "get-number-id") {
   return `${WAAPI_API_BASE}/instances/${instanceId}/client/action/${action}`;
 }
 
-export function buildWaapiTextPayload(digits: string, message: string) {
+export function buildWaapiTextPayload(chatId: string, message: string) {
   return {
-    chatId: waapiChatId(digits),
+    chatId: chatId.includes("@") ? chatId : waapiChatId(chatId),
     message,
   };
 }
@@ -39,15 +39,29 @@ export function waapiSendAsDocument(mimeType: string) {
   return mimeType === "application/pdf" || mimeType === "image/webp";
 }
 
+export function bytesToBase64(bytes: Uint8Array) {
+  if (typeof Buffer !== "undefined") {
+    return Buffer.from(bytes).toString("base64");
+  }
+
+  let binary = "";
+  for (const byte of bytes) {
+    binary += String.fromCharCode(byte);
+  }
+
+  return btoa(binary);
+}
+
 export function buildWaapiMediaPayload(
-  digits: string,
+  chatId: string,
   file: { fileName: string; mimeType: string; bytes: Uint8Array },
 ) {
   return {
-    chatId: waapiChatId(digits),
-    mediaBase64: Buffer.from(file.bytes).toString("base64"),
+    chatId: chatId.includes("@") ? chatId : waapiChatId(chatId),
+    mediaBase64: bytesToBase64(file.bytes),
     mediaName: file.fileName,
     asDocument: waapiSendAsDocument(file.mimeType),
+    previewLink: false,
   };
 }
 

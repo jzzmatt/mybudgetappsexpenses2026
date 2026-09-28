@@ -13,7 +13,10 @@ import { z } from "zod";
 const bodySchema = z.object({
   phone: z.string().trim().min(8).max(24),
   message: z.string(),
+  receiptsOnly: z.boolean().optional(),
 });
+
+export const maxDuration = 60;
 
 type RouteContext = {
   params: Promise<{ id: string }>;
@@ -65,13 +68,7 @@ export async function POST(request: Request, context: RouteContext) {
     return NextResponse.json({ error: "not_configured" }, { status: 503 });
   }
 
-  const outbound = prepareOutboundWhatsAppMessage(parsed.data.message);
-
-  if (!outbound.ok) {
-    return NextResponse.json({ error: outbound.error === "too_long" ? "message_too_long" : "message_empty" }, { status: 400 });
-  }
-
-  const message = outbound.message;
+  const receiptsOnly = parsed.data.receiptsOnly === true;
   let expectedEvidence: Awaited<ReturnType<typeof listPaymentEvidenceMeta>> = [];
   let files: { fileName: string; mimeType: string; bytes: Uint8Array }[] = [];
 
@@ -82,8 +79,26 @@ export async function POST(request: Request, context: RouteContext) {
     return NextResponse.json({ error: "unavailable" }, { status: 503 });
   }
 
+  if (files.length === 0) {
+    return NextResponse.json({ error: receiptsOnly ? "not_found" : "unavailable" }, { status: receiptsOnly ? 404 : 503 });
+  }
+
   if (expectedEvidence.length > 0 && files.length !== expectedEvidence.length) {
     return NextResponse.json({ error: "unavailable" }, { status: 503 });
+  }
+
+  let message: string;
+
+  if (receiptsOnly) {
+    message = `[receipts-only] ${files.map((file) => file.fileName).join(", ")}`;
+  } else {
+    const outbound = prepareOutboundWhatsAppMessage(parsed.data.message);
+
+    if (!outbound.ok) {
+      return NextResponse.json({ error: outbound.error === "too_long" ? "message_too_long" : "message_empty" }, { status: 400 });
+    }
+
+    message = outbound.message;
   }
 
   const supabase = await createSupabaseServerClient();
@@ -106,11 +121,13 @@ export async function POST(request: Request, context: RouteContext) {
     body: message,
     files,
     config,
+    receiptsOnly,
   });
 
   const receiptsMissing = sent.ok
     && expectedEvidence.length > 0
     && sent.attachmentsSent !== expectedEvidence.length;
+  const receiptFailure = !sent.ok && "textSent" in sent && sent.textSent;
 
   if (logRow?.id) {
     await supabase
@@ -119,11 +136,15 @@ export async function POST(request: Request, context: RouteContext) {
         status: sent.ok && !receiptsMissing ? "sent" : "failed",
         sent_at: sent.ok && !receiptsMissing ? new Date().toISOString() : null,
         error_message: !sent.ok ? sent.error : receiptsMissing ? "receipt_send_failed" : null,
-        waapi_message_id: sent.ok && !receiptsMissing ? sent.messageId : null,
-        waapi_reference_id: sent.ok && !receiptsMissing ? sent.referenceId : null,
+        waapi_message_id: sent.ok && !receiptsMissing ? sent.messageId : "messageId" in sent ? sent.messageId : null,
+        waapi_reference_id: sent.ok && !receiptsMissing ? sent.referenceId : "referenceId" in sent ? sent.referenceId : null,
       })
       .eq("id", logRow.id)
       .eq("user_id", userId);
+  }
+
+  if (receiptFailure) {
+    return NextResponse.json({ error: "receipt_send_failed", textSent: true }, { status: 502 });
   }
 
   if (!sent.ok || receiptsMissing) {
