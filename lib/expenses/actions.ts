@@ -4,8 +4,9 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { getTranslations } from "@/lib/i18n/server";
-import { fileFromForm, revalidateExpensePaths, storePaymentEvidence } from "@/lib/payments/commit";
-import { isPaymentDate, normalizePaymentNote, resolveExpenseStatus, shouldConfirmPayment } from "@/lib/payments/rules";
+import { fileFromForm, revalidateExpensePaths } from "@/lib/payments/commit";
+import { recordExpensePayment } from "@/lib/payments/record";
+import { isPaymentDate, normalizePaymentNote, shouldConfirmPayment } from "@/lib/payments/rules";
 import { removePaymentEvidenceFile } from "@/lib/payments/storage";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { ensureUserRecord } from "@/lib/users/ensure-user";
@@ -206,7 +207,7 @@ export async function updateExpenseAction(expenseId: string, formData: FormData)
   const becomingPaid = shouldConfirmPayment(existing.status, parsed.data.status);
   let paidAt: string | null = null;
   let paymentNote: string | null = null;
-  let uploadedPaths: string[] = [];
+  let paymentFiles: Awaited<ReturnType<typeof prepareEvidenceFiles>> | null = null;
 
   if (becomingPaid) {
     const { t } = await getTranslations();
@@ -222,21 +223,10 @@ export async function updateExpenseAction(expenseId: string, formData: FormData)
       redirect(`/expenses/${expenseId}/edit?error=${encodeURIComponent(t("payments.fileInvalid"))}`);
     }
 
-    const prepared = await prepareEvidenceFiles(formData);
+    paymentFiles = await prepareEvidenceFiles(formData);
 
-    if ("error" in prepared) {
+    if ("error" in paymentFiles) {
       redirect(`/expenses/${expenseId}/edit?error=${encodeURIComponent(t("payments.fileInvalid"))}`);
-    }
-
-    try {
-      uploadedPaths = await storePaymentEvidence({
-        userId,
-        expenseId,
-        projectId: existing.project_id || parsed.data.project_id || "",
-        files: prepared.files,
-      });
-    } catch {
-      redirect(`/expenses/${expenseId}/edit?error=${encodeURIComponent(t("payments.uploadFailed"))}`);
     }
   } else if (formData.has("paid_at")) {
     const candidate = String(formData.get("paid_at") ?? "");
@@ -276,10 +266,10 @@ export async function updateExpenseAction(expenseId: string, formData: FormData)
       payment_proof_path: parsed.data.payment_proof_path,
       payment_proof_filename: parsed.data.payment_proof_filename,
       priority: parsed.data.priority,
-      status: resolveExpenseStatus(existing.status, becomingPaid),
+      status: existing.status,
       notes: parsed.data.notes,
-      ...(paidAt ? { paid_at: paidAt } : {}),
-      ...(paymentNote !== null && (becomingPaid || formData.has("payment_note")) ? { payment_note: paymentNote } : {}),
+      ...(paidAt && !becomingPaid ? { paid_at: paidAt } : {}),
+      ...(paymentNote !== null && !becomingPaid && formData.has("payment_note") ? { payment_note: paymentNote } : {}),
     })
     .eq("id", expenseId)
     .eq("user_id", userId);
@@ -308,11 +298,23 @@ export async function updateExpenseAction(expenseId: string, formData: FormData)
   }
 
   if (error) {
-    if (uploadedPaths.length > 0) {
-      await rollbackEvidence(userId, uploadedPaths);
-    }
-
     redirect(`/expenses/${expenseId}/edit?error=${encodeURIComponent(error.message)}`);
+  }
+
+  if (becomingPaid && paidAt && paymentFiles && !("error" in paymentFiles)) {
+    const { t } = await getTranslations();
+    const recorded = await recordExpensePayment({
+      userId,
+      expenseIds: [expenseId],
+      paidAt,
+      paymentMethod: parsed.data.payment_method,
+      description: paymentNote,
+      files: paymentFiles.files,
+    });
+
+    if (!recorded.ok) {
+      redirect(`/expenses/${expenseId}/edit?error=${encodeURIComponent(paymentFailureMessage(t, recorded.error))}`);
+    }
   }
 
   revalidateExpensePaths(parsed.data.project_id);
@@ -340,12 +342,6 @@ async function prepareEvidenceFiles(formData: FormData) {
   return {
     files: [receipt, picture].filter((file): file is NonNullable<typeof receipt> & { filename: string } => Boolean(file && "filename" in file)),
   };
-}
-
-async function rollbackEvidence(userId: string, paths: string[]) {
-  const supabase = await createSupabaseServerClient();
-  await supabase.from("expense_payment_evidence").delete().eq("user_id", userId).in("storage_path", paths);
-  await Promise.all(paths.map((path) => removePaymentEvidenceFile(path).catch(() => undefined)));
 }
 
 function withCopySuffix(description: string) {
@@ -420,20 +416,23 @@ function safeReturnPath(value: FormDataEntryValue | null) {
 }
 
 export async function markExpensePaidAction(expenseId: string, formData: FormData) {
+  await commitPaidExpenses(formData, [expenseId], "single");
+}
+
+export async function markExpensesPaidAction(formData: FormData) {
+  const ids = formData.getAll("expense_id").map((value) => String(value));
+  await commitPaidExpenses(formData, ids, "bulk");
+}
+
+async function commitPaidExpenses(formData: FormData, expenseIds: string[], mode: "single" | "bulk") {
   const { t } = await getTranslations();
   const returnPath = safeReturnPath(formData.get("return_to"));
   const userId = await ensureUserRecord();
-  const existing = await getExpenseById(expenseId);
-
-  if (!existing || existing.user_id !== userId || !shouldConfirmPayment(existing.status, "paid")) {
-    redirect(`${returnPath}?error=${encodeURIComponent(t("payments.confirmRequired"))}`);
-  }
-
   const paidAt = String(formData.get("paid_at") ?? "");
   const paymentNote = normalizePaymentNote(String(formData.get("payment_note") ?? ""));
-  const paymentMethod = String(formData.get("payment_method") ?? "").trim() || existing.payment_method;
+  const paymentMethod = String(formData.get("payment_method") ?? "").trim() || null;
 
-  if (!isPaymentDate(paidAt)) {
+  if (!isPaymentDate(paidAt) || expenseIds.length < 1) {
     redirect(`${returnPath}?error=${encodeURIComponent(t("payments.fileInvalid"))}`);
   }
 
@@ -443,38 +442,48 @@ export async function markExpensePaidAction(expenseId: string, formData: FormDat
     redirect(`${returnPath}?error=${encodeURIComponent(t("payments.fileInvalid"))}`);
   }
 
-  let uploadedPaths: string[] = [];
+  const recorded = await recordExpensePayment({
+    userId,
+    expenseIds,
+    paidAt,
+    paymentMethod,
+    description: paymentNote,
+    files: prepared.files,
+  });
 
-  try {
-    uploadedPaths = await storePaymentEvidence({
-      userId,
-      expenseId,
-      projectId: existing.project_id || "",
-      files: prepared.files,
-    });
-  } catch {
-    redirect(`${returnPath}?error=${encodeURIComponent(t("payments.uploadFailed"))}`);
+  if (!recorded.ok) {
+    redirect(`${returnPath}?error=${encodeURIComponent(paymentFailureMessage(t, recorded.error))}`);
   }
 
-  const supabase = await createSupabaseServerClient();
-  const { error } = await supabase
-    .from("expenses")
-    .update({
-      status: "paid",
-      paid_at: paidAt,
-      payment_note: paymentNote,
-      payment_method: paymentMethod,
-    })
-    .eq("id", expenseId)
-    .eq("user_id", userId);
-
-  if (error) {
-    await rollbackEvidence(userId, uploadedPaths);
-    redirect(`${returnPath}?error=${encodeURIComponent(t("payments.uploadFailed"))}`);
+  revalidateExpensePaths(null);
+  for (const projectId of recorded.projectIds) {
+    revalidateExpensePaths(projectId);
   }
 
-  revalidateExpensePaths(existing.project_id);
+  if (mode === "bulk") {
+    redirect(`${returnPath}?payment=${recorded.paymentId}`);
+  }
+
   redirect(`${returnPath}?paid=1`);
+}
+
+function paymentFailureMessage(
+  t: (key: string, params?: Record<string, string | number>) => string,
+  error: string,
+) {
+  if (error === "selection_changed") {
+    return t("payments.selectionChanged");
+  }
+
+  if (error === "mixed_currency") {
+    return t("payments.mixedCurrency");
+  }
+
+  if (error === "upload_failed" || error === "invalid_evidence") {
+    return t("payments.uploadFailed");
+  }
+
+  return t("payments.confirmRequired");
 }
 
 export async function removePaymentEvidenceAction(evidenceId: string) {

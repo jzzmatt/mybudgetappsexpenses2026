@@ -104,6 +104,38 @@ export async function readEvidenceFiles(userId: string, expenseId: string, legac
   return downloaded;
 }
 
+export async function readPaymentEvidenceFiles(userId: string, paymentId: string) {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("expense_payment_evidence")
+    .select("storage_path, file_name, mime_type")
+    .eq("user_id", userId)
+    .eq("payment_id", paymentId)
+    .order("created_at", { ascending: true });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  const downloaded = [];
+
+  for (const file of data ?? []) {
+    const storagePath = String(file.storage_path);
+
+    if (!storagePath.startsWith(`${userId}/`)) {
+      throw new Error("evidence_forbidden");
+    }
+
+    downloaded.push({
+      fileName: String(file.file_name),
+      mimeType: String(file.mime_type),
+      bytes: await downloadPaymentEvidenceFile(storagePath),
+    });
+  }
+
+  return downloaded;
+}
+
 export function revalidateExpensePaths(projectId: string | null) {
   revalidatePath("/expenses");
   revalidatePath("/dashboard");

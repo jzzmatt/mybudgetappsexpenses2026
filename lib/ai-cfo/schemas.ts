@@ -21,6 +21,7 @@ export const toolArgsSchema = z.object({
   projectId: z.string().uuid().optional(),
   projectName: z.string().trim().max(200).optional(),
   expenseId: z.string().uuid().optional(),
+  paymentId: z.string().uuid().optional(),
   status: z.enum(["pending", "partial", "paid"]).optional(),
   basis: z.enum(["paid", "budget"]).optional(),
   dateRange: dateRangeSchema,

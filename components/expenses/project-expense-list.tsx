@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BulkExpenseCheckbox, BulkSelectVisibleCheckbox } from "@/components/expenses/bulk-payment";
 import { ExpenseActionsMenu } from "@/components/expenses/expense-actions-menu";
 import { ExpensePaymentActions } from "@/components/expenses/expense-payment-actions";
 import { ExpensePercentageBar } from "@/components/expenses/expense-percentage-bar";
@@ -133,6 +134,7 @@ export async function ProjectExpenseList({
             <li key={expense.id}>
               <Card className="project-expense-mobile-card">
                 <div className="project-expense-mobile-card-top">
+                  <BulkExpenseCheckbox id={expense.id} />
                   <div>
                     <h3>{expense.description}</h3>
                     <p className="project-expense-mobile-date">
@@ -185,6 +187,7 @@ export async function ProjectExpenseList({
           <table className="category-table list-table project-expense-table">
             <caption className="sr-only">{t("expenses.allExpenses")}</caption>
             <colgroup>
+              <col className="project-expense-col-select" />
               <col className="project-expense-col-date" />
               <col className="project-expense-col-description" />
               <col className="project-expense-col-category" />
@@ -198,6 +201,9 @@ export async function ProjectExpenseList({
             </colgroup>
             <thead>
               <tr>
+                <th scope="col">
+                  <BulkSelectVisibleCheckbox />
+                </th>
                 <SortableHeader basePath={basePath} field="date" filters={filters} label={t("expenses.date")} />
                 <SortableHeader
                   basePath={basePath}
@@ -244,6 +250,9 @@ export async function ProjectExpenseList({
 
                 return (
                   <tr key={expense.id}>
+                    <td className="bulk-select-cell">
+                      <BulkExpenseCheckbox id={expense.id} />
+                    </td>
                     <td className="expense-table-nowrap">{formatExpenseDate(expense.date, locale)}</td>
                     <td>
                       <div className="project-expense-description-cell">

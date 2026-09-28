@@ -10,7 +10,10 @@ import {
 } from "@/lib/whatsapp/message";
 
 type WhatsAppShareButtonProps = {
-  expenseId: string;
+  expenseId?: string;
+  paymentId?: string;
+  initialMessage?: string;
+  expenseCount?: number;
   description: string;
   amountLabel: string;
   paymentDateLabel: string;
@@ -33,15 +36,16 @@ export function WhatsAppShareButton(props: WhatsAppShareButtonProps) {
 
   function openShare() {
     setMessage(
-      generatePaidExpenseWhatsAppTemplate({
-        description: props.description,
-        amountLabel: props.amountLabel,
-        paymentDateLabel: props.paymentDateLabel,
-        paymentMethodLabel: props.paymentMethodLabel,
-        categoryName: props.categoryName,
-        projectName: props.projectName,
-        locale,
-      }).message,
+      props.initialMessage ??
+        generatePaidExpenseWhatsAppTemplate({
+          description: props.description,
+          amountLabel: props.amountLabel,
+          paymentDateLabel: props.paymentDateLabel,
+          paymentMethodLabel: props.paymentMethodLabel,
+          categoryName: props.categoryName,
+          projectName: props.projectName,
+          locale,
+        }).message,
     );
     setOpen(true);
     setError(null);
@@ -58,7 +62,8 @@ export function WhatsAppShareButton(props: WhatsAppShareButtonProps) {
     setError(null);
 
     try {
-      const response = await fetch(`/api/expenses/${props.expenseId}/whatsapp`, {
+      const endpoint = props.paymentId ? `/api/payments/${props.paymentId}/whatsapp` : `/api/expenses/${props.expenseId}/whatsapp`;
+      const response = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ phone, message: outbound.message }),
@@ -94,7 +99,7 @@ export function WhatsAppShareButton(props: WhatsAppShareButtonProps) {
   return (
     <>
       <button
-        aria-label={t("payments.sharePaidExpense")}
+        aria-label={(props.expenseCount ?? 0) > 1 ? t("payments.shareBulkPayment") : t("payments.sharePaidExpense")}
         className="button button-outline button-small"
         onClick={openShare}
         type="button"
@@ -105,16 +110,23 @@ export function WhatsAppShareButton(props: WhatsAppShareButtonProps) {
         <div className="payment-sheet" role="presentation">
           <div aria-labelledby="whatsapp-share-title" className="payment-sheet-card" role="dialog">
             <div className="payment-sheet-header">
-              <h2 id="whatsapp-share-title">{t("payments.sharePaidExpense")}</h2>
+              <h2 id="whatsapp-share-title">{(props.expenseCount ?? 0) > 1 ? t("payments.shareBulkPayment") : t("payments.sharePaidExpense")}</h2>
               <button className="button button-outline button-small" onClick={() => setOpen(false)} type="button">
                 ×
               </button>
             </div>
             <dl className="payment-sheet-facts">
-              <div>
-                <dt>{t("expenses.description")}</dt>
-                <dd>{props.description}</dd>
-              </div>
+              {(props.expenseCount ?? 0) > 1 ? (
+                <div>
+                  <dt>{t("payments.selectedExpenses")}</dt>
+                  <dd>{t("payments.selectedCount", { count: props.expenseCount ?? 0 })}</dd>
+                </div>
+              ) : (
+                <div>
+                  <dt>{t("expenses.description")}</dt>
+                  <dd>{props.description}</dd>
+                </div>
+              )}
               <div>
                 <dt>{t("expenses.paid")}</dt>
                 <dd>{props.amountLabel}</dd>

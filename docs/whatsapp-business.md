@@ -26,4 +26,6 @@ A WaAPI HTTP 200 response counts as a successful send only when both the outer `
 
 The share dialog counts characters up to 65536, the WhatsApp client text limit. WaAPI does not publish a smaller maximum for `message`.
 
-Apply `supabase/migrations/20260927150000_payment_evidence_and_share_logs.sql` before using payment evidence or share logs. Evidence files stay in the private `payment-proofs` bucket. The server downloads them and sends the bytes as base64. Storage URLs are not placed in the message.
+Apply `supabase/migrations/20260927150000_payment_evidence_and_share_logs.sql` and `supabase/migrations/20260928120000_bulk_payments.sql` before using payment evidence, share logs, or bulk payments.
+
+A bulk payment is one payment linked to many expenses. The share for that payment posts the edited message, then the payment evidence, through the same WaAPI actions. The saved share log stores `payment_id` and the final message. Evidence files stay in the private `payment-proofs` bucket. The server downloads them and sends the bytes as base64. Storage URLs are not placed in the message.

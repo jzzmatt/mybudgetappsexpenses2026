@@ -14,6 +14,7 @@ import {
   type AiCfoExpenseRecord,
   type AiCfoNamedRecord,
 } from "@/lib/ai-cfo/repository";
+import { getScopedPayment, listScopedPayments } from "@/lib/ai-cfo/payments";
 import { bindAuthorizedProjects } from "@/lib/ai-cfo/project-context";
 import { toolArgsSchema, type ToolArgs } from "@/lib/ai-cfo/schemas";
 import type { AiCfoEvidenceExpense, AiCfoSource } from "@/lib/ai-cfo/types";
@@ -41,6 +42,8 @@ export const AI_CFO_TOOL_NAMES = [
   "get_budget_summary",
   "get_budget_vs_actual",
   "get_unpaid_expenses",
+  "search_payments",
+  "get_payment_expenses",
 ] as const;
 
 export type AiCfoToolName = (typeof AI_CFO_TOOL_NAMES)[number];
@@ -59,6 +62,8 @@ const PROJECT_SCOPED_TOOLS = new Set<AiCfoToolName>([
   "get_budget_summary",
   "get_budget_vs_actual",
   "get_unpaid_expenses",
+  "search_payments",
+  "get_payment_expenses",
 ]);
 
 export type AiCfoToolContext = {
@@ -246,6 +251,29 @@ export async function executeAiCfoTool(
       }
       return { success: true, matched: true, project: namedPayload(resolved.record) };
     }
+    case "search_payments": {
+      const payments = await listScopedPayments(userId, scope.projectIds, dates.startDate, dates.endDate);
+      return {
+        success: true,
+        matched: payments.length > 0,
+        status: payments.length === 0 ? "not_found" : "found",
+        payments: payments.map((payment) => ({
+          ...payment,
+          expenses: payment.expenses.slice(0, EVIDENCE_LIMIT),
+          truncated: payment.expenses.length > EVIDENCE_LIMIT,
+        })),
+      };
+    }
+    case "get_payment_expenses": {
+      if (!args.paymentId) {
+        return { success: false, error: "invalid_arguments" };
+      }
+      const payment = await getScopedPayment(userId, args.paymentId, scope.projectIds);
+      if (!payment) {
+        return { success: true, matched: false, status: "not_found" };
+      }
+      return { success: true, matched: true, payment };
+    }
     case "get_expense": {
       if (!args.expenseId) {
         return { success: false, error: "invalid_arguments" };
@@ -415,6 +443,7 @@ export const aiCfoToolDefinitions = AI_CFO_TOOL_NAMES.map((name) => ({
         projectId: { type: "string" },
         projectName: { type: "string" },
         expenseId: { type: "string" },
+        paymentId: { type: "string", description: "Payment id returned by search_payments." },
         status: { type: "string", enum: ["pending", "partial", "paid"] },
         basis: { type: "string", enum: ["paid", "budget"] },
         limit: { type: "integer", minimum: 1, maximum: 50 },
@@ -488,6 +517,10 @@ function toolDescription(name: AiCfoToolName) {
       return "Compare each project budget with the deterministic sum of paid expenses in that project.";
     case "get_unpaid_expenses":
       return "List pending and partial expenses for the authenticated user.";
+    case "search_payments":
+      return "Find payments in the authorized project. Returns each payment total, date, method, expense count, and the included expense descriptions and amounts. Totals include only expenses inside the authorized project.";
+    case "get_payment_expenses":
+      return "List the expenses included in one payment id, with each description and amount, plus the payment total. Refuses payments outside the authorized project.";
     default:
       return "Read authenticated BudgetApp data.";
   }

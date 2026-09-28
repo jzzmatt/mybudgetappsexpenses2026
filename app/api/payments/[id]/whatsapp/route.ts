@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { readEvidenceFiles } from "@/lib/payments/commit";
-import { canSharePaidExpense, paymentAccess } from "@/lib/payments/rules";
+import { readPaymentEvidenceFiles } from "@/lib/payments/commit";
+import { getPaymentShareView } from "@/lib/payments/queries";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { ensureUserRecord } from "@/lib/users/ensure-user";
 import { deliverPaidExpenseWhatsApp, readWhatsAppServerConfig } from "@/lib/whatsapp/send";
@@ -52,24 +52,10 @@ export async function POST(request: Request, context: RouteContext) {
     return NextResponse.json({ error: "invalid_phone" }, { status: 400 });
   }
 
-  const supabase = await createSupabaseServerClient();
-  const { data, error } = await supabase
-    .from("expenses")
-    .select("id, user_id, description, status, paid_at, paid_amount, budget_amount, currency, payment_method, payment_proof_path, payment_proof_filename, project_id, category:categories(name), project:projects(name)")
-    .eq("id", id)
-    .eq("user_id", userId)
-    .maybeSingle();
+  const payment = await getPaymentShareView(userId, id);
 
-  if (error) {
-    return NextResponse.json({ error: "unavailable" }, { status: 503 });
-  }
-
-  if (!data || paymentAccess(String(data.user_id), userId) !== "allowed") {
+  if (!payment || payment.expenses.length === 0 || payment.expenses.some((expense) => expense.status !== "paid")) {
     return NextResponse.json({ error: "not_found" }, { status: 404 });
-  }
-
-  if (!canSharePaidExpense(String(data.status))) {
-    return NextResponse.json({ error: "not_paid" }, { status: 422 });
   }
 
   const config = readWhatsAppServerConfig();
@@ -85,24 +71,19 @@ export async function POST(request: Request, context: RouteContext) {
   }
 
   const message = outbound.message;
-
   let files: { fileName: string; mimeType: string; bytes: Uint8Array }[] = [];
 
   try {
-    files = await readEvidenceFiles(
-      userId,
-      id,
-      data.payment_proof_path ? String(data.payment_proof_path) : null,
-      data.payment_proof_filename ? String(data.payment_proof_filename) : null,
-    );
+    files = await readPaymentEvidenceFiles(userId, id);
   } catch {
     return NextResponse.json({ error: "unavailable" }, { status: 503 });
   }
 
+  const supabase = await createSupabaseServerClient();
   const { data: logRow } = await supabase
     .from("expense_share_logs")
     .insert({
-      expense_id: id,
+      payment_id: id,
       user_id: userId,
       recipient_phone: phone.display,
       channel: "whatsapp",
