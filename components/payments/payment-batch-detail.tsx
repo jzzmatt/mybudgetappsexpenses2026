@@ -233,6 +233,34 @@ export function notificationStatusLabel(t: (key: string, params?: Record<string,
   return status;
 }
 
+export function notificationStatusClass(status: string) {
+  if (status === "sent" || status === "delivered") {
+    return "status-badge status-paid";
+  }
+
+  if (status === "failed" || status === "cancelled") {
+    return "status-badge status-paused";
+  }
+
+  return "status-badge status-pending";
+}
+
+export function notificationErrorLabel(t: (key: string) => string, errorMessage: string | null) {
+  if (!errorMessage) {
+    return null;
+  }
+
+  if (errorMessage === "receipt_send_failed") {
+    return t("payments.notificationErrorReceiptNotSent");
+  }
+
+  if (errorMessage === "send_failed") {
+    return t("payments.notificationErrorSendFailed");
+  }
+
+  return errorMessage;
+}
+
 function money(amount: number, currency: string, locale: string) {
   if (!isExpenseCurrency(currency)) {
     return `${amount.toFixed(2)} ${currency}`;
