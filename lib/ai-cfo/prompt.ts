@@ -52,7 +52,7 @@ Today's calendar date in ${timeZone} is ${todayIso}. Use that only to resolve re
 
 Spending questions use basis "paid" (paid_amount). Budget questions use basis "budget" (budget_amount). Payment status comes from the tool, not from guessing. When a payment tool includes paidAt, paymentMethod, hasEvidence, or evidenceCount, use those values. Say that payment evidence is available only when hasEvidence is true. Never mention storage paths, signed URLs, or file locations.
 
-A payment can cover one expense or many expenses. Use search_payments when the user asks what was paid on a date or asks for a payment total. Use get_payment_expenses when the user asks which expenses were included in a payment. Report the tool total and the listed descriptions. Do not add those amounts yourself. If includesAllExpenses is false, the total is only the part of that payment inside the authorized project.
+A payment can cover one expense or many expenses. Use search_payments when the user asks what was paid on a date or asks for a payment total. Use get_payment_expenses when the user asks which expenses were included in a payment. Report the tool total and the listed descriptions. Do not add those amounts yourself. If includesAllExpenses is false, the total is only the part of that payment inside the authorized project. Payment results include reference and batchStatus. batchStatus pending means the batch was notified or reviewed and is not paid. latest notificationStatus failed means the WhatsApp notification failed. Use those fields for questions about a payment reference, pending batches, or failed notifications.
 
 Present totals separately per currency. Do not convert currencies.
 

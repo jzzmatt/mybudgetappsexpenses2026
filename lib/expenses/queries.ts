@@ -482,19 +482,56 @@ export async function listPayableExpenses(filters: ExpenseFilters = {}): Promise
     throw new Error(error.message);
   }
 
+  const expenses = (data ?? []).map((row) =>
+    toBulkExpenseOption({
+      id: String(row.id),
+      description: String(row.description ?? ""),
+      status: String(row.status),
+      currency: String(row.currency),
+      budget_amount: Number(row.budget_amount),
+      paid_amount: Number(row.paid_amount),
+      category: normalizeRelation(row.category as ExpenseRelation | ExpenseRelation[] | null),
+      project: normalizeRelation(row.project as ExpenseRelation | ExpenseRelation[] | null),
+    }),
+  );
+  const available = await excludeReservedExpenses(supabase, expenses);
+
   return {
-    total: count ?? data?.length ?? 0,
-    expenses: (data ?? []).map((row) =>
-      toBulkExpenseOption({
-        id: String(row.id),
-        description: String(row.description ?? ""),
-        status: String(row.status),
-        currency: String(row.currency),
-        budget_amount: Number(row.budget_amount),
-        paid_amount: Number(row.paid_amount),
-        category: normalizeRelation(row.category as ExpenseRelation | ExpenseRelation[] | null),
-        project: normalizeRelation(row.project as ExpenseRelation | ExpenseRelation[] | null),
-      }),
-    ),
+    total: available.length === expenses.length ? (count ?? expenses.length) : available.length,
+    expenses: available,
   };
+}
+
+async function excludeReservedExpenses<T extends { id: string }>(
+  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
+  expenses: T[],
+) {
+  if (expenses.length === 0) {
+    return expenses;
+  }
+
+  const ids = expenses.map((expense) => expense.id);
+  const { data, error } = await supabase
+    .from("payment_expenses")
+    .select("expense_id, payment:payments(batch_status)")
+    .in("expense_id", ids);
+
+  if (error) {
+    return expenses;
+  }
+
+  const reserved = new Set(
+    (data ?? []).flatMap((row) => {
+      const payment = Array.isArray(row.payment) ? row.payment[0] : row.payment;
+      const status = payment && "batch_status" in payment ? String(payment.batch_status ?? "") : "";
+
+      if (status === "cancelled") {
+        return [];
+      }
+
+      return [String(row.expense_id)];
+    }),
+  );
+
+  return expenses.filter((expense) => !reserved.has(expense.id));
 }

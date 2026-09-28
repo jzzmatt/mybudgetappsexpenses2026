@@ -4144,6 +4144,33 @@ select {
   font-weight: 700;
 }
 
+.batch-review-meta {
+  display: block;
+  color: var(--muted-foreground);
+  font-size: 0.85rem;
+}
+
+.batch-detail {
+  display: grid;
+  gap: 16px;
+}
+
+.batch-review-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+@media (max-width: 767px) {
+  .batch-review-actions {
+    display: grid;
+  }
+
+  .bulk-payment-bar {
+    bottom: calc(12px + env(safe-area-inset-bottom));
+  }
+}
+
 @media (max-width: 767px) {
   .bulk-payment-bar {
     flex-direction: column;
