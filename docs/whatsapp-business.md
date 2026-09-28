@@ -26,6 +26,6 @@ A WaAPI HTTP 200 response counts as a successful send only when both the outer `
 
 The share dialog counts characters up to 65536, the WhatsApp client text limit. WaAPI does not publish a smaller maximum for `message`.
 
-Apply `supabase/migrations/20260927150000_payment_evidence_and_share_logs.sql` and `supabase/migrations/20260928120000_bulk_payments.sql` before using payment evidence, share logs, or bulk payments.
+Apply `supabase/migrations/20260927150000_payment_evidence_and_share_logs.sql`, `supabase/migrations/20260928120000_bulk_payments.sql`, and `supabase/migrations/20260928140000_payment_batch_notifications.sql` before using payment batches.
 
-A bulk payment is one payment linked to many expenses. The share for that payment posts the edited message, then the payment evidence, through the same WaAPI actions. The saved share log stores `payment_id` and the final message. Evidence files stay in the private `payment-proofs` bucket. The server downloads them and sends the bytes as base64. Storage URLs are not placed in the message.
+A payment batch is one `payments` row linked to many expenses. Reviewing a selection creates a draft with a reference such as `PAY-2026-000001`. Sending a notification keeps the expenses unpaid and records the result on `expense_share_logs`. Marking the batch paid happens only from Send & mark as paid, which uses the same payment confirmation as a single expense and sets each expense `paid_amount` from its line amount. The server sends the edited message exactly, then each private comprovativo as its own WaAPI media message. The receipt count in the generated text matches the files queued for that send. Storage URLs are not placed in the message.

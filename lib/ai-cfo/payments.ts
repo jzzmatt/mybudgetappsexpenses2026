@@ -18,6 +18,8 @@ type PaymentRelation = {
   description: string | null;
   currency: string;
   amount: number;
+  reference?: string | null;
+  batch_status?: string | null;
 } | null;
 
 function one<T>(value: T | T[] | null | undefined) {
@@ -71,15 +73,26 @@ export async function getScopedPayment(userId: string, paymentId: string, projec
 
 async function loadPaymentLines(userId: string, paymentIds: string[]) {
   const supabase = await createSupabaseServerClient();
-  const { data, error } = await supabase
+  const rich = await supabase
     .from("payment_expenses")
-    .select("amount, payment_id, expense_id, payment:payments(id, payment_date, payment_method, description, currency, amount), expense:expenses(id, description, project_id, currency)")
+    .select("amount, payment_id, expense_id, payment:payments(id, payment_date, payment_method, description, currency, amount, reference, batch_status), expense:expenses(id, description, project_id, currency)")
     .eq("user_id", userId)
     .in("payment_id", paymentIds);
+  const fallback = rich.error?.code === "42703"
+    ? await supabase
+      .from("payment_expenses")
+      .select("amount, payment_id, expense_id, payment:payments(id, payment_date, payment_method, description, currency, amount), expense:expenses(id, description, project_id, currency)")
+      .eq("user_id", userId)
+      .in("payment_id", paymentIds)
+    : null;
+  const data = fallback ? fallback.data : rich.data;
+  const error = fallback ? fallback.error : rich.error;
 
   if (error) {
     throw new AiCfoDatabaseError(error.message);
   }
+
+  const notificationStatus = await latestNotificationStatus(userId, paymentIds);
 
   return (data ?? []).flatMap((row) => {
     const payment = one(row.payment as PaymentRelation | PaymentRelation[]);
@@ -101,6 +114,39 @@ async function loadPaymentLines(userId: string, paymentIds: string[]) {
       projectId: expense.project_id ? String(expense.project_id) : null,
       amount: Number(row.amount),
       currency: String(expense.currency ?? payment.currency),
+      reference: payment.reference ? String(payment.reference) : null,
+      batchStatus: payment.batch_status ? String(payment.batch_status) : null,
+      notificationStatus: notificationStatus.get(String(payment.id)) ?? null,
     } satisfies ScopedPaymentLine];
   });
+}
+
+async function latestNotificationStatus(userId: string, paymentIds: string[]) {
+  const statuses = new Map<string, string>();
+
+  if (paymentIds.length === 0) {
+    return statuses;
+  }
+
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("expense_share_logs")
+    .select("payment_id, status, created_at")
+    .eq("user_id", userId)
+    .in("payment_id", paymentIds)
+    .order("created_at", { ascending: false });
+
+  if (error || !data) {
+    return statuses;
+  }
+
+  for (const row of data) {
+    const paymentId = row.payment_id ? String(row.payment_id) : "";
+
+    if (paymentId && !statuses.has(paymentId)) {
+      statuses.set(paymentId, String(row.status));
+    }
+  }
+
+  return statuses;
 }

@@ -11,6 +11,8 @@ export const primaryNavItems: NavItem[] = [
   { href: "/vendors", labelKey: "nav.vendors", icon: "vendors" },
   { href: "/ai-cfo", labelKey: "nav.aiCfo", icon: "ai", mobileLabelKey: "nav.aiCfoShort" },
   { href: "/reports", labelKey: "nav.reports", icon: "reports" },
+  { href: "/payments", labelKey: "nav.payments", icon: "budget" },
+  { href: "/notifications", labelKey: "nav.notifications", icon: "expenses" },
   { href: "/how-it-works", labelKey: "nav.howItWorks", icon: "help" },
 ];
 

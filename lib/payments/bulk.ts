@@ -121,6 +121,9 @@ export type ScopedPaymentLine = {
   projectId: string | null;
   amount: number;
   currency: string;
+  reference?: string | null;
+  batchStatus?: string | null;
+  notificationStatus?: string | null;
 };
 
 export type ScopedPaymentSummary = {
@@ -132,6 +135,9 @@ export type ScopedPaymentSummary = {
   total: number;
   expenseCount: number;
   includesAllExpenses: boolean;
+  reference: string | null;
+  batchStatus: string | null;
+  notificationStatus: string | null;
   expenses: { expenseId: string; description: string; amount: number; currency: string }[];
 };
 
@@ -164,6 +170,9 @@ export function summarizeScopedPayments(lines: ScopedPaymentLine[], projectIds: 
       total: visible.reduce((sum, line) => sum + line.amount, 0),
       expenseCount: visible.length,
       includesAllExpenses: visible.length === group.length,
+      reference: first.reference ?? null,
+      batchStatus: first.batchStatus ?? null,
+      notificationStatus: first.notificationStatus ?? null,
       expenses: visible.map((line) => ({
         expenseId: line.expenseId,
         description: line.description,
