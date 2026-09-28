@@ -246,6 +246,20 @@ export type Messages = {
     uploadFailed: string;
     confirmRequired: string;
     evidenceCount: string;
+    selectedCount: string;
+    totalLabel: string;
+    clearSelection: string;
+    mixedCurrency: string;
+    selectAllVisible: string;
+    selectAllMatching: string;
+    deselectAll: string;
+    selectExpense: string;
+    bulkTitle: string;
+    selectedExpenses: string;
+    andMore: string;
+    bulkPaidSuccess: string;
+    selectionChanged: string;
+    shareBulkPayment: string;
   };
   categories: {
     title: string;

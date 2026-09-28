@@ -53,8 +53,24 @@ export function buildWaapiMediaPayload(
 
 export type WaapiActionBody = {
   status?: string;
-  data?: { status?: string };
+  data?: {
+    status?: string;
+    data?: {
+      id?: { _serialized?: string; id?: string };
+      _data?: { id?: { _serialized?: string; id?: string } };
+    };
+  };
 };
+
+export function readWaapiMessageIds(payload: WaapiActionBody | null | undefined) {
+  const inner = payload?.data?.data;
+  const serialized = inner?._data?.id?._serialized ?? inner?.id?._serialized;
+  const reference = inner?._data?.id?.id ?? inner?.id?.id;
+  const messageId = typeof serialized === "string" ? serialized.slice(0, 200) : null;
+  const referenceId = typeof reference === "string" && reference !== messageId ? reference.slice(0, 200) : null;
+
+  return { messageId, referenceId };
+}
 
 export function waapiActionAccepted(payload: WaapiActionBody | null | undefined) {
   return payload?.status === "success" && payload.data?.status === "success";

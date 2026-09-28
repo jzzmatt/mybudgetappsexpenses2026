@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { BulkPaymentProvider } from "@/components/expenses/bulk-payment";
+import { PaymentResultBanner } from "@/components/expenses/payment-result-banner";
 import { ProjectExpenseList } from "@/components/expenses/project-expense-list";
 import { ProjectExpenseToolbar } from "@/components/expenses/project-expense-toolbar";
 import { ExpensePagination } from "@/components/expenses/expense-pagination";
@@ -10,7 +12,8 @@ import { ProjectExpensesSummary } from "@/components/projects/project-expenses-s
 import { ProjectWorkspaceNav } from "@/components/projects/project-workspace-nav";
 import { getCategories } from "@/lib/categories/queries";
 import { getProjectExpenseFilters, buildExpenseQueryString } from "@/lib/expenses/params";
-import { getExpenses } from "@/lib/expenses/queries";
+import { getExpenses, listPayableExpenses } from "@/lib/expenses/queries";
+import { toBulkExpenseOption } from "@/lib/payments/bulk";
 import type { ExpenseListResult } from "@/lib/expenses/types";
 import { getTranslations } from "@/lib/i18n/server";
 import { getProjectById, getProjectExpenseTotals } from "@/lib/projects/queries";
@@ -48,13 +51,15 @@ export default async function ProjectExpensesPage({ params, searchParams }: Proj
   let totals: ProjectExpenseTotals = { byCurrency: {}, currencies: [], expenseCount: 0 };
   let categories: Awaited<ReturnType<typeof getCategories>> = [];
   let vendors: Awaited<ReturnType<typeof getVendors>> = [];
+  let payable = { total: 0, expenses: [] as ReturnType<typeof toBulkExpenseOption>[] };
 
   try {
-    [result, totals, categories, vendors] = await Promise.all([
+    [result, totals, categories, vendors, payable] = await Promise.all([
       getExpenses(filters),
       getProjectExpenseTotals(id),
       getCategories(),
       getVendors(),
+      listPayableExpenses(filters),
     ]);
   } catch (error) {
     loadError = error instanceof Error ? error.message : t("expenses.loadError");
@@ -75,11 +80,7 @@ export default async function ProjectExpensesPage({ params, searchParams }: Proj
       }
       title={project.name}
     >
-      {queryParams.paid === "1" ? (
-        <p className="payment-sheet-success" role="status">
-          ✓ {t("payments.paidSuccess")}
-        </p>
-      ) : null}
+      <PaymentResultBanner paid={queryParams.paid === "1"} paymentId={typeof queryParams.payment === "string" ? queryParams.payment : undefined} />
       {typeof queryParams.error === "string" ? (
         <p className="form-error page-error" role="alert">
           {queryParams.error}
@@ -112,6 +113,12 @@ export default async function ProjectExpensesPage({ params, searchParams }: Proj
           vendors={vendors}
         />
 
+        <BulkPaymentProvider
+          matching={payable.expenses}
+          matchingTotal={payable.total}
+          returnTo={basePath}
+          visible={result.expenses.map(toBulkExpenseOption)}
+        >
         <ProjectExpenseList
           addExpenseHref={addExpenseHref}
           basePath={basePath}
@@ -120,6 +127,7 @@ export default async function ProjectExpensesPage({ params, searchParams }: Proj
           hasCategoryOrVendorFilter={hasCategoryOrVendorFilter}
           hasSearch={hasSearch}
         />
+        </BulkPaymentProvider>
 
         <ExpensePagination
           basePath={basePath}

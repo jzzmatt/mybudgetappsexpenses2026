@@ -2947,16 +2947,17 @@ select {
   width: 100%;
 }
 
-.project-expense-col-date { width: 12%; }
+.project-expense-col-select { width: 4%; }
+.project-expense-col-date { width: 11%; }
 .project-expense-col-description { width: 9%; }
-.project-expense-col-category { width: 9%; }
-.project-expense-col-vendor { width: 10%; }
-.project-expense-col-budget { width: 12%; }
+.project-expense-col-category { width: 8%; }
+.project-expense-col-vendor { width: 9%; }
+.project-expense-col-budget { width: 11%; }
 .project-expense-col-paid { width: 10%; }
-.project-expense-col-remaining { width: 12%; }
+.project-expense-col-remaining { width: 11%; }
 .project-expense-col-percent { width: 7%; }
 .project-expense-col-status { width: 13%; }
-.project-expense-col-actions { width: 6%; }
+.project-expense-col-actions { width: 7%; }
 
 @media (max-width: 1279px) {
   .project-expense-desktop-table .category-table-wrap {
@@ -4082,5 +4083,74 @@ select {
 
   .ai-cfo-composer {
     background: transparent;
+  }
+}
+
+.bulk-select-cell {
+  width: 36px;
+  text-align: center;
+}
+
+.bulk-selection-toolbar,
+.bulk-payment-bar-actions,
+.payment-result-banner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.bulk-selection-toolbar,
+.payment-result-banner {
+  margin-bottom: 12px;
+}
+
+.bulk-payment-bar {
+  position: sticky;
+  bottom: 12px;
+  z-index: 20;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  margin-top: 12px;
+  padding: 12px 16px;
+  border: 1px solid var(--border, #d6d3d1);
+  border-radius: 12px;
+  background: var(--surface, #fff);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 12%);
+}
+
+.bulk-payment-bar p {
+  margin: 4px 0 0;
+}
+
+.bulk-payment-lines {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 240px;
+  overflow: auto;
+}
+
+.bulk-payment-lines li,
+.bulk-payment-total {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.bulk-payment-total {
+  font-weight: 700;
+}
+
+@media (max-width: 767px) {
+  .bulk-payment-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .bulk-payment-bar-actions {
+    display: grid;
   }
 }

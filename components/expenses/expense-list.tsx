@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BulkExpenseCheckbox, BulkSelectVisibleCheckbox } from "@/components/expenses/bulk-payment";
 import { CopyExpenseButton } from "@/components/expenses/copy-expense-button";
 import { DeleteExpenseButton } from "@/components/expenses/delete-expense-button";
 import { ExpenseActionsMenu } from "@/components/expenses/expense-actions-menu";
@@ -109,6 +110,7 @@ export async function ExpenseList({
         {expenses.map((expense) => (
           <Card className="list-mobile-card" key={expense.id}>
             <div className="list-mobile-card-header">
+              <BulkExpenseCheckbox id={expense.id} />
               <div>
                 <h3>{expense.description}</h3>
                 <p className="list-mobile-card-date">{formatExpenseDate(expense.date, locale)}</p>
@@ -188,6 +190,9 @@ export async function ExpenseList({
             <caption className="sr-only">{t("expenses.title")}</caption>
             <thead>
               <tr>
+                <th scope="col">
+                  <BulkSelectVisibleCheckbox />
+                </th>
                 <SortableHeader
                   basePath={basePath}
                   field="date"
@@ -248,6 +253,9 @@ export async function ExpenseList({
             <tbody>
               {expenses.map((expense) => (
                 <tr key={expense.id}>
+                  <td className="bulk-select-cell">
+                    <BulkExpenseCheckbox id={expense.id} />
+                  </td>
                   <td className="expense-table-nowrap">{formatExpenseDate(expense.date, locale)}</td>
                   <td className="expense-table-description">{expense.description}</td>
                   <td className="expense-table-nowrap">{expense.category?.name ?? t("common.dash")}</td>

@@ -7,6 +7,39 @@ export function evidenceObjectPath(userId: string, projectId: string, expenseId:
   return `${userId}/${projectId}/${expenseId}/${Date.now()}_${randomSuffix}_${safeEvidenceFileName(filename)}`;
 }
 
+export async function uploadEvidenceObjects(input: {
+  userId: string;
+  projectId: string;
+  folderId: string;
+  files: { filename: string; mimeType: string; bytes: ArrayBuffer | Uint8Array; evidenceType: "receipt" | "image" }[];
+}) {
+  const uploaded: { storagePath: string; fileName: string; mimeType: string; evidenceType: "receipt" | "image" }[] = [];
+
+  try {
+    for (const file of input.files) {
+      const storagePath = await uploadPaymentEvidenceFile({
+        userId: input.userId,
+        projectId: input.projectId || "shared",
+        expenseId: input.folderId,
+        filename: file.filename,
+        mimeType: file.mimeType,
+        bytes: file.bytes,
+      });
+      uploaded.push({
+        storagePath,
+        fileName: file.filename,
+        mimeType: file.mimeType,
+        evidenceType: file.evidenceType,
+      });
+    }
+  } catch (error) {
+    await Promise.all(uploaded.map((file) => removePaymentEvidenceFile(file.storagePath).catch(() => undefined)));
+    throw error;
+  }
+
+  return uploaded;
+}
+
 export async function uploadPaymentEvidenceFile(input: {
   userId: string;
   projectId: string;

@@ -1,4 +1,6 @@
+import { BulkPaymentProvider } from "@/components/expenses/bulk-payment";
 import { ExpenseList } from "@/components/expenses/expense-list";
+import { PaymentResultBanner } from "@/components/expenses/payment-result-banner";
 import { ExpensePagination } from "@/components/expenses/expense-pagination";
 import { ExpenseToolbar } from "@/components/expenses/expense-toolbar";
 import { AppShell } from "@/components/layout/app-shell";
@@ -7,7 +9,8 @@ import { PageActionButton } from "@/components/layout/page-action-button";
 import { getCategories } from "@/lib/categories/queries";
 import type { Category } from "@/lib/categories/types";
 import { parseExpenseSearchParams } from "@/lib/expenses/params";
-import { getExpenses } from "@/lib/expenses/queries";
+import { getExpenses, listPayableExpenses } from "@/lib/expenses/queries";
+import { toBulkExpenseOption } from "@/lib/payments/bulk";
 import type { ExpenseListResult } from "@/lib/expenses/types";
 import { getTranslations } from "@/lib/i18n/server";
 import { getProjects } from "@/lib/projects/queries";
@@ -37,13 +40,15 @@ export default async function ExpensesPage({ searchParams }: ExpensesPageProps) 
   let categories: Category[] = [];
   let projects: Project[] = [];
   let vendors: Vendor[] = [];
+  let payable = { total: 0, expenses: [] as ReturnType<typeof toBulkExpenseOption>[] };
 
   try {
-    [result, categories, projects, vendors] = await Promise.all([
+    [result, categories, projects, vendors, payable] = await Promise.all([
       getExpenses(filters),
       getCategories(),
       getProjects(),
       getVendors(),
+      listPayableExpenses(filters),
     ]);
   } catch (error) {
     loadError = error instanceof Error ? error.message : t("expenses.loadError");
@@ -65,11 +70,7 @@ export default async function ExpensesPage({ searchParams }: ExpensesPageProps) 
       actions={<PageActionButton href="/expenses/new">{t("common.add")}</PageActionButton>}
       title={t("expenses.title")}
     >
-      {params.paid === "1" ? (
-        <p className="payment-sheet-success" role="status">
-          ✓ {t("payments.paidSuccess")}
-        </p>
-      ) : null}
+      <PaymentResultBanner paid={params.paid === "1"} paymentId={typeof params.payment === "string" ? params.payment : undefined} />
       {typeof params.error === "string" ? (
         <p className="form-error page-error" role="alert">
           {params.error}
@@ -87,12 +88,19 @@ export default async function ExpensesPage({ searchParams }: ExpensesPageProps) 
           projects={projects}
           vendors={vendors}
         />
-        <ExpenseList
-          expenses={result.expenses}
-          filters={filters}
-          hasActiveFilters={hasActiveFilters}
-          totalBudgetByCurrency={result.totalBudgetByCurrency}
-        />
+        <BulkPaymentProvider
+          matching={payable.expenses}
+          matchingTotal={payable.total}
+          returnTo="/expenses"
+          visible={result.expenses.map(toBulkExpenseOption)}
+        >
+          <ExpenseList
+            expenses={result.expenses}
+            filters={filters}
+            hasActiveFilters={hasActiveFilters}
+            totalBudgetByCurrency={result.totalBudgetByCurrency}
+          />
+        </BulkPaymentProvider>
         <ExpensePagination
           filters={filters}
           page={result.page}

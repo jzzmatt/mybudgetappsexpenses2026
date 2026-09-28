@@ -14,6 +14,7 @@ import {
   type ExpenseWithRelations,
 } from "@/lib/expenses/types";
 import { calculateExpenseBudgetPercentage } from "@/lib/expenses/format";
+import { MAX_BULK_EXPENSES, toBulkExpenseOption, type BulkExpenseOption } from "@/lib/payments/bulk";
 
 const expenseSelect = `
   id,
@@ -449,4 +450,51 @@ export async function getTopProjectExpenses(projectId: string, limit = 5): Promi
   }
 
   return (data ?? []).map((row) => normalizeExpense(row as Record<string, unknown>));
+}
+
+export async function listPayableExpenses(filters: ExpenseFilters = {}): Promise<{ total: number; expenses: BulkExpenseOption[] }> {
+  if (filters.status === "paid") {
+    return { total: 0, expenses: [] };
+  }
+
+  try {
+    await ensureUserRecord();
+  } catch (error) {
+    console.error("ensureUserRecord failed in listPayableExpenses:", error);
+  }
+
+  const supabase = await createSupabaseServerClient();
+  const searchRelationIds = filters.search?.trim()
+    ? await resolveExpenseSearchRelationIds(supabase, filters.search)
+    : undefined;
+  const statuses = filters.status === "pending" || filters.status === "partial" ? [filters.status] : ["pending", "partial"];
+  let query = supabase
+    .from("expenses")
+    .select("id, description, status, currency, budget_amount, paid_amount, category:categories(name), project:projects(name)", { count: "exact" })
+    .in("status", statuses)
+    .order("date", { ascending: false })
+    .limit(MAX_BULK_EXPENSES);
+  query = applyExpenseFilters(query, { ...filters, status: undefined }, searchRelationIds);
+
+  const { data, error, count } = await query;
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return {
+    total: count ?? data?.length ?? 0,
+    expenses: (data ?? []).map((row) =>
+      toBulkExpenseOption({
+        id: String(row.id),
+        description: String(row.description ?? ""),
+        status: String(row.status),
+        currency: String(row.currency),
+        budget_amount: Number(row.budget_amount),
+        paid_amount: Number(row.paid_amount),
+        category: normalizeRelation(row.category as ExpenseRelation | ExpenseRelation[] | null),
+        project: normalizeRelation(row.project as ExpenseRelation | ExpenseRelation[] | null),
+      }),
+    ),
+  };
 }

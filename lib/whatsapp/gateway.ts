@@ -2,6 +2,7 @@ import {
   buildWaapiMediaPayload,
   buildWaapiTextPayload,
   planWhatsAppDelivery,
+  readWaapiMessageIds,
   sanitizeWhatsAppError,
   waapiActionAccepted,
   waapiActionUrl,
@@ -33,6 +34,7 @@ export async function deliverPaidExpenseWhatsApp(input: {
     return text;
   }
 
+  let referenceId = text.referenceId;
   const documents = input.files.filter((file) => file.mimeType === "application/pdf");
   const images = input.files.filter((file) => file.mimeType.startsWith("image/"));
 
@@ -42,9 +44,13 @@ export async function deliverPaidExpenseWhatsApp(input: {
     if (!sent.ok) {
       return sent;
     }
+
+    if (!referenceId && sent.messageId) {
+      referenceId = sent.messageId;
+    }
   }
 
-  return { ok: true as const };
+  return { ok: true as const, messageId: text.messageId, referenceId };
 }
 
 async function postAction(
@@ -77,5 +83,6 @@ async function postAction(
     return { ok: false as const, error: "send_failed" };
   }
 
-  return { ok: true as const };
+  const ids = readWaapiMessageIds(body);
+  return { ok: true as const, messageId: ids.messageId, referenceId: ids.referenceId };
 }

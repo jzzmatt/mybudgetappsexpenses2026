@@ -107,6 +107,104 @@ export function generatePaidExpenseWhatsAppMessage(input: PaidExpenseMessageInpu
   ].join("\n");
 }
 
+export const MAX_WHATSAPP_EXPENSE_ITEMS = 30;
+
+export type BulkPaidExpenseLine = {
+  description: string;
+  amountLabel: string;
+};
+
+export function generateBulkPaidExpenseWhatsAppTemplate(input: {
+  expenses: BulkPaidExpenseLine[];
+  totalLabel: string;
+  paymentDateLabel: string;
+  paymentMethodLabel: string;
+  projectName?: string | null;
+  categoryName?: string | null;
+  locale: Locale;
+}) {
+  const lines = input.expenses.map((expense) => ({
+    description: expense.description.trim() || "—",
+    amountLabel: expense.amountLabel.trim(),
+  }));
+  const shown = lines.slice(0, MAX_WHATSAPP_EXPENSE_ITEMS);
+  const hidden = lines.length - shown.length;
+  const method = input.paymentMethodLabel.trim() || "—";
+  const project = input.projectName?.trim() || "";
+  const category = input.categoryName?.trim() || "";
+  const itemLines = shown.map((expense) => `• ${expense.description} — ${expense.amountLabel}`);
+
+  if (input.locale === "pt") {
+    return {
+      message: [
+        "💰 *Comprovativo de Pagamento*",
+        "",
+        `🧾 Despesas pagas: ${lines.length}`,
+        "",
+        hidden > 0 ? "📋 Primeiras despesas:" : "📋 Despesas:",
+        "",
+        ...itemLines,
+        ...(hidden > 0 ? ["", `+${hidden} outras despesas`] : []),
+        "",
+        `💵 *Total pago: ${input.totalLabel}*`,
+        "",
+        `📅 Data do pagamento: ${input.paymentDateLabel}`,
+        `💳 Método de pagamento: ${method}`,
+        ...(category ? [`📂 Categoria: ${category}`] : []),
+        ...(project ? [`📁 Projeto: ${project}`] : []),
+        "",
+        "✅ Estado: Pago",
+      ].join("\n"),
+    };
+  }
+
+  if (input.locale === "fr") {
+    return {
+      message: [
+        "💰 *Confirmation de paiement*",
+        "",
+        `🧾 Dépenses payées : ${lines.length}`,
+        "",
+        hidden > 0 ? "📋 Premières dépenses :" : "📋 Dépenses :",
+        "",
+        ...itemLines,
+        ...(hidden > 0 ? ["", `+${hidden} autres dépenses`] : []),
+        "",
+        `💵 *Total payé : ${input.totalLabel}*`,
+        "",
+        `📅 Date du paiement : ${input.paymentDateLabel}`,
+        `💳 Mode de paiement : ${method}`,
+        ...(category ? [`📂 Catégorie : ${category}`] : []),
+        ...(project ? [`📁 Projet : ${project}`] : []),
+        "",
+        "✅ Statut : Payé",
+      ].join("\n"),
+    };
+  }
+
+  return {
+    message: [
+      "💰 *Payment Confirmation*",
+      "",
+      `🧾 Expenses paid: ${lines.length}`,
+      "",
+      hidden > 0 ? "📋 First expenses:" : "📋 Expenses:",
+      "",
+      ...itemLines,
+      ...(hidden > 0 ? ["", `+${hidden} other expenses`] : []),
+      "",
+      `💵 *Total paid: ${input.totalLabel}*`,
+      "",
+      `📅 Payment date: ${input.paymentDateLabel}`,
+      `💳 Payment method: ${method}`,
+      ...(category ? [`📂 Category: ${category}`] : []),
+      ...(project ? [`📁 Project: ${project}`] : []),
+      "",
+      "✅ Status: Paid",
+    ].join("\n"),
+  };
+}
+
 export function messageMentionsAttachment(message: string) {
   const normalized = message.toLowerCase();
   return ATTACHMENT_PHRASES.some((phrase) => normalized.includes(phrase));
