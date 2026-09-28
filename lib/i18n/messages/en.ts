@@ -233,6 +233,8 @@ export const enMessages: Messages = {
     sendViaWhatsApp: "Send via WhatsApp",
     paymentInformationSent: "Payment information sent via WhatsApp",
     receiptsSentViaWhatsApp: "{count} receipt(s) sent via WhatsApp",
+    receiptSendFailedTextSent: "The payment message was sent, but the receipt file could not be delivered. Try sending the receipt again.",
+    sendReceiptsOnly: "Send receipt only",
     unableToSend: "Unable to send the payment information via WhatsApp. Please try again.",
     whatsappNotConfigured: "WhatsApp sending is not currently configured. Please contact the administrator.",
     withoutEvidence: "Are you sure you want to mark this expense as paid without adding payment evidence?",

@@ -213,7 +213,19 @@ describe("WaAPI gateway", () => {
     const calls: { url: string; body: Record<string, unknown> }[] = [];
     const fetchImpl: typeof fetch = async (input, init) => {
       calls.push({ url: String(input), body: JSON.parse(String(init?.body)) as Record<string, unknown> });
-      const failedMedia = calls.length === 3;
+      const url = String(input);
+
+      if (url.includes("get-number-id")) {
+        return new Response(
+          JSON.stringify({
+            status: "success",
+            data: { status: "success", data: { numberId: { _serialized: "244923000000@c.us" } } },
+          }),
+          { status: 200, headers: { "Content-Type": "application/json" } },
+        );
+      }
+
+      const failedMedia = calls.length === 4;
       return new Response(
         JSON.stringify({
           status: "success",
@@ -235,26 +247,42 @@ describe("WaAPI gateway", () => {
     });
 
     assert.equal(sent.ok, false);
-    assert.equal("attachmentsSent" in sent ? sent.attachmentsSent : undefined, undefined);
-    assert.equal(calls.length, 3);
-    assert.equal(calls[0]?.url, "https://waapi.app/api/v1/instances/42/client/action/send-message");
-    assert.equal(calls[0]?.body.message, "Olá João");
-    assert.equal(calls[0]?.body.chatId, "244923000000@c.us");
-    assert.equal(calls[1]?.url.endsWith("/send-media"), true);
-    assert.equal(calls[1]?.body.mediaName, "comprovativo.pdf");
-    assert.equal(calls[1]?.body.asDocument, true);
-    assert.equal("mediaUrl" in (calls[1]?.body ?? {}), false);
-    assert.equal("mediaCaption" in (calls[1]?.body ?? {}), false);
-    assert.equal(calls[2]?.body.mediaName, "foto.jpg");
-    assert.equal(calls[2]?.body.asDocument, false);
+    assert.equal(sent.error, "receipt_send_failed");
+    assert.equal("textSent" in sent ? sent.textSent : false, true);
+    assert.equal(calls.length, 4);
+    assert.equal(calls[0]?.url.endsWith("/get-number-id"), true);
+    assert.equal(calls[1]?.url, "https://waapi.app/api/v1/instances/42/client/action/send-message");
+    assert.equal(calls[1]?.body.message, "Olá João");
+    assert.equal(calls[1]?.body.chatId, "244923000000@c.us");
+    assert.equal(calls[2]?.url.endsWith("/send-media"), true);
+    assert.equal(calls[2]?.body.mediaName, "comprovativo.pdf");
+    assert.equal(calls[2]?.body.asDocument, true);
+    assert.equal("mediaUrl" in (calls[2]?.body ?? {}), false);
+    assert.equal("mediaCaption" in (calls[2]?.body ?? {}), false);
+    assert.equal(calls[3]?.body.mediaName, "foto.jpg");
+    assert.equal(calls[3]?.body.asDocument, false);
     assert.equal(calls.every((call) => call.url.startsWith("https://waapi.app/")), true);
   });
 
   it("reports how many receipts were sent after the text message", async () => {
-    const fetchImpl: typeof fetch = async () => new Response(
-      JSON.stringify({ status: "success", data: { status: "success" } }),
-      { status: 200, headers: { "Content-Type": "application/json" } },
-    );
+    const fetchImpl: typeof fetch = async (input) => {
+      const url = String(input);
+
+      if (url.includes("get-number-id")) {
+        return new Response(
+          JSON.stringify({
+            status: "success",
+            data: { status: "success", data: { numberId: { _serialized: "244923000000@c.us" } } },
+          }),
+          { status: 200, headers: { "Content-Type": "application/json" } },
+        );
+      }
+
+      return new Response(
+        JSON.stringify({ status: "success", data: { status: "success" } }),
+        { status: 200, headers: { "Content-Type": "application/json" } },
+      );
+    };
 
     const sent = await deliverPaidExpenseWhatsApp({
       to: "244923000000",

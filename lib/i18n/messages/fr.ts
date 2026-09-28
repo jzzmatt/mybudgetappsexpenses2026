@@ -234,6 +234,8 @@ export const frMessages: Messages = {
     sendViaWhatsApp: "Envoyer via WhatsApp",
     paymentInformationSent: "Informations de paiement envoyées via WhatsApp",
     receiptsSentViaWhatsApp: "{count} justificatif(s) envoyé(s) via WhatsApp",
+    receiptSendFailedTextSent: "Le message de paiement a été envoyé, mais le justificatif n’a pas pu être livré. Réessayez d’envoyer le justificatif.",
+    sendReceiptsOnly: "Envoyer le justificatif seulement",
     unableToSend: "Impossible d'envoyer les informations de paiement via WhatsApp. Veuillez réessayer.",
     whatsappNotConfigured: "L'envoi WhatsApp n'est pas configuré. Contactez l'administrateur.",
     withoutEvidence: "Voulez-vous vraiment marquer cette dépense comme payée sans ajouter de preuve de paiement ?",
