@@ -2,6 +2,7 @@ import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import type { NextFetchEvent, NextRequest } from "next/server";
 import { isClerkConfigured } from "@/lib/clerk/config";
+import { INSTALL_ASSET_PATHS } from "@/lib/pwa/public-paths";
 
 const isPublicRoute = createRouteMatcher([
   "/login",
@@ -9,6 +10,7 @@ const isPublicRoute = createRouteMatcher([
   "/forgot-password",
   "/update-password",
   "/sso-callback",
+  ...INSTALL_ASSET_PATHS,
 ]);
 
 const clerkHandler = clerkMiddleware(async (auth, request) => {
@@ -39,6 +41,6 @@ export default function proxy(request: NextRequest, event: NextFetchEvent) {
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|manifest\\.webmanifest$|sw\\.js$|offline\\.html$|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };
