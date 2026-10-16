@@ -1,6 +1,7 @@
 import { AuthPageShell } from "@/components/auth/auth-page-shell";
 import { ClerkUnavailableNotice } from "@/components/auth/clerk-unavailable-notice";
 import { LoginForm } from "@/components/auth/login-form";
+import { InstallAppButton } from "@/components/pwa/install-app-button";
 import { isClerkConfigured } from "@/lib/clerk/config";
 import { getTranslations } from "@/lib/i18n/server";
 
@@ -9,7 +10,11 @@ export default async function LoginPage() {
   const clerkReady = isClerkConfigured();
 
   return (
-    <AuthPageShell description={t("auth.signInDescription")} title={t("auth.signInTitle")}>
+    <AuthPageShell
+      description={t("auth.signInDescription")}
+      install={<InstallAppButton />}
+      title={t("auth.signInTitle")}
+    >
       {clerkReady ? <LoginForm /> : <ClerkUnavailableNotice message={t("auth.clerkUnavailable")} />}
     </AuthPageShell>
   );

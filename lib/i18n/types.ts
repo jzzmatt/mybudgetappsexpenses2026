@@ -472,6 +472,25 @@ export type Messages = {
     ctaFooterDescription: string;
     skipToContent: string;
   };
+  pwa: {
+    install: string;
+    installAria: string;
+    dialogTitle: string;
+    dialogDescription: string;
+    dismissedNote: string;
+    installed: string;
+    stepsLabel: string;
+    androidStep1: string;
+    androidStep2: string;
+    androidStep3: string;
+    iosStep1: string;
+    iosStep2: string;
+    iosStep3: string;
+    desktopStep1: string;
+    desktopStep2: string;
+    desktopStep3: string;
+    desktopUnsupported: string;
+  };
   validation: {
     emailInvalid: string;
     passwordRequired: string;

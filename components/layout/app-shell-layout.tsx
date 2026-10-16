@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 import { LanguageSelector } from "@/components/i18n/language-selector";
 import { AppBottomNav } from "@/components/layout/app-bottom-nav";
+import { InstallAppButton } from "@/components/pwa/install-app-button";
 import { AppMobileSignOut } from "@/components/layout/app-mobile-sign-out";
 import { AppSidebarToggle } from "@/components/layout/app-sidebar-toggle";
 import { SidebarVisibilityProvider, useSidebarVisibility } from "@/components/layout/sidebar-visibility";
@@ -46,6 +47,7 @@ function AppShellLayoutFrame({
           </div>
           <div className="app-header-actions">
             <LanguageSelector />
+            <InstallAppButton />
             {actions}
             {showMobileSignOut ? <AppMobileSignOut /> : null}
           </div>

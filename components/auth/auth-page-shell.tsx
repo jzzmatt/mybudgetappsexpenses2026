@@ -7,9 +7,10 @@ type AuthPageShellProps = {
   title: string;
   description: string;
   children: ReactNode;
+  install?: ReactNode;
 };
 
-export function AuthPageShell({ title, description, children }: AuthPageShellProps) {
+export function AuthPageShell({ title, description, children, install }: AuthPageShellProps) {
   return (
     <main className="login-page">
       <LoginBrandingPanel />
@@ -23,6 +24,7 @@ export function AuthPageShell({ title, description, children }: AuthPageShellPro
           <p className="login-description">{description}</p>
           {children}
         </Card>
+        {install ? <div className="login-install">{install}</div> : null}
       </section>
     </main>
   );
